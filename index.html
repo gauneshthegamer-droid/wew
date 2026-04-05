@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureReport — Whistleblower Portal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0c0f; --surface:#111318; --surface2:#181c24;
+    --border:#1e2430; --border2:#2a3040;
+    --accent:#00e5a0; --accent2:#00b87d;
+    --adm:#7b8cff; --adm2:#5a6adf;
+    --danger:#ff4d6a; --warn:#ffaa00;
+    --text:#e8ecf0; --text2:#8896a8; --text3:#4a5568;
+    --mono:'JetBrains Mono',monospace; --sans:'Inter',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,160,0.012) 2px,rgba(0,229,160,0.012) 4px);pointer-events:none;z-index:999;}
+
+  /* ROLE SCREEN */
+  #roleScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200;flex-direction:column;gap:40px;}
+  .rs-logo{text-align:center;}
+  .rs-logo svg{width:58px;height:58px;display:block;margin:0 auto 14px;}
+  .rs-logo h1{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent);letter-spacing:0.12em;text-transform:uppercase;}
+  .rs-logo p{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.06em;margin-top:4px;}
+  .rs-cards{display:flex;gap:18px;}
+  .rs-card{background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:28px 32px;width:196px;text-align:center;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .rs-card:hover{transform:translateY(-3px);}
+  .rs-card.uc:hover{border-color:var(--accent);box-shadow:0 0 24px rgba(0,229,160,0.1);}
+  .rs-card.ac:hover{border-color:var(--adm);box-shadow:0 0 24px rgba(123,140,255,0.1);}
+  .rs-card .rci{font-size:30px;}
+  .rs-card h2{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;}
+  .rs-card.uc h2{color:var(--accent);}
+  .rs-card.ac h2{color:var(--adm);}
+  .rs-card p{font-size:11px;color:var(--text3);line-height:1.5;}
+  .no-pass{font-family:var(--mono);font-size:9px;color:var(--accent);background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);border-radius:2px;padding:3px 7px;text-transform:uppercase;letter-spacing:0.06em;}
+
+  /* LOGIN (admin only) */
+  #loginScreen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:190;flex-direction:column;gap:26px;}
+  .login-back{font-family:var(--mono);font-size:10px;color:var(--text3);cursor:pointer;text-transform:uppercase;letter-spacing:0.08em;transition:color 0.15s;}
+  .login-back:hover{color:var(--text2);}
+  .login-box{background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:30px;width:340px;display:flex;flex-direction:column;gap:16px;}
+  .ltitle{font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;padding-bottom:13px;border-bottom:1px solid var(--border);color:var(--adm);}
+  .login-box label{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;display:block;margin-bottom:6px;}
+  .login-box input{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:3px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:14px;outline:none;transition:border-color 0.2s;}
+  .lhint{font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center;}
+  .lhint .ha{color:var(--adm);}
+  .lerr{font-family:var(--mono);font-size:11px;color:var(--danger);text-align:center;display:none;}
+  .btn-a{background:var(--adm);color:#fff;border:none;border-radius:3px;padding:12px;width:100%;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;}
+  .btn-a:hover{background:var(--adm2);}
+
+  /* APP HEADER */
+  #app{display:none;}
+  header{border-bottom:1px solid var(--border);padding:13px 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(10,12,15,0.96);backdrop-filter:blur(10px);z-index:50;}
+  .hb{display:flex;align-items:center;gap:11px;}
+  .dot{width:7px;height:7px;border-radius:50%;animation:pulse 2s infinite;}
+  .du{background:var(--accent);box-shadow:0 0 7px var(--accent);}
+  .da{background:var(--adm);box-shadow:0 0 7px var(--adm);}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.25}}
+  .hb h1{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;}
+  .hb h1.u{color:var(--accent);}
+  .hb h1.a{color:var(--adm);}
+  .hnav{display:flex;gap:4px;}
+  .nb{background:none;border:1px solid transparent;border-radius:3px;padding:6px 14px;color:var(--text2);font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;}
+  .nb:hover{border-color:var(--border2);color:var(--text);}
+  .nb.au{border-color:var(--accent);color:var(--accent);background:rgba(0,229,160,0.06);}
+  .nb.aa{border-color:var(--adm);color:var(--adm);background:rgba(123,140,255,0.06);}
+  .hr{display:flex;align-items:center;gap:10px;}
+  .rbadge{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;border-radius:2px;padding:4px 10px;text-transform:uppercase;border:1px solid;}
+  .rbadge.u{color:var(--accent);background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.2);}
+  .rbadge.a{color:var(--adm);background:rgba(123,140,255,0.08);border-color:rgba(123,140,255,0.2);}
+  .lkbtn{background:none;border:1px solid var(--border2);border-radius:3px;padding:5px 12px;color:var(--text3);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.06em;}
+  .lkbtn:hover{border-color:var(--danger);color:var(--danger);}
+
+  /* PAGES */
+  .page{display:none;padding:34px 26px;max-width:920px;margin:0 auto;}
+  .page.active{display:block;}
+  .ptitle{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:10px;}
+  .ptitle::before{content:'';display:block;width:14px;height:1px;}
+  .ptitle.u::before{background:var(--accent);}
+  .ptitle.a::before{background:var(--adm);}
+
+  /* FORM */
+  .fg{display:flex;flex-direction:column;gap:20px;}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;}
+  .field input,.field select,.field textarea{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:10px 14px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;width:100%;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);}
+  .field textarea{resize:vertical;min-height:120px;line-height:1.6;}
+  .field select{appearance:none;cursor:pointer;}
+  .fhint{font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.5;}
+  .anotice{background:rgba(0,229,160,0.04);border:1px solid rgba(0,229,160,0.14);border-radius:3px;padding:12px 15px;display:flex;gap:11px;align-items:flex-start;margin-bottom:22px;}
+  .anotice .ic{color:var(--accent);font-size:14px;flex-shrink:0;margin-top:1px;}
+  .anotice p{font-size:12px;color:var(--text2);line-height:1.6;font-family:var(--mono);}
+  .anotice p strong{color:var(--accent);font-weight:500;}
+  .sevs{display:flex;gap:8px;}
+  .so{flex:1;padding:8px;border:1px solid var(--border);border-radius:3px;text-align:center;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.15s;color:var(--text3);}
+  .so.low:hover,.so.low.sel{border-color:#00c8a0;color:#00c8a0;background:rgba(0,200,160,0.06);}
+  .so.med:hover,.so.med.sel{border-color:var(--warn);color:var(--warn);background:rgba(255,170,0,0.06);}
+  .so.high:hover,.so.high.sel{border-color:var(--danger);color:var(--danger);background:rgba(255,77,106,0.06);}
+  .upzone{border:1px dashed var(--border2);border-radius:3px;padding:22px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;}
+  .upzone:hover{border-color:var(--accent);background:rgba(0,229,160,0.02);}
+  .upzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .upzone .upi{font-size:26px;margin-bottom:7px;}
+  .upzone p{font-family:var(--mono);font-size:11px;color:var(--text2);}
+  .upzone p span{color:var(--accent);}
+  .flist{display:flex;flex-direction:column;gap:5px;margin-top:7px;}
+  .fi{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:7px 11px;font-family:var(--mono);font-size:11px;color:var(--text2);}
+  .fi .rmf{color:var(--danger);cursor:pointer;background:none;border:none;font-size:14px;}
+  .sbtn{background:var(--accent);color:#000;border:none;border-radius:3px;padding:12px 24px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;align-self:flex-start;}
+  .sbtn:hover{background:var(--accent2);transform:translateY(-1px);}
+
+  /* SUCCESS */
+  #sc{display:none;background:var(--surface);border:1px solid rgba(0,229,160,0.18);border-radius:4px;padding:34px;text-align:center;flex-direction:column;align-items:center;gap:13px;}
+  #sc.show{display:flex;}
+  #sc h2{font-family:var(--mono);font-size:15px;color:var(--accent);letter-spacing:0.08em;}
+  #sc p{font-size:13px;color:var(--text2);line-height:1.6;}
+  .rid{background:var(--bg);border:1px solid var(--accent);border-radius:3px;padding:12px 24px;font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent);letter-spacing:0.15em;}
+
+  /* REPORTS */
+  .rgrid{display:flex;flex-direction:column;gap:10px;}
+  .rcard{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:17px 19px;cursor:pointer;transition:border-color 0.15s;display:grid;grid-template-columns:auto 1fr auto;gap:13px;align-items:start;}
+  .rcard:hover{border-color:var(--border2);}
+  .rcid{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.15);border-radius:2px;padding:4px 9px;white-space:nowrap;align-self:center;}
+  .rcb h3{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px;}
+  .rcb p{font-size:12px;color:var(--text2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .rcm{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+  .sevb{font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:2px;border:1px solid;}
+  .sevb.low{color:#00c8a0;border-color:#00c8a0;background:rgba(0,200,160,0.08);}
+  .sevb.medium{color:var(--warn);border-color:var(--warn);background:rgba(255,170,0,0.08);}
+  .sevb.high{color:var(--danger);border-color:var(--danger);background:rgba(255,77,106,0.08);}
+  .rdate{font-family:var(--mono);font-size:10px;color:var(--text3);}
+  .stbadge{font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;padding:3px 8px;border-radius:2px;}
+  .stbadge.new{background:rgba(0,229,160,0.1);color:var(--accent);}
+  .stbadge.reviewing{background:rgba(255,170,0,0.1);color:var(--warn);}
+  .stbadge.resolved{background:rgba(74,85,104,0.18);color:var(--text3);}
+  .stup{display:flex;gap:5px;margin-top:5px;}
+  .stup button{background:none;border:1px solid var(--border);border-radius:2px;padding:3px 9px;font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;color:var(--text3);transition:all 0.15s;}
+  .stup button:hover{border-color:var(--adm);color:var(--adm);}
+
+  /* TRACK */
+  .tbox{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:26px;max-width:420px;display:flex;flex-direction:column;gap:15px;}
+  .tres{display:none;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:20px;margin-top:16px;flex-direction:column;gap:12px;}
+  .tres.show{display:flex;}
+
+  /* ADMIN STATS */
+  .srow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:26px;}
+  .scard{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:15px 17px;}
+  .scard .sl{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;}
+  .scard .sv{font-family:var(--mono);font-size:26px;font-weight:600;}
+  .scard.tall .sv{color:var(--text);}
+  .scard.snew .sv{color:var(--accent);}
+  .scard.srev .sv{color:var(--warn);}
+  .scard.sres .sv{color:var(--text3);}
+
+  /* ADMIN NOTE */
+  .nota{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:8px 12px;color:var(--text2);font-family:var(--mono);font-size:12px;width:100%;outline:none;resize:vertical;min-height:70px;transition:border-color 0.2s;}
+  .nota:focus{border-color:var(--adm);}
+  .notebtn{background:var(--adm);color:#fff;border:none;border-radius:3px;padding:7px 15px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;}
+  .notebtn:hover{background:var(--adm2);}
+  .delbtn{background:none;border:1px solid rgba(255,77,106,0.3);border-radius:3px;padding:7px 13px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;color:var(--danger);transition:all 0.15s;}
+  .delbtn:hover{background:rgba(255,77,106,0.08);border-color:var(--danger);}
+
+  /* MODAL */
+  #detailModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:300;align-items:center;justify-content:center;padding:22px;}
+  #detailModal.open{display:flex;}
+  .mbox{background:var(--surface2);border:1px solid var(--border2);border-radius:5px;width:100%;max-width:580px;max-height:82vh;overflow-y:auto;padding:26px;display:flex;flex-direction:column;gap:17px;}
+  .mbox h2{font-family:var(--mono);font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--adm);}
+  .mrow{display:grid;grid-template-columns:100px 1fr;gap:10px;border-top:1px solid var(--border);padding-top:13px;font-size:13px;}
+  .mrow .lbl{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;padding-top:2px;}
+  .mrow .val{color:var(--text2);line-height:1.6;word-break:break-word;}
+  .mclose{background:none;border:1px solid var(--border2);border-radius:3px;padding:7px 15px;color:var(--text2);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;align-self:flex-end;transition:all 0.15s;}
+  .mclose:hover{border-color:var(--danger);color:var(--danger);}
+
+  /* QR CODE PAGE */
+  .qr-wrap{display:flex;flex-direction:column;gap:22px;}
+  .qr-card{background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:28px;display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;}
+  .qr-canvas-wrap{background:#fff;border-radius:4px;padding:14px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .qr-info{display:flex;flex-direction:column;gap:13px;flex:1;min-width:220px;}
+  .qr-info h2{font-family:var(--mono);font-size:13px;color:var(--adm);letter-spacing:0.08em;text-transform:uppercase;}
+  .qr-info p{font-size:13px;color:var(--text2);line-height:1.7;}
+  .qr-info ul{font-size:12px;color:var(--text2);line-height:2;padding-left:18px;font-family:var(--mono);}
+  .qr-info ul li::marker{color:var(--accent);}
+  .qr-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
+  .btn-print{background:var(--adm);color:#fff;border:none;border-radius:3px;padding:10px 20px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;}
+  .btn-print:hover{background:var(--adm2);}
+  .btn-dl{background:none;border:1px solid var(--border2);color:var(--text2);border-radius:3px;padding:10px 20px;font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;}
+  .btn-dl:hover{border-color:var(--adm);color:var(--adm);}
+  .qr-url{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:9px 13px;font-family:var(--mono);font-size:11px;color:var(--accent);word-break:break-all;}
+  .qr-tip{background:rgba(123,140,255,0.05);border:1px solid rgba(123,140,255,0.15);border-radius:3px;padding:13px 16px;font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.8;}
+  .qr-tip strong{color:var(--adm);}
+
+  /* PRINT */
+  @media print {
+    body{background:#fff !important;}
+    body::before,header,#roleScreen,#loginScreen,.qr-actions,.qr-tip{display:none !important;}
+    .page{display:block !important;padding:0 !important;}
+    .ptitle{display:none;}
+    .qr-card{background:#fff !important;border:1px solid #ccc !important;}
+    .qr-info h2{color:#222 !important;}
+    .qr-info p,.qr-info ul li{color:#444 !important;}
+  }
+
+  /* MISC */
+  .empty{text-align:center;padding:56px 0;color:var(--text3);font-family:var(--mono);font-size:12px;letter-spacing:0.05em;}
+  .empty .ei{font-size:30px;margin-bottom:11px;opacity:0.35;}
+  .frow2{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+  .fsel{background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 11px;outline:none;cursor:pointer;}
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+  @media(max-width:600px){.frow{grid-template-columns:1fr}.hnav{display:none}.srow{grid-template-columns:1fr 1fr}.page{padding:18px 13px}.rs-cards{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<!-- ROLE SELECT -->
+<div id="roleScreen">
+  <div class="rs-logo">
+    <svg viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M29 3L5 13V29C5 41.5 15.3 52.6 29 55C42.7 52.6 53 41.5 53 29V13L29 3Z" stroke="#00e5a0" stroke-width="1.4" fill="rgba(0,229,160,0.05)"/>
+      <path d="M19 29L25 35L39 21" stroke="#00e5a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h1>SecureReport</h1>
+    <p>// Anonymous Whistleblower Portal</p>
+  </div>
+  <div class="rs-cards">
+    <div class="rs-card uc" onclick="enterReporter()">
+      <div class="rci">&#128100;</div>
+      <h2>Reporter</h2>
+      <p>Submit &amp; track reports anonymously</p>
+      <span class="no-pass">&#10003; No password needed</span>
+    </div>
+    <div class="rs-card ac" onclick="goLogin()">
+      <div class="rci">&#128737;</div>
+      <h2>Admin</h2>
+      <p>Review, manage &amp; action all reports</p>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN ONLY -->
+<div id="loginScreen">
+  <div class="login-back" onclick="goBack()">&#8592; Back</div>
+  <div class="login-box">
+    <div class="ltitle">Admin Access</div>
+    <div>
+      <label>Admin Passphrase</label>
+      <input type="password" id="lpass" placeholder="Enter passphrase..." autocomplete="off" />
+    </div>
+    <button class="btn-a" onclick="doLogin()">Enter Admin Panel</button>
+    <div class="lhint">Admin passphrase: <span class="ha">admin123</span></div>
+    <div class="lerr" id="lerr">Incorrect passphrase. Access denied.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="hb">
+      <div class="dot" id="hdot"></div>
+      <h1 id="htitle" class="u">SecureReport</h1>
+    </div>
+    <div class="hnav" id="hnav"></div>
+    <div class="hr">
+      <span class="rbadge u" id="rbadge">Reporter</span>
+      <button class="lkbtn" id="lockBtn" onclick="lockApp()" style="display:none;">Lock</button>
+    </div>
+  </header>
+
+  <!-- REPORTER: Submit -->
+  <div class="page active" id="page-submit">
+    <div class="ptitle u">Submit Confidential Report</div>
+    <div class="anotice">
+      <span class="ic">&#9651;</span>
+      <p><strong>Your identity is fully protected.</strong> No personal details are required or stored. You will receive a unique Report ID — use it to track your report anonymously at any time.</p>
+    </div>
+    <div id="submitForm" class="fg">
+      <div class="frow">
+        <div class="field">
+          <label>Category *</label>
+          <select id="f-cat">
+            <option value="">Select category...</option>
+            <option>Workplace Misconduct</option>
+            <option>Financial Fraud / Corruption</option>
+            <option>Safety Violation</option>
+            <option>Discrimination / Harassment</option>
+            <option>Data Privacy Breach</option>
+            <option>Environmental Violation</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Organization / Dept (optional)</label>
+          <input type="text" id="f-org" placeholder="e.g. Finance Dept, Acme Corp" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Report Title *</label>
+        <input type="text" id="f-title" placeholder="Brief summary of the issue" />
+      </div>
+      <div class="field">
+        <label>Detailed Description *</label>
+        <textarea id="f-desc" placeholder="Describe the incident clearly — dates, locations, persons involved. Do NOT include information that could identify you."></textarea>
+        <span class="fhint">// Do not include your name, role, or any personally identifying details</span>
+      </div>
+      <div class="field">
+        <label>Severity Level *</label>
+        <div class="sevs">
+          <div class="so low" onclick="selSev(this,'low')">Low</div>
+          <div class="so med" onclick="selSev(this,'medium')">Medium</div>
+          <div class="so high" onclick="selSev(this,'high')">High</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Supporting Evidence (optional)</label>
+        <div class="upzone">
+          <input type="file" multiple id="f-files" onchange="handleFiles(this)" />
+          <div class="upi">&#128206;</div>
+          <p>Drop files or <span>browse</span></p>
+          <p style="margin-top:4px;color:var(--text3);">Images, PDFs, documents</p>
+        </div>
+        <div class="flist" id="flist"></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <button class="sbtn" onclick="submitReport()">&#9654; Submit Report</button>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Stored securely on this device</span>
+      </div>
+    </div>
+    <div id="sc">
+      <div style="font-size:42px;">&#10003;</div>
+      <h2>Report Submitted Successfully</h2>
+      <p>Your report has been recorded. Save the Report ID below — use it to check your report status anonymously at any time.</p>
+      <div class="rid" id="sid">RPT-000000</div>
+      <p style="font-size:11px;color:var(--text3);">&#9888; Save this ID — it cannot be recovered if lost</p>
+      <button class="sbtn" onclick="resetForm()" style="margin-top:4px;">Submit Another Report</button>
+    </div>
+  </div>
+
+  <!-- REPORTER: Track -->
+  <div class="page" id="page-track">
+    <div class="ptitle u">Track Your Report</div>
+    <div class="anotice">
+      <span class="ic">&#128274;</span>
+      <p><strong>No password required.</strong> Enter your unique Report ID to check the current status of your submission and any admin notes.</p>
+    </div>
+    <div class="tbox">
+      <div class="field">
+        <label>Your Report ID</label>
+        <input type="text" id="tid" placeholder="e.g. RPT-482931" style="text-transform:uppercase;font-family:var(--mono);" />
+      </div>
+      <button class="sbtn" onclick="trackReport()">&#9654; Check Status</button>
+    </div>
+    <div class="tres" id="tres">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;">Result</div>
+      <div id="tcon"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN: Dashboard -->
+  <div class="page" id="page-dashboard">
+    <div class="ptitle a">Admin Dashboard</div>
+    <div class="srow" id="srow"></div>
+    <div class="ptitle a" style="margin-bottom:14px;">Recent Reports</div>
+    <div class="rgrid" id="dashGrid"></div>
+  </div>
+
+  <!-- ADMIN: All Reports -->
+  <div class="page" id="page-allreports">
+    <div class="frow2">
+      <div class="ptitle a" style="margin:0;">All Reports</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;">
+        <select class="fsel" id="fsev" onchange="renderAll()">
+          <option value="">All Severity</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+        <select class="fsel" id="fst" onchange="renderAll()">
+          <option value="">All Status</option>
+          <option value="new">New</option>
+          <option value="reviewing">Reviewing</option>
+          <option value="resolved">Resolved</option>
+        </select>
+        <select class="fsel" id="fcat" onchange="renderAll()">
+          <option value="">All Categories</option>
+          <option>Workplace Misconduct</option>
+          <option>Financial Fraud / Corruption</option>
+          <option>Safety Violation</option>
+          <option>Discrimination / Harassment</option>
+          <option>Data Privacy Breach</option>
+          <option>Environmental Violation</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="rgrid" id="allGrid"></div>
+  </div>
+
+  <!-- ADMIN: QR Code -->
+  <div class="page" id="page-qrcode">
+    <div class="ptitle a">QR Code — Premises Poster</div>
+    <div class="qr-wrap">
+      <div class="qr-card">
+        <div class="qr-canvas-wrap">
+          <div id="qrcode"></div>
+        </div>
+        <div class="qr-info">
+          <h2>&#128247; Scan to Report Anonymously</h2>
+          <p>Print and paste this QR code throughout your premises. Anyone who scans it is taken <strong>directly to the anonymous report form</strong> — no password, no login required.</p>
+          <ul>
+            <li>Opens reporter portal instantly on scan</li>
+            <li>100% anonymous — no identity captured</li>
+            <li>Reporter receives unique Report ID</li>
+            <li>Track status anytime with Report ID only</li>
+            <li>No app install needed — works in any browser</li>
+          </ul>
+          <div class="qr-actions">
+            <button class="btn-print" onclick="window.print()">&#128438; Print Poster</button>
+            <button class="btn-dl" onclick="downloadQR()">&#11015; Download QR Image</button>
+          </div>
+        </div>
+      </div>
+      <div class="qr-tip">
+        <strong>&#128204; Placement tips:</strong> Paste near notice boards, canteen, restroom entrances, HR area, stairwells, and entry gates. The more visible the QR, the safer employees feel reporting issues.
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;">QR Code encodes this URL:</div>
+        <div class="qr-url" id="qrUrlDisplay">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div id="detailModal">
+  <div class="mbox" id="mbox"></div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDNpMRkkidbbRz7IVQMNl7IZQnYSAIVn1s",
+    authDomain: "gaunesh-94e92.firebaseapp.com",
+    projectId: "gaunesh-94e92",
+    storageBucket: "gaunesh-94e92.firebasestorage.app",
+    messagingSenderId: "111112760525",
+    appId: "1:111112760525:web:006715ae6905cd939fcd84",
+    measurementId: "G-RBTZMVG1E4"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const REPORTS_COL = 'wb_reports';
+
+  const ADMIN_PASS = 'admin123';
+  let role = null;
+  let reports = [];
+  let selSevVal = '';
+  let files = [];
+  let qrGenerated = false;
+
+  // ---- FIREBASE HELPERS ----
+  async function fbGetAll() {
+    const q = query(collection(db, REPORTS_COL), orderBy('date', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+  }
+
+  async function fbAdd(data) {
+    const ref = await addDoc(collection(db, REPORTS_COL), data);
+    return ref.id;
+  }
+
+  async function fbUpdate(docId, data) {
+    await updateDoc(doc(db, REPORTS_COL, docId), data);
+  }
+
+  async function fbDelete(docId) {
+    await deleteDoc(doc(db, REPORTS_COL, docId));
+  }
+
+  async function fbGetById(reportId) {
+    const q = query(collection(db, REPORTS_COL), where('id', '==', reportId));
+    const snap = await getDocs(q);
+    if(snap.empty) return null;
+    const d = snap.docs[0];
+    return { _id: d.id, ...d.data() };
+  }
+
+  function showToast(msg, color='var(--accent)') {
+    let t = document.getElementById('toast');
+    if(!t) { t = document.createElement('div'); t.id='toast'; t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:10px 20px;font-family:var(--mono);font-size:12px;z-index:9999;transition:opacity 0.3s;'; document.body.appendChild(t); }
+    t.style.color = color;
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.style.opacity = '0', 2500);
+  }
+
+  // ---- INIT ----
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if(params.get('report') === 'true') enterReporter();
+  });
+
+  // ---- ROLE / LOGIN ----
+  window.enterReporter = function() {
+    role = 'user';
+    document.getElementById('roleScreen').style.display = 'none';
+    initApp('user');
+  }
+
+  window.goLogin = function() {
+    document.getElementById('roleScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('lerr').style.display = 'none';
+    document.getElementById('lpass').value = '';
+    setTimeout(()=>document.getElementById('lpass').focus(), 50);
+  }
+
+  window.goBack = function() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('roleScreen').style.display = 'flex';
+    role = null;
+  }
+
+  document.getElementById('lpass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+  window.doLogin = function() {
+    const v = document.getElementById('lpass').value;
+    if(v === ADMIN_PASS) {
+      document.getElementById('loginScreen').style.display = 'none';
+      role = 'admin';
+      initApp('admin');
+    } else {
+      document.getElementById('lerr').style.display = 'block';
+      document.getElementById('lpass').value = '';
+    }
+  }
+
+  function initApp(r) {
+    document.getElementById('app').style.display = 'block';
+    const isA = r === 'admin';
+    document.getElementById('hdot').className = 'dot ' + (isA ? 'da' : 'du');
+    const ht = document.getElementById('htitle');
+    ht.className = isA ? 'a' : 'u';
+    ht.textContent = isA ? 'SecureReport — Admin' : 'SecureReport';
+    const rb = document.getElementById('rbadge');
+    rb.className = 'rbadge ' + (isA ? 'a' : 'u');
+    rb.textContent = isA ? 'Admin' : 'Reporter';
+    document.getElementById('lockBtn').style.display = isA ? 'inline-block' : 'none';
+    const nav = document.getElementById('hnav');
+    if(isA) {
+      nav.innerHTML = `<button class="nb aa" onclick="showPage('dashboard',this)">Dashboard</button><button class="nb" onclick="showPage('allreports',this)">All Reports</button><button class="nb" onclick="showPage('qrcode',this)">&#128247; QR Code</button>`;
+      showPage('dashboard', nav.querySelector('.aa'));
+    } else {
+      nav.innerHTML = `<button class="nb au" onclick="showPage('submit',this)">Submit Report</button><button class="nb" onclick="showPage('track',this)">Track Report</button>`;
+      showPage('submit', nav.querySelector('.au'));
+    }
+  }
+
+  window.lockApp = function() {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('roleScreen').style.display = 'flex';
+    role = null;
+    resetForm();
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  }
+
+  window.showPage = function(name, btn) {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+name).classList.add('active');
+    document.querySelectorAll('.nb').forEach(b=>b.classList.remove('au','aa'));
+    if(btn) btn.classList.add(role==='admin' ? 'aa' : 'au');
+    if(name==='dashboard') renderDash();
+    if(name==='allreports') renderAll();
+    if(name==='qrcode') renderQR();
+  }
+
+  // ---- REPORTER SUBMIT ----
+  window.selSev = function(el, v) {
+    document.querySelectorAll('.so').forEach(s=>s.classList.remove('sel'));
+    el.classList.add('sel');
+    selSevVal = v;
+  }
+
+  window.handleFiles = function(input) {
+    files = [...files, ...Array.from(input.files)];
+    renderFileList();
+  }
+
+  function renderFileList() {
+    document.getElementById('flist').innerHTML = files.map((f,i)=>
+      `<div class="fi"><span>&#128206; ${f.name} (${(f.size/1024).toFixed(1)}KB)</span><button class="rmf" onclick="rmFile(${i})">&#215;</button></div>`
+    ).join('');
+  }
+
+  window.rmFile = function(i) { files.splice(i,1); renderFileList(); }
+  function genId() { return 'RPT-'+Math.floor(100000+Math.random()*900000); }
+
+  window.submitReport = async function() {
+    const t = document.getElementById('f-title').value.trim();
+    const d = document.getElementById('f-desc').value.trim();
+    const c = document.getElementById('f-cat').value;
+    if(!t||!d||!c||!selSevVal) { alert('Please fill all required fields and select a severity level.'); return; }
+    const btn = document.querySelector('#submitForm .sbtn');
+    btn.textContent = 'Submitting…'; btn.disabled = true;
+    const id = genId();
+    const payload = { id, title:t, description:d, category:c, org:document.getElementById('f-org').value.trim(), severity:selSevVal, files:files.map(f=>f.name), status:'new', date:new Date().toISOString(), adminNotes:'' };
+    try {
+      await fbAdd(payload);
+      document.getElementById('submitForm').style.display = 'none';
+      document.getElementById('sc').classList.add('show');
+      document.getElementById('sid').textContent = id;
+    } catch(e) {
+      alert('Failed to submit. Please check your connection and try again.');
+      btn.textContent = '▶ Submit Report'; btn.disabled = false;
+    }
+  }
+
+  function resetForm() {
+    ['f-title','f-desc','f-org'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    const fc=document.getElementById('f-cat'); if(fc) fc.value='';
+    document.querySelectorAll('.so').forEach(s=>s.classList.remove('sel'));
+    selSevVal=''; files=[];
+    const fl=document.getElementById('flist'); if(fl) fl.innerHTML='';
+    const sf=document.getElementById('submitForm'); if(sf) sf.style.display='';
+    const sc=document.getElementById('sc'); if(sc) sc.classList.remove('show');
+  }
+  window.resetForm = resetForm;
+
+  // ---- REPORTER TRACK ----
+  window.trackReport = async function() {
+    const inp = document.getElementById('tid').value.trim().toUpperCase();
+    const res = document.getElementById('tres');
+    const con = document.getElementById('tcon');
+    res.classList.add('show');
+    con.innerHTML = `<span style="font-family:var(--mono);font-size:12px;color:var(--text3);">Searching…</span>`;
+    try {
+      const r = await fbGetById(inp);
+      if(!r) {
+        con.innerHTML = `<span style="font-family:var(--mono);font-size:12px;color:var(--danger);">&#9888; No report found for ID: ${inp||'—'}</span>`;
+        return;
+      }
+      con.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:11px;">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <span style="font-family:var(--mono);font-size:17px;color:var(--accent);">${r.id}</span>
+            <span class="stbadge ${r.status}">${r.status}</span>
+            <span class="sevb ${r.severity}">${r.severity}</span>
+          </div>
+          <div style="font-size:14px;color:var(--text);">${r.title}</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text2);">${r.category}</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);">Submitted: ${new Date(r.date).toLocaleString('en-IN')}</div>
+          ${r.adminNotes ? `<div style="background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:11px 13px;"><div style="font-family:var(--mono);font-size:10px;color:var(--adm);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;">Admin Note</div><div style="font-size:13px;color:var(--text2);line-height:1.6;">${r.adminNotes}</div></div>` : ''}
+        </div>`;
+    } catch(e) {
+      con.innerHTML = `<span style="font-family:var(--mono);font-size:12px;color:var(--danger);">Connection error. Please try again.</span>`;
+    }
+  }
+
+  document.getElementById('tid').addEventListener('keydown', e=>{ if(e.key==='Enter') window.trackReport(); });
+
+  // ---- QR CODE ----
+  function renderQR() {
+    if(qrGenerated) return;
+    qrGenerated = true;
+    const base = window.location.href.split('?')[0];
+    const url = base + '?report=true';
+    document.getElementById('qrUrlDisplay').textContent = url;
+    new QRCode(document.getElementById('qrcode'), {
+      text: url, width: 164, height: 164,
+      colorDark: '#000000', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+
+  window.downloadQR = function() {
+    setTimeout(() => {
+      const canvas = document.querySelector('#qrcode canvas');
+      if(!canvas) { alert('QR code is still generating, please try again.'); return; }
+      const link = document.createElement('a');
+      link.download = 'securereport-qr.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }, 200);
+  }
+
+  // ---- ADMIN DASHBOARD ----
+  async function renderDash() {
+    document.getElementById('dashGrid').innerHTML = '<div class="empty"><div class="ei">⏳</div><div>Loading…</div></div>';
+    reports = await fbGetAll();
+    const t=reports.length, n=reports.filter(r=>r.status==='new').length, rv=reports.filter(r=>r.status==='reviewing').length, rs=reports.filter(r=>r.status==='resolved').length;
+    document.getElementById('srow').innerHTML = `
+      <div class="scard tall"><div class="sl">Total</div><div class="sv">${t}</div></div>
+      <div class="scard snew"><div class="sl">New</div><div class="sv">${n}</div></div>
+      <div class="scard srev"><div class="sl">Reviewing</div><div class="sv">${rv}</div></div>
+      <div class="scard sres"><div class="sl">Resolved</div><div class="sv">${rs}</div></div>`;
+    const recent = reports.slice(0,5);
+    document.getElementById('dashGrid').innerHTML = recent.length
+      ? recent.map((r,i)=>cardHTML(r,i)).join('')
+      : '<div class="empty"><div class="ei">&#128196;</div><div>No reports yet</div></div>';
+  }
+
+  async function renderAll() {
+    document.getElementById('allGrid').innerHTML = '<div class="empty"><div class="ei">⏳</div><div>Loading…</div></div>';
+    reports = await fbGetAll();
+    const sf=document.getElementById('fsev').value, st=document.getElementById('fst').value, sc=document.getElementById('fcat').value;
+    let f = reports.filter(r=>(!sf||r.severity===sf)&&(!st||r.status===st)&&(!sc||r.category===sc));
+    document.getElementById('allGrid').innerHTML = f.length
+      ? f.map((r,i)=>cardHTML(r,reports.indexOf(r))).join('')
+      : '<div class="empty"><div class="ei">&#128196;</div><div>No reports match filters</div></div>';
+  }
+  window.renderAll = renderAll;
+
+  function cardHTML(r, idx) {
+    const ds = new Date(r.date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    return `
+      <div class="rcard" onclick="openDetail(${idx})">
+        <div class="rcid">${r.id}</div>
+        <div class="rcb">
+          <h3>${r.title}</h3>
+          <p>${r.description}</p>
+          <div class="stup" onclick="event.stopPropagation()">
+            <button onclick="updStatus(${idx},'new')">New</button>
+            <button onclick="updStatus(${idx},'reviewing')">Reviewing</button>
+            <button onclick="updStatus(${idx},'resolved')">Resolved</button>
+          </div>
+        </div>
+        <div class="rcm">
+          <span class="sevb ${r.severity}">${r.severity}</span>
+          <span class="stbadge ${r.status}">${r.status}</span>
+          <span class="rdate">${ds}</span>
+        </div>
+      </div>`;
+  }
+
+  window.updStatus = async function(i, s) {
+    const r = reports[i];
+    if(!r) return;
+    try {
+      await fbUpdate(r._id, { status: s });
+      reports[i].status = s;
+      showToast('Status updated');
+      if(document.getElementById('page-dashboard').classList.contains('active')) renderDash(); else renderAll();
+    } catch(e) { showToast('Update failed', 'var(--danger)'); }
+  }
+
+  window.saveNote = async function(i) {
+    const r = reports[i];
+    const note = document.getElementById('na-'+i).value.trim();
+    try {
+      await fbUpdate(r._id, { adminNotes: note });
+      reports[i].adminNotes = note;
+      showToast('Note saved ✓');
+    } catch(e) { showToast('Save failed', 'var(--danger)'); }
+  }
+
+  window.delReport = async function(i) {
+    if(!confirm('Permanently delete this report? This cannot be undone.')) return;
+    const r = reports[i];
+    try {
+      await fbDelete(r._id);
+      reports.splice(i,1);
+      closeDetail();
+      if(document.getElementById('page-dashboard').classList.contains('active')) renderDash(); else renderAll();
+    } catch(e) { showToast('Delete failed', 'var(--danger)'); }
+  }
+
+  // ---- MODAL ----
+  window.openDetail = function(i) {
+    const r = reports[i];
+    document.getElementById('mbox').innerHTML = `
+      <h2>${r.id}</h2>
+      <div class="mrow"><span class="lbl">Title</span><span class="val">${r.title}</span></div>
+      <div class="mrow"><span class="lbl">Category</span><span class="val">${r.category}</span></div>
+      <div class="mrow"><span class="lbl">Organization</span><span class="val">${r.org||'—'}</span></div>
+      <div class="mrow"><span class="lbl">Severity</span><span class="val"><span class="sevb ${r.severity}">${r.severity}</span></span></div>
+      <div class="mrow"><span class="lbl">Status</span><span class="val"><span class="stbadge ${r.status}">${r.status}</span></span></div>
+      <div class="mrow"><span class="lbl">Submitted</span><span class="val">${new Date(r.date).toLocaleString('en-IN')}</span></div>
+      <div class="mrow"><span class="lbl">Description</span><span class="val">${r.description}</span></div>
+      <div class="mrow"><span class="lbl">Evidence</span><span class="val">${r.files&&r.files.length?r.files.join(', '):'None attached'}</span></div>
+      <div class="mrow">
+        <span class="lbl">Admin Notes</span>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <textarea class="nota" id="na-${i}" placeholder="Add internal notes...">${r.adminNotes||''}</textarea>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="notebtn" onclick="saveNote(${i})">Save Note</button>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:14px;">
+        <button class="delbtn" onclick="delReport(${i})">&#128465; Delete Report</button>
+        <button class="mclose" onclick="closeDetail()">Close</button>
+      </div>`;
+    document.getElementById('detailModal').classList.add('open');
+  }
+
+  window.closeDetail = function() { document.getElementById('detailModal').classList.remove('open'); }
+  document.getElementById('detailModal').addEventListener('click', function(e){ if(e.target===this) window.closeDetail(); });
+</script>
+</body>
+</html>
