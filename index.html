@@ -7,6 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -146,6 +147,10 @@
   #sc.show{display:flex;}
   #sc h2{font-family:var(--mono);font-size:15px;color:var(--accent);letter-spacing:0.08em;}
   #sc p{font-size:13px;color:var(--text2);line-height:1.6;}
+  .sync-note{display:none;max-width:560px;border-radius:3px;padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.7;text-align:left;}
+  .sync-note.show{display:block;}
+  .sync-note.cloud{background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.22);color:var(--accent);}
+  .sync-note.local{background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.22);color:var(--warn);}
   .rid{background:var(--bg);border:1px solid var(--accent);border-radius:3px;padding:12px 24px;font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent);letter-spacing:0.15em;}
 
   /* ─── REPORT CARDS ─────────────────────────────────────── */
@@ -263,6 +268,8 @@
   .qr-url{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:9px 13px;font-family:var(--mono);font-size:11px;color:var(--accent);word-break:break-all;}
   .qr-tip{background:rgba(123,140,255,0.05);border:1px solid rgba(123,140,255,0.15);border-radius:3px;padding:13px 16px;font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.8;}
   .qr-tip strong{color:var(--adm);}
+  .qr-warn{display:none;background:rgba(255,170,0,0.06);border:1px solid rgba(255,170,0,0.18);border-radius:3px;padding:13px 16px;font-family:var(--mono);font-size:11px;color:var(--warn);line-height:1.8;}
+  .qr-warn.show{display:block;}
 
   /* ─── CATEGORY MANAGEMENT ──────────────────────────────── */
   .cat-list{display:flex;flex-direction:column;gap:7px;margin-bottom:24px;}
@@ -311,6 +318,11 @@
   ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
 
   /* ─── PRINT ─────────────────────────────────────────────── */
+  /* ─── FIREBASE STATUS BANNER ─────────────────────────── */
+  #fb-status{display:none;padding:6px 26px;font-family:var(--mono);font-size:10px;text-align:center;letter-spacing:0.06em;}
+  #fb-status.local{background:rgba(255,170,0,0.06);border-bottom:1px solid rgba(255,170,0,0.15);color:var(--warn);}
+  #fb-status.cloud{background:rgba(0,229,160,0.04);border-bottom:1px solid rgba(0,229,160,0.1);color:var(--accent);}
+
   @media print {
     body{background:#fff !important;}
     body::before,header,#roleScreen,#loginScreen,.qr-actions,.qr-tip{display:none !important;}
@@ -394,6 +406,7 @@
       <button class="lkbtn" id="lockBtn" onclick="lockApp()" style="display:none;">Lock</button>
     </div>
   </header>
+  <div id="fb-status"></div>
 
   <!-- ── REPORTER: Submit ────────────────────── -->
   <div class="page active" id="page-submit">
@@ -447,11 +460,16 @@
     </div>
     <div id="sc">
       <div style="font-size:42px;">&#10003;</div>
-      <h2>Report Submitted Successfully</h2>
-      <p>Your report has been recorded. Save the Report ID below — use it to check your report status anonymously at any time.</p>
+      <h2 id="submitSuccessTitle">Report Submitted Successfully</h2>
+      <p id="submitSuccessMessage">Your report has been recorded. Save the Report ID below and use it to check your report status anonymously at any time.</p>
+      <div id="submitSyncStatus" class="sync-note"></div>
       <div class="rid" id="sid">RPT-000000</div>
+      <button onclick="copyReportId()" style="background:none;border:1px solid rgba(0,229,160,0.3);border-radius:3px;padding:6px 16px;color:var(--accent);font-family:var(--mono);font-size:10px;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;" id="copyBtn">&#128203; Copy ID</button>
       <p style="font-size:11px;color:var(--text3);">&#9888; Save this ID — it cannot be recovered if lost</p>
-      <button class="sbtn" onclick="resetForm()" style="margin-top:4px;">Submit Another Report</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
+        <button class="sbtn" onclick="goToTrackWithId()">&#128269; Track This Report</button>
+        <button class="sbtn" style="background:var(--surface);color:var(--text2);border:1px solid var(--border2);" onclick="resetForm()">Submit Another</button>
+      </div>
     </div>
   </div>
 
@@ -533,6 +551,7 @@
       <div class="qr-tip">
         <strong>&#128204; Placement tips:</strong> Paste near notice boards, canteen, restroom entrances, HR area, stairwells, and entry gates. The more visible the QR, the safer employees feel reporting issues.
       </div>
+      <div class="qr-warn" id="qrModeWarning"></div>
       <div>
         <div style="font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;">QR Code encodes this URL:</div>
         <div class="qr-url" id="qrUrlDisplay">—</div>
@@ -752,13 +771,13 @@
 //  FIREBASE CONFIG
 // ══════════════════════════════════════════════════════════
 const _fbConfig = {
-  apiKey:            "AIzaSyCYGV5HpF6-j_HBqix3EA-XFGmT8E698k8",
-  authDomain:        "skr-task.firebaseapp.com",
-  projectId:         "skr-task",
-  storageBucket:     "skr-task.firebasestorage.app",
-  messagingSenderId: "1011690659933",
-  appId:             "1:1011690659933:web:f57e43ee0267a475682db4",
-  measurementId:     "G-67NGHMK0QR"
+  apiKey:            "AIzaSyDNpMRkkidbbRz7IVQMNl7IZQnYSAIVn1s",
+  authDomain:        "gaunesh-94e92.firebaseapp.com",
+  projectId:         "gaunesh-94e92",
+  storageBucket:     "gaunesh-94e92.firebasestorage.app",
+  messagingSenderId: "111112760525",
+  appId:             "1:111112760525:web:006715ae6905cd939fcd84",
+  measurementId:     "G-RBTZMVG1E4"
 };
 let _db = null, _fbReady = false, _unsubscribe = null;
 
@@ -766,9 +785,13 @@ function initFirebase() {
   try {
     if (!firebase.apps.length) firebase.initializeApp(_fbConfig);
     _db = firebase.firestore();
+    _db.enablePersistence({synchronizeTabs:true}).catch(e=>console.warn('Persistence:',e.code));
     _fbReady = true;
     console.log('Firebase connected ✓');
-  } catch(e) { console.warn('Firebase init failed:', e); }
+  } catch(e) {
+    console.warn('Firebase init failed, using local storage:', e);
+    _fbReady = false; _db = null;
+  }
 }
 
 // ══════════════════════════════════════════════════════════
@@ -818,12 +841,27 @@ function saveCategories(cats) { localStorage.setItem('wb_categories', JSON.strin
 // ══════════════════════════════════════════════════════════
 async function saveReport(report) {
   const idx = reports.findIndex(r => r.id === report.id);
-  if(idx >= 0) reports[idx] = report; else reports.push(report);
+  if (idx >= 0) reports[idx] = report; else reports.push(report);
   localStorage.setItem('wb_reports', JSON.stringify(reports));
-  if(_fbReady && _db) {
-    try { await _db.collection('wb_reports').doc(report.id).set(report); }
-    catch(e) { console.warn('Firestore write failed (saved locally):', e); }
+  const result = { savedLocally: true, syncedToCloud: false, localOnlyReason: '' };
+  if (_fbReady && _db) {
+    try {
+      const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 6000));
+      await Promise.race([
+        _db.collection('wb_reports').doc(report.id).set(report),
+        timeout
+      ]);
+      result.syncedToCloud = true;
+    } catch(e) {
+      result.localOnlyReason = e.code === 'permission-denied'
+        ? 'Firestore permission denied — data saved locally only.'
+        : 'Firestore write failed (data saved locally): ' + (e.message || e);
+      console.warn(result.localOnlyReason);
+    }
+  } else {
+    result.localOnlyReason = 'Firestore is not connected, so this report is stored only in the submitting browser.';
   }
+  return result;
 }
 
 async function deleteReportById(id) {
@@ -831,7 +869,13 @@ async function deleteReportById(id) {
   localStorage.setItem('wb_reports', JSON.stringify(reports));
   if(_fbReady && _db) {
     try { await _db.collection('wb_reports').doc(id).delete(); }
-    catch(e) { console.warn('Firestore delete failed:', e); }
+    catch(e) {
+      if (e.code === 'permission-denied') {
+        console.warn('Firestore delete permission denied — deleted locally only.');
+      } else {
+        console.warn('Firestore delete failed:', e);
+      }
+    }
   }
 }
 
@@ -840,21 +884,64 @@ function subscribeReports(onUpdate) {
   if(_unsubscribe) _unsubscribe();
   _unsubscribe = _db.collection('wb_reports').orderBy('date', 'desc')
     .onSnapshot(snap => {
-      reports = snap.docs.map(d => d.data());
+      const fbReports = snap.docs.map(d => d.data());
+      // Merge: keep local-only reports that haven't synced to Firestore yet
+      const localData = JSON.parse(localStorage.getItem('wb_reports') || '[]');
+      const merged = [...fbReports];
+      localData.forEach(lr => {
+        if (!merged.find(fr => fr.id === lr.id)) merged.push(lr);
+      });
+      reports = merged.sort((a, b) => new Date(b.date) - new Date(a.date));
       localStorage.setItem('wb_reports', JSON.stringify(reports));
+      // Update banner
+      const fbBanner = document.getElementById('fb-status');
+      if (fbBanner) {
+        fbBanner.className = 'cloud';
+        fbBanner.textContent = '☁ Cloud sync active — Firestore connected (live)';
+        fbBanner.style.display = 'block';
+      }
       if(onUpdate) onUpdate();
-    }, err => console.warn('Firestore snapshot error:', err));
+    }, err => {
+      console.warn('Firestore snapshot error:', err);
+      // On permission error, fall back gracefully
+      if (err.code === 'permission-denied') {
+        const fbBanner = document.getElementById('fb-status');
+        if (fbBanner) {
+          fbBanner.className = 'local';
+          fbBanner.textContent = '⚠ Local mode — Firestore rules not set. Go to Firebase Console > Firestore > Rules to enable access.';
+          fbBanner.style.display = 'block';
+        }
+      }
+      reports = JSON.parse(localStorage.getItem('wb_reports')||'[]');
+      if(onUpdate) onUpdate();
+    });
 }
 
 async function loadReports() {
-  if(!_fbReady || !_db) return;
+  // Always start with local cache for instant display
+  const localData = JSON.parse(localStorage.getItem('wb_reports')||'[]');
+  reports = localData;
+  if (!_fbReady || !_db) return;
   try {
-    const snap = await _db.collection('wb_reports').orderBy('date','desc').get();
-    reports = snap.docs.map(d => d.data());
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 7000));
+    const snap = await Promise.race([
+      _db.collection('wb_reports').orderBy('date', 'desc').get(),
+      timeout
+    ]);
+    const fbReports = snap.docs.map(d => d.data());
+    // Merge: start with Firestore data, then add any local-only reports
+    // (reports submitted in this session that haven't synced to Firestore yet)
+    const merged = [...fbReports];
+    localData.forEach(lr => {
+      if (!merged.find(fr => fr.id === lr.id)) {
+        merged.push(lr); // keep local-only report
+      }
+    });
+    reports = merged.sort((a, b) => new Date(b.date) - new Date(a.date));
     localStorage.setItem('wb_reports', JSON.stringify(reports));
   } catch(e) {
-    console.warn('Firestore load failed (using local):', e);
-    reports = JSON.parse(localStorage.getItem('wb_reports')||'[]');
+    console.warn('Firestore load failed (using local cache):', e.message || e);
+    reports = localData;
   }
 }
 
@@ -865,6 +952,17 @@ window.addEventListener('DOMContentLoaded', () => {
   initFirebase();
   getUsers();       // seed defaults if needed
   getCategories();  // seed defaults if needed
+
+  // Keyboard shortcuts for login
+  const lpass = document.getElementById('lpass');
+  const luser = document.getElementById('luser');
+  if (lpass) lpass.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  if (luser) luser.addEventListener('keydown', e => { if(e.key==='Enter') lpass && lpass.focus(); });
+
+  // Keyboard shortcut for track page
+  const tid = document.getElementById('tid');
+  if (tid) tid.addEventListener('keydown', e => { if(e.key==='Enter') trackReport(); });
+
   const params = new URLSearchParams(window.location.search);
   if(params.get('report') === 'true') enterReporter();
 });
@@ -875,8 +973,11 @@ window.addEventListener('DOMContentLoaded', () => {
 async function enterReporter() {
   role = 'user'; currentUser = null;
   document.getElementById('roleScreen').style.display = 'none';
-  await loadReports();
+  // Load local cache first for instant display, then sync from Firebase
+  reports = JSON.parse(localStorage.getItem('wb_reports')||'[]');
   initApp('user');
+  // Sync from Firebase in background
+  loadReports().catch(e => console.warn('Background sync failed:', e));
 }
 
 function goLogin() {
@@ -894,10 +995,7 @@ function goBack() {
   role = null; currentUser = null;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('lpass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-  document.getElementById('luser').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('lpass').focus(); });
-});
+// keyboard listeners consolidated in main DOMContentLoaded
 
 async function doLogin() {
   const uname = document.getElementById('luser').value.trim().toLowerCase();
@@ -908,8 +1006,10 @@ async function doLogin() {
     document.getElementById('loginScreen').style.display = 'none';
     role = found.role;
     currentUser = found;
-    await loadReports();
+    // Use local cache immediately so UI shows instantly
+    reports = JSON.parse(localStorage.getItem('wb_reports')||'[]');
     initApp(role);
+    // Then sync from Firebase in background (subscribeReports handles this for staff)
   } else {
     document.getElementById('lerr').style.display = 'block';
     document.getElementById('lpass').value = '';
@@ -917,7 +1017,10 @@ async function doLogin() {
 }
 
 function initApp(r) {
-  reports = JSON.parse(localStorage.getItem('wb_reports')||'[]');
+  // reports already loaded by loadReports() — don't overwrite with stale localStorage
+  if (!reports || reports.length === 0) {
+    reports = JSON.parse(localStorage.getItem('wb_reports')||'[]');
+  }
   document.getElementById('app').style.display = 'block';
   populateCategoryDropdowns();
 
@@ -928,6 +1031,21 @@ function initApp(r) {
   const nav   = document.getElementById('hnav');
 
   lkBtn.style.display = 'inline-block';
+
+  // Show Firebase sync status for staff roles
+  const fbBanner = document.getElementById('fb-status');
+  if (r !== 'user') {
+    if (_fbReady && _db) {
+      fbBanner.className = 'cloud';
+      fbBanner.textContent = '☁ Cloud sync active — Firestore connected';
+    } else {
+      fbBanner.className = 'local';
+      fbBanner.textContent = '⚠ Local mode — data saved in this browser only (Firestore not connected)';
+    }
+    fbBanner.style.display = 'block';
+  } else {
+    fbBanner.style.display = 'none';
+  }
 
   if (r === 'user') {
     hdot.className = 'dot du'; ht.className = 'u'; ht.textContent = 'SecureReport';
@@ -973,6 +1091,7 @@ function initApp(r) {
 }
 
 function onRealtimeUpdate() {
+  syncFromStorage(); // merge any local-only reports into the Firestore snapshot
   const active = document.querySelector('.page.active');
   if (!active) return;
   const pid = active.id;
@@ -985,6 +1104,7 @@ function onRealtimeUpdate() {
 function lockApp() {
   if(_unsubscribe) { _unsubscribe(); _unsubscribe = null; }
   document.getElementById('app').style.display = 'none';
+  document.getElementById('fb-status').style.display = 'none';
   document.getElementById('roleScreen').style.display = 'flex';
   role = null; currentUser = null;
   qrGenerated = false;
@@ -1008,22 +1128,36 @@ function showPage(name, btn) {
   if (name==='categories')     renderCatPage();
   if (name==='users')          renderUserPage();
   if (name==='changepassword') renderChangePwPage();
+  if (name==='track') {
+    // Clear stale results when navigating to track page
+    const tres = document.getElementById('tres');
+    const tcon = document.getElementById('tcon');
+    const tid  = document.getElementById('tid');
+    if (tres) tres.classList.remove('show');
+    if (tcon) tcon.innerHTML = '';
+    if (tid)  tid.value = '';
+  }
 }
 
 // ══════════════════════════════════════════════════════════
 //  CATEGORY MANAGEMENT
 // ══════════════════════════════════════════════════════════
 function populateCategoryDropdowns() {
-  const cats = getCategories();
+  let cats = getCategories();
+  // Ensure defaults if somehow empty
+  if (!cats || cats.length === 0) {
+    cats = DEFAULT_CATEGORIES;
+    saveCategories(cats);
+  }
   // Submit form dropdown
   const fc = document.getElementById('f-cat');
   if (fc) {
-    fc.innerHTML = '<option value="">Select category...</option>' + cats.map(c=>`<option>${c}</option>`).join('');
+    fc.innerHTML = '<option value="">Select category...</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
   }
   // Filter dropdown
   const fcat = document.getElementById('fcat');
   if (fcat) {
-    fcat.innerHTML = '<option value="">All Categories</option>' + cats.map(c=>`<option>${c}</option>`).join('');
+    fcat.innerHTML = '<option value="">All Categories</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
   }
 }
 
@@ -1231,20 +1365,96 @@ function renderFileList() {
 function rmFile(i) { files.splice(i,1); renderFileList(); }
 function genId() { return 'RPT-'+Math.floor(100000+Math.random()*900000); }
 
+function setSubmitFeedback(saveResult) {
+  const title = document.getElementById('submitSuccessTitle');
+  const message = document.getElementById('submitSuccessMessage');
+  const status = document.getElementById('submitSyncStatus');
+  if (!title || !message || !status) return;
+
+  if (saveResult && saveResult.syncedToCloud) {
+    title.textContent = 'Report Submitted Successfully';
+    message.textContent = 'Your report has been recorded and synced to the shared dashboard. Save the Report ID below to track it anonymously at any time.';
+    status.className = 'sync-note cloud show';
+    status.textContent = 'Cloud sync complete. Staff on other devices should be able to see this report.';
+    return;
+  }
+
+  const reason = saveResult && saveResult.localOnlyReason
+    ? saveResult.localOnlyReason
+    : 'Cloud sync is unavailable right now.';
+  title.textContent = 'Report Saved On This Device';
+  message.textContent = 'Your report was saved in this browser, but it was not confirmed on the shared dashboard. Save the Report ID below and fix cloud sync before expecting it on desktop.';
+  status.className = 'sync-note local show';
+  status.textContent = 'Cross-device sync is not confirmed: ' + reason;
+}
+
 async function submitReport() {
   const t = document.getElementById('f-title').value.trim();
   const d = document.getElementById('f-desc').value.trim();
   const c = document.getElementById('f-cat').value;
-  if(!t||!d||!c||!selSevVal) { alert('Please fill all required fields and select a severity level.'); return; }
+  if (!t) { alert('Please enter a Report Title.'); return; }
+  if (!d) { alert('Please enter a Description.'); return; }
+  if (!c) { alert('Please select a Category.'); return; }
+  if (!selSevVal) { alert('Please select a Severity Level (Low / Medium / High).'); return; }
+
   const id = genId();
-  const report = { id, title:t, description:d, category:c, org:document.getElementById('f-org').value.trim(), severity:selSevVal, files:files.map(f=>f.name), status:'new', date:new Date().toISOString(), adminNotes:'' };
+  const report = {
+    id, title: t, description: d, category: c,
+    org: document.getElementById('f-org').value.trim(),
+    severity: selSevVal,
+    files: files.map(f => f.name),
+    status: 'new',
+    date: new Date().toISOString(),
+    adminNotes: ''
+  };
+
   const btn = document.querySelector('#submitForm .sbtn');
-  if(btn){ btn.disabled=true; btn.textContent='⏳ Submitting...'; }
-  await saveReport(report);
-  if(btn){ btn.disabled=false; btn.textContent='▶ Submit Report'; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Submitting...'; }
+
+  let saveResult = { savedLocally: true, syncedToCloud: false, localOnlyReason: 'Report save did not complete.' };
+  try {
+    saveResult = await saveReport(report);
+  } catch (e) {
+    console.warn('Submit error:', e);
+    saveResult.localOnlyReason = e.message || String(e);
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = '▶ Submit Report'; }
+  setSubmitFeedback(saveResult);
   document.getElementById('submitForm').style.display = 'none';
   document.getElementById('sc').classList.add('show');
   document.getElementById('sid').textContent = id;
+}
+
+function copyReportId() {
+  const id = document.getElementById('sid').textContent;
+  navigator.clipboard.writeText(id).then(() => {
+    const btn = document.getElementById('copyBtn');
+    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = '⧉ Copy ID'; }, 2000); }
+  }).catch(() => {
+    // Fallback for older browsers
+    const el = document.createElement('textarea');
+    el.value = document.getElementById('sid').textContent;
+    document.body.appendChild(el); el.select(); document.execCommand('copy');
+    document.body.removeChild(el);
+    const btn = document.getElementById('copyBtn');
+    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = '⧉ Copy ID'; }, 2000); }
+  });
+}
+
+function goToTrackWithId() {
+  const id = document.getElementById('sid').textContent;
+  // Navigate to track page with the report ID pre-filled
+  const nav = document.getElementById('hnav');
+  const trackBtn = nav ? nav.querySelectorAll('button')[1] : null;
+  showPage('track', trackBtn);
+  setTimeout(() => {
+    const tid = document.getElementById('tid');
+    if (tid) {
+      tid.value = id;
+      trackReport();
+    }
+  }, 50);
 }
 
 function resetForm() {
@@ -1255,14 +1465,38 @@ function resetForm() {
   const fl=document.getElementById('flist'); if(fl) fl.innerHTML='';
   const sf=document.getElementById('submitForm'); if(sf) sf.style.display='';
   const sc=document.getElementById('sc'); if(sc) sc.classList.remove('show');
+  const title = document.getElementById('submitSuccessTitle');
+  const message = document.getElementById('submitSuccessMessage');
+  const status = document.getElementById('submitSyncStatus');
+  if (title) title.textContent = 'Report Submitted Successfully';
+  if (message) message.textContent = 'Your report has been recorded. Save the Report ID below and use it to check your report status anonymously at any time.';
+  if (status) status.className = 'sync-note';
+  if (status) status.textContent = '';
+  // Navigate back to submit page properly (fixes blank screen after "Submit Another")
+  if (role === 'user') {
+    const nav = document.getElementById('hnav');
+    const submitBtn = nav ? nav.querySelector('button') : null;
+    showPage('submit', submitBtn);
+  }
 }
 
 async function trackReport() {
   const inp = document.getElementById('tid').value.trim().toUpperCase();
   const res = document.getElementById('tres');
   const con = document.getElementById('tcon');
-  await loadReports();
-  const r = reports.find(x=>x.id===inp);
+  if (!inp) {
+    con.innerHTML = '<span style="font-family:var(--mono);font-size:12px;color:var(--danger);">&#9888; Please enter a Report ID.</span>';
+    res.classList.add('show');
+    return;
+  }
+  // Search in-memory reports first (covers just-submitted reports)
+  // then fall back to localStorage in case of stale in-memory state
+  let r = reports.find(x => x.id === inp);
+  if (!r) {
+    const local = JSON.parse(localStorage.getItem('wb_reports') || '[]');
+    r = local.find(x => x.id === inp);
+    if (r) reports = local; // sync in-memory with localStorage
+  }
   if(!r) { con.innerHTML=`<span style="font-family:var(--mono);font-size:12px;color:var(--danger);">&#9888; No report found for ID: ${inp||'—'}</span>`; res.classList.add('show'); return; }
   con.innerHTML = `<div style="display:flex;flex-direction:column;gap:11px;">
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
@@ -1277,14 +1511,30 @@ async function trackReport() {
   </div>`;
   res.classList.add('show');
 }
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('tid').addEventListener('keydown', e=>{ if(e.key==='Enter') trackReport(); });
-});
+// track keyboard listener consolidated in main DOMContentLoaded
 
 // ══════════════════════════════════════════════════════════
 //  ADMIN / SUPERADMIN DASHBOARD
 // ══════════════════════════════════════════════════════════
+function syncFromStorage() {
+  // Merge in-memory reports with localStorage to catch any submissions
+  // made in reporter mode (same browser, different session)
+  const stored = JSON.parse(localStorage.getItem('wb_reports') || '[]');
+  stored.forEach(sr => {
+    if (!reports.find(r => r.id === sr.id)) {
+      reports.push(sr);
+    } else {
+      // Update in-memory with stored version (may have admin notes etc)
+      const idx = reports.findIndex(r => r.id === sr.id);
+      if (idx >= 0) reports[idx] = sr;
+    }
+  });
+  // Save merged result back
+  localStorage.setItem('wb_reports', JSON.stringify(reports));
+}
+
 function renderDash() {
+  syncFromStorage();
   const t=reports.length, n=reports.filter(r=>r.status==='new').length, rv=reports.filter(r=>r.status==='reviewing').length, rs=reports.filter(r=>r.status==='resolved').length, hi=reports.filter(r=>r.severity==='high').length;
   document.getElementById('srow').innerHTML = `
     <div class="scard tall"><div class="sl">Total Reports</div><div class="sv">${t}</div></div>
@@ -1298,6 +1548,7 @@ function renderDash() {
 }
 
 function renderAll() {
+  syncFromStorage();
   const sf=document.getElementById('fsev').value, st=document.getElementById('fst').value, sc=document.getElementById('fcat').value;
   let f = reports.filter(r=>(!sf||r.severity===sf)&&(!st||r.status===st)&&(!sc||r.category===sc));
   document.getElementById('allGrid').innerHTML = f.length
@@ -1327,9 +1578,15 @@ function cardHTML(r, idx) {
 }
 
 async function updStatus(i, s) {
+  if (!reports[i]) return;
   reports[i].status = s;
   await saveReport(reports[i]);
-  if(document.getElementById('page-dashboard').classList.contains('active')) renderDash(); else renderAll();
+  const activePage = document.querySelector('.page.active');
+  if (!activePage) return;
+  if (activePage.id === 'page-dashboard') renderDash();
+  else if (activePage.id === 'page-allreports') renderAll();
+  else if (activePage.id === 'page-saanalytics') renderSAAnalytics();
+  else renderAll();
 }
 
 async function saveNote(i) {
@@ -1344,13 +1601,18 @@ async function delReport(i) {
   const id = reports[i].id;
   await deleteReportById(id);
   closeDetail();
-  if(document.getElementById('page-dashboard').classList.contains('active')) renderDash(); else renderAll();
+  const activePage = document.querySelector('.page.active');
+  if (!activePage) return;
+  if (activePage.id === 'page-dashboard') renderDash();
+  else if (activePage.id === 'page-saanalytics') renderSAAnalytics();
+  else renderAll();
 }
 
 // ══════════════════════════════════════════════════════════
 //  TOP MANAGEMENT ANALYTICS
 // ══════════════════════════════════════════════════════════
 function renderTopMgmt() {
+  syncFromStorage();
   const t  = reports.length;
   const n  = reports.filter(r=>r.status==='new').length;
   const rv = reports.filter(r=>r.status==='reviewing').length;
@@ -1462,6 +1724,7 @@ function avgDaily30() {
 //  SUPERADMIN ANALYTICS
 // ══════════════════════════════════════════════════════════
 function renderSAAnalytics() {
+  syncFromStorage();
   const t  = reports.length;
   const n  = reports.filter(r=>r.status==='new').length;
   const rv = reports.filter(r=>r.status==='reviewing').length;
@@ -1594,6 +1857,21 @@ function renderQR() {
   qrGenerated = true;
   const base = window.location.href.split('?')[0];
   const url  = base + '?report=true';
+  const qrWarning = document.getElementById('qrModeWarning');
+  if (qrWarning) {
+    let showWarning = false;
+    try {
+      const parsed = new URL(url, window.location.href);
+      const host = parsed.hostname.toLowerCase();
+      showWarning = !['http:', 'https:'].includes(parsed.protocol) || ['localhost', '127.0.0.1', '::1'].includes(host);
+    } catch (e) {
+      showWarning = true;
+    }
+    qrWarning.className = showWarning ? 'qr-warn show' : 'qr-warn';
+    qrWarning.textContent = showWarning
+      ? 'This QR code points to a local-only address. Host this page on a shared HTTP/HTTPS URL before expecting reports from other devices to appear on the desktop dashboard.'
+      : '';
+  }
   document.getElementById('qrUrlDisplay').textContent = url;
   new QRCode(document.getElementById('qrcode'), { text:url, width:164, height:164, colorDark:'#000000', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.H });
 }
