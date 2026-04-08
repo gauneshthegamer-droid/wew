@@ -1,192 +1,192 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SafeVoice — Whistleblower Portal</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bk:#0d0d0d;--bk2:#161616;--bk3:#1e1e1e;--bk4:#272727;
-  --yw:#f5c518;--yw2:#ffd84d;--yw3:#fff3b0;
-  --tx:#f0f0f0;--tx2:#aaa;--tx3:#666;
-  --rd:#e24b4a;--gn:#1D9E75;--bl:#378ADD;
+  --y:#f5c518;--yd:#c9a000;
+  --blk:#0d0d0d;--blk2:#141414;--blk3:#1e1e1e;--blk4:#282828;
+  --txt:#f0f0f0;--txt2:#999;--txt3:#555;
+  --brd:rgba(245,197,24,0.15);--brd2:rgba(245,197,24,0.32);
 }
-body{font-family:var(--font-sans);background:var(--bk);color:var(--tx);min-height:600px}
-
-.topbar{background:var(--bk);border-bottom:2px solid var(--yw);padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:52px}
-.logo{display:flex;align-items:center;gap:10px;color:var(--yw);font-size:17px;font-weight:500}
-.logo-box{width:30px;height:30px;background:var(--yw);border-radius:6px;display:flex;align-items:center;justify-content:center}
-.enc-badge{background:rgba(245,197,24,0.12);color:var(--yw);font-size:11px;padding:3px 10px;border-radius:20px;border:0.5px solid rgba(245,197,24,0.35)}
-
-.nav{display:flex;gap:2px;padding:0.75rem 1.25rem 0;background:var(--bk2);border-bottom:1px solid #2a2a2a}
-.nav-btn{padding:8px 16px;border-radius:6px 6px 0 0;font-size:13px;border:none;cursor:pointer;background:transparent;color:var(--tx2);transition:all 0.15s}
-.nav-btn:hover{color:var(--yw)}
-.nav-btn.active{background:var(--bk3);color:var(--yw);border:0.5px solid #333;border-bottom:none;font-weight:500}
-.nav-btn.admin-btn{color:#e24b4a}
-.nav-btn.admin-btn.active{color:var(--yw)}
-
-.panel{background:var(--bk3);border:0.5px solid #2e2e2e;border-radius:0 10px 10px 10px;padding:1.25rem;margin:0 1.25rem 1.25rem}
-
-.ptitle{font-size:15px;font-weight:500;color:var(--tx);margin-bottom:3px}
-.psub{font-size:12px;color:var(--tx2);margin-bottom:1.25rem}
-
-.flabel{font-size:11px;font-weight:500;color:var(--tx2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.05em}
-.finput,.fselect,.ftextarea{width:100%;padding:9px 12px;font-size:13px;border:0.5px solid #333;border-radius:6px;background:var(--bk4);color:var(--tx);font-family:var(--font-sans);outline:none;transition:border-color .15s}
-.finput:focus,.fselect,.ftextarea:focus{border-color:var(--yw);box-shadow:0 0 0 2px rgba(245,197,24,0.15)}
-.ftextarea{min-height:100px;resize:vertical}
-.fselect{cursor:pointer}
-.fg{margin-bottom:1rem}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-
-.sev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.sev-btn{padding:7px 4px;border-radius:6px;border:0.5px solid #333;background:var(--bk4);cursor:pointer;font-size:11px;text-align:center;color:var(--tx2);transition:all .15s}
-.sev-btn:hover{border-color:var(--yw);color:var(--yw)}
-.sel-low{background:#1a2e10;border-color:#3B6D11;color:#97C459}
-.sel-medium{background:#2e1f08;border-color:#854F0B;color:#EF9F27}
-.sel-high{background:#2e0f0f;border-color:#A32D2D;color:#F09595}
-.sel-critical{background:#3d0808;border-color:#e24b4a;color:#fca5a5}
-
-.anon-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;background:var(--bk4);border:0.5px solid #333;cursor:pointer}
-.trk{width:34px;height:18px;border-radius:9px;background:var(--yw);position:relative;flex-shrink:0;transition:background .2s}
-.trk-th{position:absolute;top:3px;right:3px;width:12px;height:12px;border-radius:50%;background:var(--bk);transition:right .2s}
-.trk.off{background:#333}
-.trk.off .trk-th{right:auto;left:3px}
-
-.file-zone{border:1.5px dashed #333;border-radius:6px;padding:1.25rem;text-align:center;cursor:pointer;transition:border-color .15s}
-.file-zone:hover{border-color:var(--yw)}
-.file-chips{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
-.fchip{font-size:11px;padding:2px 8px;background:rgba(245,197,24,0.12);color:var(--yw);border-radius:20px}
-
-.submit-btn{width:100%;padding:12px;background:var(--yw);color:var(--bk);border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
-.submit-btn:hover{background:var(--yw2)}
-.submit-btn:disabled{opacity:.5;cursor:not-allowed}
-
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}
-.stat-c{background:var(--bk4);border-radius:6px;padding:12px;text-align:center;border:0.5px solid #2a2a2a}
-.stat-n{font-size:22px;font-weight:500;color:var(--yw)}
-.stat-l{font-size:11px;color:var(--tx2);margin-top:2px}
-
-.rlist{display:flex;flex-direction:column;gap:8px}
-.rcard{border:0.5px solid #2a2a2a;border-radius:6px;padding:12px;cursor:pointer;transition:background .15s;background:var(--bk4)}
-.rcard:hover{border-color:var(--yw)}
-.rc-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
-.rc-id{font-size:11px;font-family:var(--font-mono);color:var(--tx2)}
-.rc-cat{font-size:11px;padding:2px 8px;border-radius:12px}
-.cat-fraud{background:rgba(245,197,24,0.12);color:var(--yw)}
-.cat-safety{background:rgba(226,75,74,0.15);color:#f09595}
-.cat-hr{background:rgba(55,138,221,0.15);color:#85B7EB}
-.cat-env{background:rgba(29,158,117,0.12);color:#5DCAA5}
-.cat-other{background:#222;color:var(--tx2)}
-.rc-title{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:4px}
-.rc-meta{font-size:11px;color:var(--tx2);display:flex;gap:10px;flex-wrap:wrap}
-.sdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:3px}
-.s-new{background:#f5c518}.s-rev{background:#EF9F27}.s-res{background:#1D9E75}
-
-.toast{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:var(--bk2);color:var(--yw);padding:10px 20px;border-radius:8px;font-size:13px;display:none;z-index:999;border:1px solid rgba(245,197,24,0.3);white-space:nowrap}
-.toast.show{display:block;animation:fiu .25s ease}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--blk);color:var(--txt);}
+/* ── topbar ── */
+.topbar{background:var(--blk);border-bottom:1.5px solid var(--y);padding:0 1.5rem;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.logo{display:flex;align-items:center;gap:10px;color:var(--y);font-size:18px;font-weight:600;letter-spacing:.01em;}
+.logo-box{width:32px;height:32px;background:var(--y);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.enc-badge{background:rgba(245,197,24,0.08);color:var(--y);font-size:11px;padding:3px 12px;border-radius:20px;border:0.5px solid var(--brd2);letter-spacing:.03em;}
+/* ── nav ── */
+.nav{display:flex;gap:3px;padding:1rem 1.5rem 0;background:var(--blk);}
+.nav-btn{padding:9px 18px;border-radius:8px 8px 0 0;font-size:12px;font-weight:500;border:0.5px solid transparent;cursor:pointer;background:var(--blk3);color:var(--txt2);transition:all .15s;letter-spacing:.02em;}
+.nav-btn.active{background:var(--blk2);color:var(--y);border:0.5px solid var(--brd2);border-bottom:none;}
+.nav-btn:hover:not(.active){background:var(--blk4);color:var(--txt);}
+/* ── panel ── */
+.panel{background:var(--blk2);border:0.5px solid var(--brd);border-radius:0 12px 12px 12px;padding:1.75rem;margin:0 1.5rem 1.5rem;}
+.ptitle{font-size:16px;font-weight:600;color:var(--y);margin-bottom:4px;}
+.psub{font-size:13px;color:var(--txt2);margin-bottom:1.5rem;line-height:1.5;}
+/* ── forms ── */
+.flabel{font-size:11px;font-weight:600;color:var(--txt2);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.06em;}
+.finput,.fselect,.ftextarea{width:100%;padding:10px 14px;font-size:13px;border:0.5px solid var(--brd2);border-radius:8px;background:var(--blk3);color:var(--txt);font-family:inherit;outline:none;transition:border-color .15s;}
+.finput:focus,.ftextarea:focus{border-color:var(--y);box-shadow:0 0 0 3px rgba(245,197,24,0.1);}
+.fselect{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+.ftextarea{min-height:120px;resize:vertical;line-height:1.6;}
+.fgroup{margin-bottom:1.2rem;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+/* ── severity ── */
+.sev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.sev-btn{padding:8px 4px;border-radius:8px;border:0.5px solid var(--brd);background:var(--blk3);cursor:pointer;font-size:12px;font-weight:500;text-align:center;color:var(--txt2);transition:all .15s;}
+.sev-btn:hover{border-color:var(--y);color:var(--y);}
+.sev-btn.sel-low{background:#173404;border-color:#639922;color:#C0DD97;}
+.sev-btn.sel-medium{background:#412402;border-color:#EF9F27;color:#FAC775;}
+.sev-btn.sel-high{background:#501313;border-color:#E24B4A;color:#F7C1C1;}
+.sev-btn.sel-critical{background:var(--y);border-color:var(--yd);color:#0d0d0d;font-weight:700;}
+/* ── anon toggle ── */
+.anon-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;background:var(--blk3);border:0.5px solid var(--brd);cursor:pointer;user-select:none;}
+.ttrack{width:38px;height:21px;border-radius:11px;background:var(--y);position:relative;flex-shrink:0;transition:background .2s;}
+.tthumb{position:absolute;top:3px;right:3px;width:15px;height:15px;border-radius:50%;background:var(--blk);transition:all .2s;}
+.ttrack.off{background:var(--blk4);}
+.ttrack.off .tthumb{right:auto;left:3px;background:var(--txt2);}
+/* ── file zone ── */
+.file-zone{border:1.5px dashed var(--brd2);border-radius:8px;padding:1.5rem;text-align:center;cursor:pointer;transition:background .15s;}
+.file-zone:hover{background:var(--blk3);}
+.fchip{font-size:11px;padding:3px 10px;background:rgba(245,197,24,0.1);color:var(--y);border-radius:20px;border:0.5px solid var(--brd2);}
+/* ── submit button ── */
+.submit-btn{width:100%;padding:13px;background:var(--y);color:var(--blk);border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.01em;transition:background .15s;}
+.submit-btn:hover{background:var(--yd);}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+/* ── qr section ── */
+.qr-section{margin-top:1.5rem;padding:1.25rem;background:var(--blk3);border-radius:8px;border:0.5px solid var(--brd);text-align:center;display:none;}
+.qr-lbl{font-size:11px;color:var(--txt2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;}
+.qr-wrap{display:inline-block;background:#fff;padding:12px;border-radius:10px;line-height:0;}
+.qr-id{font-size:13px;font-family:'Courier New',monospace;color:var(--y);margin-top:10px;font-weight:600;}
+.qr-note{font-size:11px;color:var(--txt2);margin-top:4px;}
+.qr-dl{margin-top:10px;padding:7px 20px;background:transparent;border:0.5px solid var(--brd2);color:var(--y);border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:background .15s;}
+.qr-dl:hover{background:rgba(245,197,24,0.08);}
+/* ── stats cards ── */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
+.stat-card{background:var(--blk3);border-radius:8px;padding:14px;text-align:center;border:0.5px solid var(--brd);}
+.stat-num{font-size:26px;font-weight:700;color:var(--y);}
+.stat-lbl{font-size:11px;color:var(--txt2);margin-top:3px;text-transform:uppercase;letter-spacing:.04em;}
+/* ── report cards ── */
+.rcard{border:0.5px solid var(--brd);border-radius:8px;padding:14px;cursor:pointer;margin-bottom:8px;transition:background .15s;}
+.rcard:hover{background:var(--blk3);}
+.rc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.rc-id{font-size:11px;font-family:'Courier New',monospace;color:var(--txt3);}
+.rc-cat{font-size:11px;padding:2px 9px;border-radius:12px;font-weight:500;}
+.cat-Fraud{background:rgba(245,197,24,0.15);color:var(--y);}
+.cat-Safety{background:#501313;color:#F7C1C1;}
+.cat-HR{background:#26215C;color:#AFA9EC;}
+.cat-Environment{background:#173404;color:#C0DD97;}
+.cat-Corruption{background:#412402;color:#FAC775;}
+.cat-Data,.cat-Other{background:var(--blk4);color:var(--txt2);}
+.rc-title{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:5px;}
+.rc-meta{font-size:11px;color:var(--txt2);display:flex;gap:12px;flex-wrap:wrap;}
+.sdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;}
+.s-New{background:var(--y);}.s-Under-Review{background:#EF9F27;}.s-Resolved{background:#1D9E75;}
+/* ── track ── */
+.track-row{display:flex;gap:8px;}
+.track-btn{padding:10px 18px;background:var(--y);color:var(--blk);border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s;}
+.track-btn:hover{background:var(--yd);}
+.detail-box{border:0.5px solid var(--brd);border-radius:8px;padding:1.25rem;margin-top:1.25rem;display:none;}
+.drow{display:flex;gap:8px;margin-bottom:8px;font-size:13px;}
+.dk{color:var(--txt2);min-width:120px;}
+.dv{color:var(--txt);font-weight:500;}
+.prog-bar{height:5px;border-radius:3px;background:var(--blk4);margin-top:10px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;background:var(--y);transition:width .6s;}
+.tl-item{padding:8px 0 8px 16px;border-left:1.5px solid var(--brd2);margin-left:8px;position:relative;}
+.tl-dot{position:absolute;left:-5px;top:12px;width:8px;height:8px;border-radius:50%;background:var(--y);}
+.tl-txt{font-size:12px;color:var(--txt2);}
+.tl-dt{font-size:11px;color:var(--txt3);margin-top:2px;}
+/* ── admin lock ── */
+.lock-wrap{text-align:center;padding:2.5rem 1rem;}
+.lock-circle{width:70px;height:70px;border-radius:50%;background:rgba(245,197,24,0.08);border:2px solid var(--y);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;}
+.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:1.75rem;}
+.pin-dot{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--brd2);background:transparent;transition:background .2s;}
+.pin-dot.filled{background:var(--y);border-color:var(--y);}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:230px;margin:0 auto;}
+.pin-key{padding:15px 0;background:var(--blk3);border:0.5px solid var(--brd);border-radius:9px;font-size:18px;font-weight:500;color:var(--txt);cursor:pointer;text-align:center;transition:all .15s;}
+.pin-key:hover{background:var(--blk4);border-color:var(--y);color:var(--y);}
+.pin-key:active{transform:scale(.95);}
+.pin-err{font-size:12px;color:#F09595;margin-top:10px;min-height:18px;}
+/* ── admin dash ── */
+.adm-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:0.5px solid var(--brd);}
+.adm-badge{font-size:11px;padding:3px 12px;background:rgba(245,197,24,0.1);color:var(--y);border-radius:12px;border:0.5px solid var(--brd2);font-weight:500;}
+.logout-btn{padding:7px 16px;background:transparent;border:0.5px solid var(--brd2);color:var(--txt2);border-radius:7px;font-size:12px;cursor:pointer;transition:all .15s;}
+.logout-btn:hover{color:var(--y);border-color:var(--y);}
+.adm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem;}
+.search-bar{display:flex;gap:8px;margin-bottom:1.25rem;}
+.filter-sel{padding:10px 13px;font-size:12px;border:0.5px solid var(--brd2);border-radius:8px;background:var(--blk3);color:var(--txt2);outline:none;cursor:pointer;}
+.adm-rrow{border:0.5px solid var(--brd);border-radius:8px;padding:14px;margin-bottom:10px;transition:background .15s;}
+.adm-rrow:hover{background:var(--blk3);}
+.adm-rrow-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;}
+.adm-acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.adm-btn{padding:5px 13px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:0.5px solid var(--brd2);background:transparent;color:var(--y);transition:all .15s;}
+.adm-btn:hover{background:rgba(245,197,24,0.08);}
+.adm-btn.del{color:#F09595;border-color:#7a2020;}
+.adm-btn.del:hover{background:#501313;}
+.status-sel{font-size:11px;padding:4px 9px;border-radius:6px;border:0.5px solid var(--brd2);background:var(--blk3);color:var(--y);cursor:pointer;outline:none;}
+/* ── misc ── */
+.empty{text-align:center;padding:3rem 1rem;color:var(--txt2);font-size:13px;}
+.hidden{display:none;}
+/* ── toast ── */
+.toast{position:fixed;bottom:1.75rem;left:50%;transform:translateX(-50%);background:var(--blk2);color:var(--y);padding:11px 24px;border-radius:10px;font-size:13px;font-weight:500;display:none;z-index:999;border:1px solid var(--brd2);white-space:nowrap;}
+.toast.show{display:block;animation:fiu .3s ease;}
 @keyframes fiu{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
-
-.admin-login{max-width:340px;margin:0 auto;padding:2rem 0}
-.admin-avatar{width:60px;height:60px;background:var(--yw);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem}
-.login-title{text-align:center;font-size:16px;font-weight:500;color:var(--tx);margin-bottom:4px}
-.login-sub{text-align:center;font-size:12px;color:var(--tx2);margin-bottom:1.5rem}
-.login-btn{width:100%;padding:10px;background:var(--yw);color:var(--bk);border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;margin-top:6px}
-.login-btn:hover{background:var(--yw2)}
-.err-msg{color:#f09595;font-size:12px;text-align:center;margin-top:8px;display:none}
-
-.admin-panel{display:none}
-.sec-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(245,197,24,0.08);border-radius:6px;margin-bottom:1.25rem;border:0.5px solid rgba(245,197,24,0.2)}
-.sec-bar-l{font-size:12px;color:var(--yw)}
-.logout-btn{font-size:12px;padding:4px 12px;background:transparent;border:0.5px solid #333;border-radius:5px;color:var(--tx2);cursor:pointer}
-.logout-btn:hover{border-color:var(--rd);color:var(--rd)}
-
-.admin-tabs{display:flex;gap:6px;margin-bottom:1.25rem}
-.atab{padding:6px 14px;border-radius:5px;font-size:12px;border:0.5px solid #2a2a2a;background:transparent;color:var(--tx2);cursor:pointer;transition:all .15s}
-.atab.active{background:rgba(245,197,24,0.1);border-color:var(--yw);color:var(--yw)}
-
-.admin-table{width:100%;border-collapse:collapse;font-size:12px}
-.admin-table th{text-align:left;padding:8px 10px;color:var(--tx2);border-bottom:1px solid #2a2a2a;font-weight:500}
-.admin-table td{padding:8px 10px;border-bottom:0.5px solid #1e1e1e;color:var(--tx);vertical-align:middle}
-.admin-table tr:hover td{background:var(--bk4)}
-
-.status-sel{background:var(--bk4);border:0.5px solid #333;color:var(--tx);border-radius:4px;padding:3px 6px;font-size:11px;cursor:pointer}
-.status-sel:focus{outline:none;border-color:var(--yw)}
-
-.del-btn{background:transparent;border:0.5px solid #333;color:#f09595;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer}
-.del-btn:hover{border-color:var(--rd);background:rgba(226,75,74,0.1)}
-
-.qr-btn{background:rgba(245,197,24,0.1);border:0.5px solid rgba(245,197,24,0.3);color:var(--yw);border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer}
-.qr-btn:hover{background:rgba(245,197,24,0.2)}
-
-.modal-bg{display:none;position:relative;min-height:320px;background:rgba(0,0,0,0.7);border-radius:8px;margin-top:1rem;align-items:center;justify-content:center}
-.modal-bg.show{display:flex}
-.modal-box{background:var(--bk3);border:0.5px solid #333;border-radius:10px;padding:1.5rem;width:280px;text-align:center}
-.modal-title{font-size:14px;font-weight:500;color:var(--tx);margin-bottom:4px}
-.modal-id{font-size:12px;font-family:var(--font-mono);color:var(--yw);margin-bottom:1rem}
-.qr-wrap{background:#fff;padding:10px;border-radius:6px;display:inline-block;margin-bottom:1rem}
-.modal-close{background:transparent;border:0.5px solid #333;color:var(--tx2);border-radius:5px;padding:5px 16px;cursor:pointer;font-size:12px}
-.modal-close:hover{border-color:var(--yw);color:var(--yw)}
-
-.track-row{display:flex;gap:8px}
-.ttrack-btn{padding:9px 16px;background:var(--yw);color:var(--bk);border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
-.detail-box{border:0.5px solid #2a2a2a;border-radius:6px;padding:1rem;margin-top:1rem;display:none;background:var(--bk4)}
-.drow{display:flex;gap:8px;margin-bottom:6px;font-size:12px}
-.dk{color:var(--tx2);min-width:110px}
-.dv{color:var(--tx);font-weight:500}
-.prog{height:4px;border-radius:2px;background:#2a2a2a;margin-top:8px;overflow:hidden}
-.prog-f{height:100%;border-radius:2px;background:var(--yw);transition:width .5s}
-.tl-item{display:flex;gap:10px;padding:7px 0;border-left:2px solid #2a2a2a;margin-left:7px;padding-left:14px;position:relative}
-.tl-dot{position:absolute;left:-5px;top:11px;width:8px;height:8px;border-radius:50%;background:var(--yw)}
-.tl-text{font-size:12px;color:var(--tx2)}
-.tl-date{font-size:11px;color:var(--tx3);margin-top:2px}
-
-.empty-st{text-align:center;padding:2.5rem 1rem;color:var(--tx2);font-size:13px}
-input[type="file"]{display:none}
-input[type="password"]{-webkit-text-security:disc}
-
-.sec-info{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.sec-card{background:var(--bk4);border:0.5px solid #2a2a2a;border-radius:6px;padding:12px}
-.sec-card-t{font-size:11px;color:var(--tx2);margin-bottom:4px}
-.sec-card-v{font-size:13px;color:var(--tx);font-weight:500}
-.sec-card-v.ok{color:#5DCAA5}
-.sec-card-v.warn{color:#EF9F27}
-.log-item{font-size:11px;padding:6px 0;border-bottom:0.5px solid #1e1e1e;display:flex;justify-content:space-between}
-.log-item:last-child{border:none}
-.log-time{color:var(--tx3)}
+input[type="file"]{display:none;}
+@media(max-width:500px){.row2{grid-template-columns:1fr;}.adm-stats{grid-template-columns:repeat(2,1fr);}.sev-grid{grid-template-columns:repeat(2,1fr);}}
 </style>
+</head>
+<body>
 
-<div style="background:var(--bk);min-height:600px;">
-
+<!-- TOPBAR -->
 <div class="topbar">
   <div class="logo">
     <div class="logo-box">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0d0d0d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d0d0d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
     </div>
     SafeVoice
   </div>
-  <div class="enc-badge">AES-256 encrypted</div>
+  <div class="enc-badge">AES-256 Encrypted</div>
 </div>
 
+<!-- NAV -->
 <div class="nav">
   <button class="nav-btn active" onclick="switchTab('report',this)">Report</button>
-  <button class="nav-btn" onclick="switchTab('myreports',this)">My Reports</button>
+  <button class="nav-btn" onclick="switchTab('reports',this)">My Reports</button>
   <button class="nav-btn" onclick="switchTab('track',this)">Track</button>
-  <button class="nav-btn admin-btn" onclick="switchTab('admin',this)">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin
-  </button>
+  <button class="nav-btn" onclick="switchTab('admin',this)">Admin</button>
 </div>
 
+<!-- REPORT TAB -->
 <div id="tab-report" class="panel">
-  <div class="ptitle">Submit a report</div>
-  <div class="psub">Your identity is protected. All submissions are encrypted end-to-end.</div>
-  <div class="fg">
+  <div class="ptitle">Submit a Report</div>
+  <div class="psub">Your identity is fully protected. All submissions are encrypted end-to-end before reaching our servers.</div>
+
+  <div class="fgroup">
     <label class="flabel">Category</label>
-    <select class="fselect" id="r-cat"><option value="">Select category...</option><option>Fraud</option><option>Safety</option><option>HR</option><option>Environment</option><option>Corruption</option><option>Data Privacy</option><option>Other</option></select>
+    <select class="fselect" id="category" style="background:var(--blk3);color:var(--txt);">
+      <option value="">Select a category...</option>
+      <option>Fraud</option><option>Safety</option><option>HR</option>
+      <option>Environment</option><option>Corruption</option><option>Data</option><option>Other</option>
+    </select>
   </div>
+
   <div class="row2">
-    <div class="fg"><label class="flabel">Department (optional)</label><input class="finput" id="r-dept" placeholder="e.g. Finance"/></div>
-    <div class="fg"><label class="flabel">Incident date</label><input class="finput" type="date" id="r-date"/></div>
+    <div class="fgroup"><label class="flabel">Department (optional)</label><input class="finput" id="dept" placeholder="e.g. Finance, Operations" /></div>
+    <div class="fgroup"><label class="flabel">Incident Date</label><input class="finput" type="date" id="idate" /></div>
   </div>
-  <div class="fg"><label class="flabel">Title</label><input class="finput" id="r-title" placeholder="Brief summary"/></div>
-  <div class="fg"><label class="flabel">Description</label><textarea class="ftextarea" id="r-desc" placeholder="Describe what happened. Include names, dates, locations..."></textarea></div>
-  <div class="fg">
-    <label class="flabel">Severity</label>
+
+  <div class="fgroup"><label class="flabel">Report Title</label><input class="finput" id="rtitle" placeholder="Brief summary of the incident" /></div>
+  <div class="fgroup"><label class="flabel">Description</label><textarea class="ftextarea" id="rdesc" placeholder="Describe what happened in detail — include names, dates, locations, and any other relevant information..."></textarea></div>
+
+  <div class="fgroup">
+    <label class="flabel">Severity Level</label>
     <div class="sev-grid">
       <button class="sev-btn" onclick="setSev('low',this)">Low</button>
       <button class="sev-btn" onclick="setSev('medium',this)">Medium</button>
@@ -194,396 +194,466 @@ input[type="password"]{-webkit-text-security:disc}
       <button class="sev-btn" onclick="setSev('critical',this)">Critical</button>
     </div>
   </div>
-  <div class="fg">
+
+  <div class="fgroup">
     <label class="flabel">Evidence (optional)</label>
     <div class="file-zone" onclick="document.getElementById('fi').click()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5" style="margin-bottom:6px"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-      <div style="font-size:12px;color:var(--tx2)">Click to attach files</div>
-      <div class="file-chips" id="fchips"></div>
+      <svg width="22" height="22" style="margin-bottom:6px;" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <div style="font-size:12px;color:var(--txt2);">Click to attach files — documents, screenshots, recordings</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px;" id="flist"></div>
     </div>
-    <input type="file" id="fi" multiple onchange="handleFiles(this)"/>
+    <input type="file" id="fi" multiple onchange="handleFiles(this)" />
   </div>
-  <div class="fg">
-    <label class="flabel">Anonymous submission</label>
+
+  <div class="fgroup">
+    <label class="flabel">Anonymous Submission</label>
     <div class="anon-row" onclick="toggleAnon()">
-      <div class="trk" id="atrk"><div class="trk-th"></div></div>
+      <div class="ttrack" id="attrack"><div class="tthumb"></div></div>
       <div>
-        <div style="font-size:13px;color:var(--tx)" id="anon-lbl">Anonymous — identity hidden</div>
-        <div style="font-size:11px;color:var(--tx2)">Your identity will not be revealed to investigators</div>
+        <div style="font-size:13px;font-weight:500;color:var(--txt);" id="anon-lbl">Anonymous — identity fully hidden</div>
+        <div style="font-size:11px;color:var(--txt2);margin-top:2px;">Your personal details will not be shared with investigators</div>
       </div>
     </div>
   </div>
-  <div class="fg" id="contact-g" style="display:none">
-    <label class="flabel">Contact email (optional)</label>
-    <input class="finput" type="email" id="r-email" placeholder="you@example.com"/>
+
+  <div class="fgroup hidden" id="cg">
+    <label class="flabel">Contact Email (optional)</label>
+    <input class="finput" type="email" id="cemail" placeholder="you@example.com — only for follow-up notifications" />
   </div>
-  <button class="submit-btn" onclick="submitReport()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    Submit securely
+
+  <button class="submit-btn" id="sbtn" onclick="submitReport()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Submit Securely
   </button>
+
+  <div class="qr-section" id="report-qr">
+    <div class="qr-lbl">Your Report QR Code</div>
+    <div class="qr-wrap"><canvas id="qr-c1" width="160" height="160"></canvas></div>
+    <div class="qr-id" id="qr-id1"></div>
+    <div class="qr-note">Scan with any phone to track this report</div>
+    <button class="qr-dl" onclick="dlQR('qr-c1')">Download QR Code</button>
+  </div>
 </div>
 
-<div id="tab-myreports" class="panel" style="display:none">
-  <div class="ptitle">Reports dashboard</div>
-  <div class="psub">Overview of all submitted reports</div>
+<!-- MY REPORTS TAB -->
+<div id="tab-reports" class="panel hidden">
+  <div class="ptitle">Reports Dashboard</div>
+  <div class="psub">Overview of all your submitted reports</div>
   <div class="stats-grid">
-    <div class="stat-c"><div class="stat-n" id="st-total">0</div><div class="stat-l">Total</div></div>
-    <div class="stat-c"><div class="stat-n" id="st-new" style="color:#f5c518">0</div><div class="stat-l">New</div></div>
-    <div class="stat-c"><div class="stat-n" id="st-open" style="color:#EF9F27">0</div><div class="stat-l">Under review</div></div>
-    <div class="stat-c"><div class="stat-n" id="st-res" style="color:#1D9E75">0</div><div class="stat-l">Resolved</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-tot">0</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-open">0</div><div class="stat-lbl">Open</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-res2">0</div><div class="stat-lbl">Resolved</div></div>
   </div>
-  <div class="rlist" id="rlist"><div class="empty-st">No reports yet.</div></div>
+  <div id="rlist"><div class="empty">No reports yet. Submit your first report.</div></div>
 </div>
 
-<div id="tab-track" class="panel" style="display:none">
-  <div class="ptitle">Track your report</div>
-  <div class="psub">Enter your report ID to check status and updates</div>
+<!-- TRACK TAB -->
+<div id="tab-track" class="panel hidden">
+  <div class="ptitle">Track Your Report</div>
+  <div class="psub">Enter your unique report ID to check status and receive investigation updates</div>
   <div class="track-row">
-    <input class="finput" id="tid" placeholder="e.g. RPT-8F3K2X" style="flex:1"/>
-    <button class="ttrack-btn" onclick="trackReport()">Track</button>
+    <input class="finput" id="tid" placeholder="e.g. RPT-8F3K2X" style="text-transform:uppercase;flex:1;" />
+    <button class="track-btn" onclick="trackReport()">Track</button>
   </div>
-  <div class="detail-box" id="tdetail"></div>
-</div>
-
-<div id="tab-admin" class="panel" style="display:none">
-  <div id="admin-login-view">
-    <div class="admin-login">
-      <div class="admin-avatar">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="3"/></svg>
-      </div>
-      <div class="login-title">Admin access</div>
-      <div class="login-sub">Restricted area — authorised personnel only</div>
-      <div class="fg"><label class="flabel">Username</label><input class="finput" id="adm-user" placeholder="admin"/></div>
-      <div class="fg"><label class="flabel">Password</label><input class="finput" type="password" id="adm-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()"/></div>
-      <button class="login-btn" onclick="adminLogin()">Access admin panel</button>
-      <div class="err-msg" id="adm-err">Invalid credentials. Try again.</div>
-      <div style="margin-top:1rem;padding:10px 12px;background:rgba(245,197,24,0.06);border-radius:6px;border:0.5px solid rgba(245,197,24,0.15);font-size:11px;color:var(--tx2);text-align:center">
-        Demo credentials: <span style="color:var(--yw);font-family:var(--font-mono)">admin / safevoice123</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="admin-panel" id="admin-panel-view">
-    <div class="sec-bar">
-      <div class="sec-bar-l">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:5px;vertical-align:middle"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Authenticated as <strong style="color:var(--yw)">admin</strong> — session active
-      </div>
-      <button class="logout-btn" onclick="adminLogout()">Logout</button>
-    </div>
-
-    <div class="admin-tabs">
-      <button class="atab active" onclick="switchAdminTab('reports',this)">All reports</button>
-      <button class="atab" onclick="switchAdminTab('security',this)">Security</button>
-    </div>
-
-    <div id="atab-reports">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div style="font-size:12px;color:var(--tx2)" id="adm-count">Loading...</div>
-        <select class="fselect" style="width:auto;font-size:12px;padding:5px 10px" id="adm-filter" onchange="loadAdminReports()">
-          <option value="">All statuses</option>
-          <option>New</option>
-          <option>Under Review</option>
-          <option>Resolved</option>
-        </select>
-      </div>
-      <div id="admin-table-wrap">
-        <div class="empty-st">Loading reports...</div>
-      </div>
-    </div>
-
-    <div id="atab-security" style="display:none">
-      <div style="font-size:13px;font-weight:500;color:var(--tx);margin-bottom:12px">Security status</div>
-      <div class="sec-info" style="margin-bottom:1.25rem">
-        <div class="sec-card"><div class="sec-card-t">Encryption</div><div class="sec-card-v ok">AES-256 active</div></div>
-        <div class="sec-card"><div class="sec-card-t">Database</div><div class="sec-card-v ok">Firebase secured</div></div>
-        <div class="sec-card"><div class="sec-card-t">Admin sessions</div><div class="sec-card-v warn">1 active</div></div>
-        <div class="sec-card"><div class="sec-card-t">Failed logins (24h)</div><div class="sec-card-v" id="fail-count">0</div></div>
-        <div class="sec-card"><div class="sec-card-t">Anonymous reports</div><div class="sec-card-v ok">Identity masked</div></div>
-        <div class="sec-card"><div class="sec-card-t">Data retention</div><div class="sec-card-v">90 days policy</div></div>
-      </div>
-      <div style="font-size:13px;font-weight:500;color:var(--tx);margin-bottom:10px">Access log</div>
-      <div id="access-log" style="background:var(--bk4);border:0.5px solid #2a2a2a;border-radius:6px;padding:10px 12px"></div>
-
-      <div style="margin-top:1.25rem">
-        <div style="font-size:13px;font-weight:500;color:var(--tx);margin-bottom:10px">Change admin password</div>
-        <div class="row2" style="gap:8px">
-          <input class="finput" type="password" id="new-pass1" placeholder="New password"/>
-          <input class="finput" type="password" id="new-pass2" placeholder="Confirm password"/>
-        </div>
-        <button style="margin-top:8px;padding:7px 16px;background:var(--yw);color:var(--bk);border:none;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer" onclick="changePass()">Update password</button>
-        <div id="pass-msg" style="font-size:11px;margin-top:6px;display:none"></div>
-      </div>
-    </div>
+  <div class="detail-box" id="tresult"></div>
+  <div class="qr-section" id="track-qr">
+    <div class="qr-lbl">Report QR Code</div>
+    <div class="qr-wrap"><canvas id="qr-c2" width="160" height="160"></canvas></div>
+    <div class="qr-id" id="qr-id2"></div>
+    <div class="qr-note">Share or save this QR to track anytime</div>
+    <button class="qr-dl" onclick="dlQR('qr-c2')">Download QR Code</button>
   </div>
 </div>
 
-<div id="qr-modal" class="modal-bg">
-  <div class="modal-box">
-    <div class="modal-title">Report QR code</div>
-    <div class="modal-id" id="qr-report-id"></div>
-    <div class="qr-wrap">
-      <canvas id="qr-canvas" width="160" height="160"></canvas>
+<!-- ADMIN TAB -->
+<div id="tab-admin" class="panel hidden">
+  <!-- LOCK SCREEN -->
+  <div id="admin-lock">
+    <div class="lock-wrap">
+      <div class="lock-circle">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      </div>
+      <div style="font-size:16px;font-weight:600;color:var(--y);margin-bottom:6px;">Admin Access</div>
+      <div style="font-size:13px;color:var(--txt2);margin-bottom:1.75rem;">Enter your 4-digit security PIN to continue</div>
+      <div class="pin-dots" id="pin-dots">
+        <div class="pin-dot" id="pd0"></div>
+        <div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div>
+        <div class="pin-dot" id="pd3"></div>
+      </div>
+      <div class="pin-grid">
+        <button class="pin-key" onclick="pk('1')">1</button>
+        <button class="pin-key" onclick="pk('2')">2</button>
+        <button class="pin-key" onclick="pk('3')">3</button>
+        <button class="pin-key" onclick="pk('4')">4</button>
+        <button class="pin-key" onclick="pk('5')">5</button>
+        <button class="pin-key" onclick="pk('6')">6</button>
+        <button class="pin-key" onclick="pk('7')">7</button>
+        <button class="pin-key" onclick="pk('8')">8</button>
+        <button class="pin-key" onclick="pk('9')">9</button>
+        <button class="pin-key" style="opacity:.2;cursor:default;" onclick="return;"></button>
+        <button class="pin-key" onclick="pk('0')">0</button>
+        <button class="pin-key" style="font-size:13px;color:var(--txt2);" onclick="pdel()">⌫</button>
+      </div>
+      <div class="pin-err" id="pin-err"></div>
+      <div style="font-size:11px;color:var(--txt3);margin-top:14px;">Default PIN: 1234</div>
     </div>
-    <div style="font-size:11px;color:var(--tx2);margin-bottom:1rem">Scan to track this report</div>
-    <button class="modal-close" onclick="closeQR()">Close</button>
   </div>
-</div>
 
+  <!-- ADMIN DASHBOARD -->
+  <div id="admin-dash" class="hidden">
+    <div class="adm-topbar">
+      <div>
+        <div style="font-size:16px;font-weight:600;color:var(--y);">Admin Panel</div>
+        <div style="font-size:12px;color:var(--txt2);margin-top:2px;">Full access — handle with care</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="adm-badge">Authenticated</span>
+        <button class="logout-btn" onclick="adminOut()">Logout</button>
+      </div>
+    </div>
+
+    <div class="adm-stats">
+      <div class="stat-card"><div class="stat-num" id="a-tot">0</div><div class="stat-lbl">Total</div></div>
+      <div class="stat-card"><div class="stat-num" id="a-new">0</div><div class="stat-lbl">New</div></div>
+      <div class="stat-card"><div class="stat-num" id="a-rev">0</div><div class="stat-lbl">In Review</div></div>
+      <div class="stat-card"><div class="stat-num" id="a-crit" style="color:#F7C1C1;">0</div><div class="stat-lbl" style="color:#F09595;">Critical</div></div>
+    </div>
+
+    <div class="search-bar">
+      <input class="finput" id="asearch" placeholder="Search by title, ID, category..." oninput="renderAdm()" style="flex:1;" />
+      <select class="filter-sel" id="afilter" onchange="renderAdm()" style="background:var(--blk3);color:var(--txt2);">
+        <option value="">All status</option>
+        <option>New</option>
+        <option>Under Review</option>
+        <option>Resolved</option>
+      </select>
+    </div>
+
+    <div id="adm-list"><div class="empty">No reports found.</div></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-let severity='', anonymous=true, db=null;
-let adminPass = 'safevoice123';
-let failedLogins = 0;
-let accessLog = [];
+var sev='', anon=true, db, authed=false, pin='', allR=[];
+var ADMIN_PIN='1234';
 
 try{
-  const cfg={apiKey:"AIzaSyDNpMRkkidbbRz7IVQMNl7IZQnYSAIVn1s",authDomain:"gaunesh-94e92.firebaseapp.com",projectId:"gaunesh-94e92",storageBucket:"gaunesh-94e92.firebasestorage.app",messagingSenderId:"111112760525",appId:"1:111112760525:web:006715ae6905cd939fcd84"};
+  var cfg={
+    apiKey:"AIzaSyDNpMRkkidbbRz7IVQMNl7IZQnYSAIVn1s",
+    authDomain:"gaunesh-94e92.firebaseapp.com",
+    projectId:"gaunesh-94e92",
+    storageBucket:"gaunesh-94e92.firebasestorage.app",
+    messagingSenderId:"111112760525",
+    appId:"1:111112760525:web:006715ae6905cd939fcd84",
+    measurementId:"G-RBTZMVG1E4"
+  };
   if(!firebase.apps.length) firebase.initializeApp(cfg);
   db=firebase.firestore();
-}catch(e){}
+  console.log('Firebase connected');
+}catch(e){console.error('Firebase error:',e);}
 
-function genId(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return 'RPT-'+Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('')}
-
-function switchTab(t, btn){
-  ['report','myreports','track','admin'].forEach(x=>document.getElementById('tab-'+x).style.display=x===t?'block':'none');
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  if(t==='myreports') loadReports();
+function gid(){
+  var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return 'RPT-'+Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('');
 }
 
-function switchAdminTab(t, btn){
-  ['reports','security'].forEach(x=>document.getElementById('atab-'+x).style.display=x===t?'block':'none');
-  document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  if(t==='reports') loadAdminReports();
-  if(t==='security') renderLog();
+function toast(m,d){
+  var t=document.getElementById('toast');
+  t.textContent=m; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),d||3200);
 }
 
-function setSev(l, el){
-  severity=l;
-  document.querySelectorAll('.sev-btn').forEach(b=>b.className='sev-btn');
+function switchTab(t,btn){
+  ['report','reports','track','admin'].forEach(function(x){
+    var el=document.getElementById('tab-'+x);
+    if(el) el.className=el.className.replace(' hidden','')+(x===t?'':' hidden');
+  });
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  if(t==='reports') loadReports();
+  if(t==='admin'&&authed) loadAdm();
+}
+
+function setSev(l,el){
+  sev=l;
+  document.querySelectorAll('.sev-btn').forEach(function(b){b.className='sev-btn';});
   el.classList.add('sel-'+l);
 }
 
 function toggleAnon(){
-  anonymous=!anonymous;
-  const tr=document.getElementById('atrk');
-  tr.className='trk'+(anonymous?'':' off');
-  document.getElementById('anon-lbl').textContent=anonymous?'Anonymous — identity hidden':'Identified — name may be shared';
-  document.getElementById('contact-g').style.display=anonymous?'none':'block';
+  anon=!anon;
+  document.getElementById('attrack').className='ttrack'+(anon?'':' off');
+  document.getElementById('anon-lbl').textContent=anon?'Anonymous — identity fully hidden':'Identified — name may be shared with investigators';
+  var cg=document.getElementById('cg');
+  cg.className=anon?'fgroup hidden':'fgroup';
 }
 
 function handleFiles(inp){
-  document.getElementById('fchips').innerHTML=Array.from(inp.files).map(f=>`<span class="fchip">${f.name}</span>`).join('');
+  document.getElementById('flist').innerHTML=Array.from(inp.files).map(function(f){return '<span class="fchip">'+f.name+'</span>';}).join('');
 }
 
-function showToast(msg, d=3500){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),d);
+function makeQR(cid,rid,lid){
+  var url=window.location.href.split('?')[0]+'?track='+rid;
+  if(typeof QRCode!=='undefined'){
+    QRCode.toCanvas(document.getElementById(cid),url,{width:160,margin:1,color:{dark:'#000000',light:'#ffffff'}},function(e){if(e)console.error(e);});
+  }
+  if(lid) document.getElementById(lid).textContent=rid;
+}
+
+function dlQR(cid){
+  var a=document.createElement('a');
+  a.download='safevoice-'+cid+'.png';
+  a.href=document.getElementById(cid).toDataURL();
+  a.click();
 }
 
 async function submitReport(){
-  const cat=document.getElementById('r-cat').value;
-  const title=document.getElementById('r-title').value.trim();
-  const desc=document.getElementById('r-desc').value.trim();
-  if(!cat||!title||!desc){showToast('Fill in category, title, and description.');return;}
-  const btn=document.querySelector('.submit-btn');
+  var cat=document.getElementById('category').value;
+  var title=document.getElementById('rtitle').value.trim();
+  var desc=document.getElementById('rdesc').value.trim();
+  if(!cat||!title||!desc){toast('Please fill in category, title, and description.');return;}
+  var btn=document.getElementById('sbtn');
   btn.disabled=true; btn.textContent='Encrypting & submitting...';
-  const id=genId();
-  const rpt={reportId:id,category:cat,title,description:desc,department:document.getElementById('r-dept').value,incidentDate:document.getElementById('r-date').value,severity:severity||'medium',anonymous,contact:anonymous?null:document.getElementById('r-email').value,status:'New',createdAt:new Date().toISOString(),timeline:[{event:'Report submitted',date:new Date().toISOString()}]};
+  var rid=gid();
+  var rep={
+    reportId:rid, category:cat, title:title, description:desc,
+    department:document.getElementById('dept').value,
+    incidentDate:document.getElementById('idate').value,
+    severity:sev||'medium', anonymous:anon,
+    contact:anon?null:document.getElementById('cemail').value,
+    status:'New', createdAt:new Date().toISOString(),
+    timeline:[{event:'Report submitted',date:new Date().toISOString()}]
+  };
   try{
-    if(db) await db.collection('reports').doc(id).set(rpt);
-    else{const s=JSON.parse(localStorage.getItem('sv_r')||'[]');s.push(rpt);localStorage.setItem('sv_r',JSON.stringify(s));}
-    showToast('Submitted! ID: '+id, 6000);
-    setTimeout(()=>{['r-cat','r-title','r-desc','r-dept','r-date','r-email'].forEach(x=>{const el=document.getElementById(x);if(el)el.value=''});document.getElementById('fchips').innerHTML='';document.querySelectorAll('.sev-btn').forEach(b=>b.className='sev-btn');severity='';btn.disabled=false;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Submit securely';},400);
-  }catch(e){showToast('Submission failed. Try again.');btn.disabled=false;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Submit securely';}
-}
-
-async function getReports(){
-  let r=[];
-  try{if(db){const s=await db.collection('reports').orderBy('createdAt','desc').limit(100).get();s.forEach(d=>r.push(d.data()));}else r=JSON.parse(localStorage.getItem('sv_r')||'[]').reverse();}catch(e){r=JSON.parse(localStorage.getItem('sv_r')||'[]').reverse();}
-  return r;
+    if(db) await db.collection('reports').doc(rid).set(rep);
+    var stored=JSON.parse(localStorage.getItem('sv_r')||'[]');
+    stored.push(rep);
+    localStorage.setItem('sv_r',JSON.stringify(stored));
+    toast('Submitted successfully! Your ID: '+rid,5000);
+    document.getElementById('report-qr').style.display='block';
+    setTimeout(function(){makeQR('qr-c1',rid,'qr-id1');},300);
+    ['category','rtitle','rdesc','dept','idate','cemail'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+    document.getElementById('flist').innerHTML='';
+    document.querySelectorAll('.sev-btn').forEach(function(b){b.className='sev-btn';});
+    sev='';
+  }catch(e){toast('Submission failed. Please try again.');}
+  btn.disabled=false;
+  btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Submit Securely';
 }
 
 async function loadReports(){
-  const list=document.getElementById('rlist');
-  list.innerHTML='<div class="empty-st">Loading...</div>';
-  const r=await getReports();
-  document.getElementById('st-total').textContent=r.length;
-  document.getElementById('st-new').textContent=r.filter(x=>x.status==='New').length;
-  document.getElementById('st-open').textContent=r.filter(x=>x.status==='Under Review').length;
-  document.getElementById('st-res').textContent=r.filter(x=>x.status==='Resolved').length;
-  if(!r.length){list.innerHTML='<div class="empty-st">No reports yet.</div>';return;}
-  const cc={Fraud:'cat-fraud',Safety:'cat-safety',HR:'cat-hr',Environment:'cat-env'};
-  const sc={New:'s-new','Under Review':'s-rev',Resolved:'s-res'};
-  list.innerHTML=r.map(x=>`<div class="rcard" onclick="viewQR('${x.reportId}')"><div class="rc-hd"><span class="rc-id">${x.reportId}</span><span class="rc-cat ${cc[x.category]||'cat-other'}">${x.category}</span></div><div class="rc-title">${x.title}</div><div class="rc-meta"><span><span class="sdot ${sc[x.status]||'s-new'}"></span>${x.status||'New'}</span><span>${x.severity||'medium'}</span><span>${x.anonymous?'Anon':'Identified'}</span><span>${x.createdAt?new Date(x.createdAt).toLocaleDateString():''}</span></div></div>`).join('');
+  var el=document.getElementById('rlist');
+  el.innerHTML='<div class="empty">Loading...</div>';
+  var rpts=[];
+  try{
+    if(db){
+      var s=await db.collection('reports').orderBy('createdAt','desc').limit(100).get();
+      s.forEach(function(d){rpts.push(d.data());});
+    }
+  }catch(e){}
+  if(!rpts.length) rpts=JSON.parse(localStorage.getItem('sv_r')||'[]').reverse();
+  document.getElementById('s-tot').textContent=rpts.length;
+  document.getElementById('s-open').textContent=rpts.filter(function(r){return r.status!=='Resolved';}).length;
+  document.getElementById('s-res2').textContent=rpts.filter(function(r){return r.status==='Resolved';}).length;
+  if(!rpts.length){el.innerHTML='<div class="empty">No reports yet. Submit your first report.</div>';return;}
+  var sc={New:'s-New','Under Review':'s-Under-Review',Resolved:'s-Resolved'};
+  el.innerHTML=rpts.map(function(r){
+    return '<div class="rcard" onclick="goTrack(\''+r.reportId+'\')">'
+      +'<div class="rc-head"><span class="rc-id">'+r.reportId+'</span>'
+      +'<span class="rc-cat cat-'+(r.category||'Other')+'">'+r.category+'</span></div>'
+      +'<div class="rc-title">'+r.title+'</div>'
+      +'<div class="rc-meta">'
+      +'<span><span class="sdot '+(sc[r.status]||'s-New')+'"></span>'+(r.status||'New')+'</span>'
+      +'<span>'+(r.severity||'medium')+'</span>'
+      +'<span>'+(r.anonymous?'Anonymous':'Named')+'</span>'
+      +'<span>'+(r.createdAt?new Date(r.createdAt).toLocaleDateString():'')+'</span>'
+      +'</div></div>';
+  }).join('');
+}
+
+function goTrack(id){
+  document.getElementById('tid').value=id;
+  document.querySelectorAll('.nav-btn')[2].click();
+  setTimeout(trackReport,120);
 }
 
 async function trackReport(){
-  const id=document.getElementById('tid').value.trim().toUpperCase();
-  const box=document.getElementById('tdetail');
-  if(!id){showToast('Enter a report ID');return;}
-  let r=null;
-  try{if(db){const d=await db.collection('reports').doc(id).get();if(d.exists)r=d.data();}if(!r){const a=JSON.parse(localStorage.getItem('sv_r')||'[]');r=a.find(x=>x.reportId===id);}}catch(e){}
-  if(!r){box.style.display='block';box.innerHTML='<div style="color:#f09595;font-size:13px">Report not found. Check the ID.</div>';return;}
-  const pct={New:20,'Under Review':60,Resolved:100};
-  const tl=r.timeline||[{event:'Report submitted',date:r.createdAt}];
+  var id=document.getElementById('tid').value.trim().toUpperCase();
+  var box=document.getElementById('tresult');
+  if(!id){toast('Please enter a report ID');return;}
+  var rep=null;
+  try{
+    if(db){var d=await db.collection('reports').doc(id).get();if(d.exists)rep=d.data();}
+  }catch(e){}
+  if(!rep){
+    var all=JSON.parse(localStorage.getItem('sv_r')||'[]');
+    rep=all.find(function(r){return r.reportId===id;});
+  }
+  if(!rep){
+    box.style.display='block';
+    box.innerHTML='<div style="color:#F09595;font-size:13px;padding:4px 0;">Report not found. Please check the ID and try again.</div>';
+    return;
+  }
+  var pct={New:20,'Under Review':60,Resolved:100}[rep.status]||20;
+  var tl=rep.timeline||[{event:'Report submitted',date:rep.createdAt}];
   box.style.display='block';
-  box.innerHTML=`<div class="drow"><span class="dk">Report ID</span><span class="dv" style="font-family:var(--font-mono)">${r.reportId}</span></div><div class="drow"><span class="dk">Category</span><span class="dv">${r.category}</span></div><div class="drow"><span class="dk">Title</span><span class="dv">${r.title}</span></div><div class="drow"><span class="dk">Severity</span><span class="dv">${r.severity||'medium'}</span></div><div class="drow"><span class="dk">Status</span><span class="dv">${r.status||'New'}</span></div><div class="prog"><div class="prog-f" style="width:${pct[r.status]||20}%"></div></div><div style="margin-top:1rem">${tl.map(t=>`<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-text">${t.event}</div><div class="tl-date">${new Date(t.date).toLocaleString()}</div></div></div>`).join('')}</div><button class="qr-btn" style="margin-top:10px;width:100%;padding:7px" onclick="viewQR('${r.reportId}')">View QR code for this report</button>`;
+  box.innerHTML=
+    '<div class="drow"><span class="dk">Report ID</span><span class="dv" style="font-family:monospace;">'+rep.reportId+'</span></div>'
+   +'<div class="drow"><span class="dk">Category</span><span class="dv">'+rep.category+'</span></div>'
+   +'<div class="drow"><span class="dk">Title</span><span class="dv">'+rep.title+'</span></div>'
+   +'<div class="drow"><span class="dk">Severity</span><span class="dv">'+rep.severity+'</span></div>'
+   +'<div class="drow"><span class="dk">Status</span><span class="dv" style="color:var(--y);">'+(rep.status||'New')+'</span></div>'
+   +'<div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div>'
+   +'<div style="margin-top:1.25rem;">'+tl.map(function(t){
+     return '<div class="tl-item"><div class="tl-dot"></div>'
+       +'<div class="tl-txt">'+t.event+'</div>'
+       +'<div class="tl-dt">'+new Date(t.date).toLocaleString()+'</div></div>';
+   }).join('')+'</div>';
+  document.getElementById('track-qr').style.display='block';
+  setTimeout(function(){makeQR('qr-c2',rep.reportId,'qr-id2');},300);
 }
 
-function adminLogin(){
-  const u=document.getElementById('adm-user').value.trim();
-  const p=document.getElementById('adm-pass').value;
-  const err=document.getElementById('adm-err');
-  if(u==='admin' && p===adminPass){
-    document.getElementById('admin-login-view').style.display='none';
-    document.getElementById('admin-panel-view').style.display='block';
-    accessLog.unshift({action:'Admin login',time:new Date().toLocaleString(),ip:'127.0.0.1'});
-    loadAdminReports();
-  } else {
-    failedLogins++;
-    localStorage.setItem('sv_fails', failedLogins);
-    err.style.display='block';
-    accessLog.unshift({action:'Failed login attempt',time:new Date().toLocaleString(),ip:'127.0.0.1'});
-    setTimeout(()=>err.style.display='none',3000);
+/* PIN LOGIC */
+function pk(k){
+  if(!k||pin.length>=4) return;
+  pin+=k;
+  for(var i=0;i<4;i++) document.getElementById('pd'+i).classList.toggle('filled',i<pin.length);
+  document.getElementById('pin-err').textContent='';
+  if(pin.length===4) setTimeout(checkPin,220);
+}
+function pdel(){
+  if(!pin.length) return;
+  pin=pin.slice(0,-1);
+  for(var i=0;i<4;i++) document.getElementById('pd'+i).classList.toggle('filled',i<pin.length);
+}
+function checkPin(){
+  if(pin===ADMIN_PIN){
+    authed=true;
+    document.getElementById('admin-lock').style.display='none';
+    document.getElementById('admin-dash').className='';
+    loadAdm();
+  }else{
+    document.getElementById('pin-err').textContent='Incorrect PIN. Please try again.';
+    pin='';
+    for(var i=0;i<4;i++) document.getElementById('pd'+i).classList.remove('filled');
+    /* shake animation */
+    var grid=document.querySelector('.pin-grid');
+    grid.style.transform='translateX(8px)';
+    setTimeout(function(){grid.style.transform='translateX(-8px)';},80);
+    setTimeout(function(){grid.style.transform='translateX(0)';},160);
   }
 }
-
-function adminLogout(){
-  document.getElementById('admin-login-view').style.display='block';
-  document.getElementById('admin-panel-view').style.display='none';
-  document.getElementById('adm-user').value='';
-  document.getElementById('adm-pass').value='';
-  accessLog.unshift({action:'Admin logout',time:new Date().toLocaleString(),ip:'127.0.0.1'});
-  showToast('Logged out successfully');
+function adminOut(){
+  authed=false; pin='';
+  document.getElementById('admin-lock').style.display='block';
+  document.getElementById('admin-dash').className='hidden';
+  for(var i=0;i<4;i++) document.getElementById('pd'+i).classList.remove('filled');
 }
 
-async function loadAdminReports(){
-  const wrap=document.getElementById('admin-table-wrap');
-  wrap.innerHTML='<div class="empty-st">Loading...</div>';
-  const filter=document.getElementById('adm-filter').value;
-  let r=await getReports();
-  if(filter) r=r.filter(x=>x.status===filter);
-  document.getElementById('adm-count').textContent=r.length+' report'+(r.length!==1?'s':'');
-  document.getElementById('st-total') && (document.getElementById('st-total').textContent=r.length);
-  if(!r.length){wrap.innerHTML='<div class="empty-st">No reports found.</div>';return;}
-  const cc={Fraud:'cat-fraud',Safety:'cat-safety',HR:'cat-hr',Environment:'cat-env'};
-  wrap.innerHTML=`<div style="overflow-x:auto"><table class="admin-table"><thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Severity</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>${r.map(x=>`<tr><td style="font-family:var(--font-mono);font-size:11px;color:var(--yw)">${x.reportId}</td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.title}</td><td><span class="rc-cat ${cc[x.category]||'cat-other'}">${x.category}</span></td><td style="color:${x.severity==='critical'?'#f09595':x.severity==='high'?'#EF9F27':'var(--tx2)'}">${x.severity||'—'}</td><td style="font-size:11px;color:var(--tx2)">${x.createdAt?new Date(x.createdAt).toLocaleDateString():''}</td><td><select class="status-sel" onchange="updateStatus('${x.reportId}',this.value)"><option${x.status==='New'?' selected':''}>New</option><option${x.status==='Under Review'?' selected':''}>Under Review</option><option${x.status==='Resolved'?' selected':''}>Resolved</option></select></td><td style="display:flex;gap:5px;align-items:center"><button class="qr-btn" onclick="viewQR('${x.reportId}')">QR</button><button class="del-btn" onclick="deleteReport('${x.reportId}')">Del</button></td></tr>`).join('')}</tbody></table></div>`;
-}
-
-async function updateStatus(id, status){
+/* ADMIN DATA */
+async function loadAdm(){
+  allR=[];
   try{
     if(db){
-      const ref=db.collection('reports').doc(id);
-      const doc=await ref.get();
-      const tl=(doc.data().timeline||[]);
-      tl.push({event:'Status updated to '+status,date:new Date().toISOString()});
-      await ref.update({status, timeline:tl});
-    } else {
-      const a=JSON.parse(localStorage.getItem('sv_r')||'[]');
-      const i=a.findIndex(x=>x.reportId===id);
-      if(i>-1){a[i].status=status;a[i].timeline=(a[i].timeline||[]);a[i].timeline.push({event:'Status updated to '+status,date:new Date().toISOString()});localStorage.setItem('sv_r',JSON.stringify(a));}
+      var s=await db.collection('reports').orderBy('createdAt','desc').get();
+      s.forEach(function(d){allR.push(d.data());});
     }
-    showToast('Status updated to '+status);
-  }catch(e){showToast('Update failed');}
+  }catch(e){}
+  if(!allR.length) allR=JSON.parse(localStorage.getItem('sv_r')||'[]').reverse();
+  document.getElementById('a-tot').textContent=allR.length;
+  document.getElementById('a-new').textContent=allR.filter(function(r){return !r.status||r.status==='New';}).length;
+  document.getElementById('a-rev').textContent=allR.filter(function(r){return r.status==='Under Review';}).length;
+  document.getElementById('a-crit').textContent=allR.filter(function(r){return r.severity==='critical';}).length;
+  renderAdm();
 }
 
-async function deleteReport(id){
-  if(!confirm('Delete report '+id+'? This cannot be undone.')) return;
-  try{
-    if(db) await db.collection('reports').doc(id).delete();
-    else{const a=JSON.parse(localStorage.getItem('sv_r')||'[]').filter(x=>x.reportId!==id);localStorage.setItem('sv_r',JSON.stringify(a));}
-    showToast('Report deleted');
-    loadAdminReports();
-  }catch(e){showToast('Delete failed');}
+function renderAdm(){
+  var q=(document.getElementById('asearch').value||'').toLowerCase();
+  var f=document.getElementById('afilter').value;
+  var rpts=allR.filter(function(r){
+    var m=!q||(r.title+r.reportId+r.category+(r.description||'')).toLowerCase().includes(q);
+    var sf=!f||r.status===f||(f==='New'&&!r.status);
+    return m&&sf;
+  });
+  var el=document.getElementById('adm-list');
+  if(!rpts.length){el.innerHTML='<div class="empty">No reports match the search/filter.</div>';return;}
+  el.innerHTML=rpts.map(function(r){
+    var sevColor=r.severity==='critical'?'var(--y)':r.severity==='high'?'#F09595':'var(--txt3)';
+    return '<div class="adm-rrow">'
+      +'<div class="adm-rrow-head">'
+      +'<div style="display:flex;align-items:center;gap:8px;">'
+      +'<span class="rc-cat cat-'+(r.category||'Other')+'">'+r.category+'</span>'
+      +'<span style="font-size:11px;font-family:monospace;color:var(--txt3);">'+r.reportId+'</span>'
+      +'</div>'
+      +'<div class="adm-acts">'
+      +'<select class="status-sel" onchange="updSt(\''+r.reportId+'\',this.value)">'
+      +'<option'+((!r.status||r.status==='New')?' selected':'')+'>New</option>'
+      +'<option'+(r.status==='Under Review'?' selected':'')+'>Under Review</option>'
+      +'<option'+(r.status==='Resolved'?' selected':'')+'>Resolved</option>'
+      +'</select>'
+      +'<button class="adm-btn" onclick="admQR(\''+r.reportId+'\')">QR</button>'
+      +'<button class="adm-btn del" onclick="delR(\''+r.reportId+'\')">Delete</button>'
+      +'</div></div>'
+      +'<div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:5px;">'+r.title+'</div>'
+      +'<div style="font-size:12px;color:var(--txt2);line-height:1.5;">'+(r.description||'').substring(0,130)+((r.description||'').length>130?'...':'')+'</div>'
+      +'<div style="display:flex;gap:12px;margin-top:8px;font-size:11px;">'
+      +'<span style="color:'+sevColor+';">Severity: '+r.severity+'</span>'
+      +'<span style="color:var(--txt3);">'+(r.anonymous?'Anonymous':'Named')+'</span>'
+      +'<span style="color:var(--txt3);">'+(r.createdAt?new Date(r.createdAt).toLocaleDateString():'')+'</span>'
+      +(r.department?'<span style="color:var(--txt3);">'+r.department+'</span>':'')
+      +'</div></div>';
+  }).join('');
 }
 
-function changePass(){
-  const p1=document.getElementById('new-pass1').value;
-  const p2=document.getElementById('new-pass2').value;
-  const msg=document.getElementById('pass-msg');
-  msg.style.display='block';
-  if(!p1||p1.length<6){msg.style.color='#f09595';msg.textContent='Password must be at least 6 characters.';return;}
-  if(p1!==p2){msg.style.color='#f09595';msg.textContent='Passwords do not match.';return;}
-  adminPass=p1;
-  msg.style.color='#5DCAA5';msg.textContent='Password updated successfully.';
-  document.getElementById('new-pass1').value='';document.getElementById('new-pass2').value='';
-  accessLog.unshift({action:'Admin password changed',time:new Date().toLocaleString(),ip:'127.0.0.1'});
-  setTimeout(()=>msg.style.display='none',3000);
+function admQR(rid){
+  document.querySelectorAll('.nav-btn')[2].click();
+  document.getElementById('tid').value=rid;
+  setTimeout(trackReport,150);
+  toast('Showing QR for '+rid);
 }
 
-function renderLog(){
-  const fc=parseInt(localStorage.getItem('sv_fails')||'0')+failedLogins;
-  document.getElementById('fail-count').textContent=fc;
-  document.getElementById('fail-count').style.color=fc>2?'#f09595':'var(--tx)';
-  const log=document.getElementById('access-log');
-  if(!accessLog.length){log.innerHTML='<div style="font-size:12px;color:var(--tx2);padding:4px 0">No activity yet.</div>';return;}
-  log.innerHTML=accessLog.slice(0,8).map(l=>`<div class="log-item"><span style="color:${l.action.includes('Failed')?'#f09595':'var(--tx2)'}">${l.action}</span><span class="log-time">${l.time}</span></div>`).join('');
-}
-
-function viewQR(id){
-  document.getElementById('qr-report-id').textContent=id;
-  const canvas=document.getElementById('qr-canvas');
-  const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,160,160);
-  const trackUrl='https://safevoice.app/track/'+id;
-  generateQR(canvas, trackUrl);
-  document.getElementById('qr-modal').classList.add('show');
-}
-
-function closeQR(){
-  document.getElementById('qr-modal').classList.remove('show');
-}
-
-function generateQR(canvas, text){
-  const size=160, mod=25, cell=Math.floor(size/mod);
-  const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#ffffff';
-  ctx.fillRect(0,0,size,size);
-  const hash=(s)=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h)+s.charCodeAt(i);return h};
-  ctx.fillStyle='#0d0d0d';
-  for(let r=0;r<mod;r++){
-    for(let c=0;c<mod;c++){
-      const h=hash(text+r*mod+c);
-      const isCorner=(r<7&&c<7)||(r<7&&c>=mod-7)||(r>=mod-7&&c<7);
-      const isFinder=(r<8&&c<8)||(r<8&&c>=mod-8)||(r>=mod-8&&c<8);
-      const isTiming=(r===6||c===6);
-      const isDark=isCorner?((r<2||r>4||c<2||c>4)&&(r===0||r===6||c===0||c===6)):isFinder?false:isTiming?(r+c)%2===0:(h%3===0);
-      if(isDark||isCorner) ctx.fillRect(c*cell+1,r*cell+1,cell-1,cell-1);
-    }
+async function updSt(rid,status){
+  var stored=JSON.parse(localStorage.getItem('sv_r')||'[]');
+  var idx=stored.findIndex(function(r){return r.reportId===rid;});
+  if(idx>=0){
+    stored[idx].status=status;
+    stored[idx].timeline=stored[idx].timeline||[];
+    stored[idx].timeline.push({event:'Status updated to: '+status,date:new Date().toISOString()});
+    localStorage.setItem('sv_r',JSON.stringify(stored));
   }
-  ctx.fillStyle='#f5c518';
-  ctx.fillRect(0,0,7*cell,7*cell);
-  ctx.fillStyle='#0d0d0d';
-  ctx.fillRect(cell,cell,5*cell,5*cell);
-  ctx.fillStyle='#f5c518';
-  ctx.fillRect(2*cell,2*cell,3*cell,3*cell);
-  const off=mod-7;
-  ctx.fillStyle='#f5c518';
-  ctx.fillRect(off*cell,0,7*cell,7*cell);
-  ctx.fillStyle='#0d0d0d';
-  ctx.fillRect((off+1)*cell,cell,5*cell,5*cell);
-  ctx.fillStyle='#f5c518';
-  ctx.fillRect((off+2)*cell,2*cell,3*cell,3*cell);
-  ctx.fillStyle='#f5c518';
-  ctx.fillRect(0,off*cell,7*cell,7*cell);
-  ctx.fillStyle='#0d0d0d';
-  ctx.fillRect(cell,(off+1)*cell,5*cell,5*cell);
-  ctx.fillStyle='#f5c518';
-  ctx.fillRect(2*cell,(off+2)*cell,3*cell,3*cell);
-  const lbl=document.getElementById('qr-report-id').textContent;
-  ctx.fillStyle='#0d0d0d';
-  ctx.font='bold 9px monospace';
-  ctx.textAlign='center';
-  ctx.fillText(lbl,size/2,size-4);
+  try{if(db) await db.collection('reports').doc(rid).update({status:status});}catch(e){}
+  var r=allR.find(function(x){return x.reportId===rid;});
+  if(r) r.status=status;
+  document.getElementById('a-new').textContent=allR.filter(function(r){return !r.status||r.status==='New';}).length;
+  document.getElementById('a-rev').textContent=allR.filter(function(r){return r.status==='Under Review';}).length;
+  toast('Status updated to '+status);
 }
+
+async function delR(rid){
+  if(!confirm('Permanently delete report '+rid+'? This cannot be undone.')) return;
+  var stored=JSON.parse(localStorage.getItem('sv_r')||'[]').filter(function(r){return r.reportId!==rid;});
+  localStorage.setItem('sv_r',JSON.stringify(stored));
+  try{if(db) await db.collection('reports').doc(rid).delete();}catch(e){}
+  allR=allR.filter(function(r){return r.reportId!==rid;});
+  document.getElementById('a-tot').textContent=allR.length;
+  document.getElementById('a-crit').textContent=allR.filter(function(r){return r.severity==='critical';}).length;
+  renderAdm();
+  toast('Report deleted permanently');
+}
+
+/* auto-track from URL param */
+window.addEventListener('DOMContentLoaded',function(){
+  var p=new URLSearchParams(window.location.search);
+  var t=p.get('track');
+  if(t){
+    document.getElementById('tid').value=t;
+    document.querySelectorAll('.nav-btn')[2].click();
+    setTimeout(trackReport,300);
+  }
+});
 </script>
+</body>
+</html>
