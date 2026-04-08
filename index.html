@@ -1,1612 +1,589 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SecureReport — Whistleblower Portal</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bk:#0d0d0d;--bk2:#161616;--bk3:#1e1e1e;--bk4:#272727;
+  --yw:#f5c518;--yw2:#ffd84d;--yw3:#fff3b0;
+  --tx:#f0f0f0;--tx2:#aaa;--tx3:#666;
+  --rd:#e24b4a;--gn:#1D9E75;--bl:#378ADD;
+}
+body{font-family:var(--font-sans);background:var(--bk);color:var(--tx);min-height:600px}
+
+.topbar{background:var(--bk);border-bottom:2px solid var(--yw);padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:52px}
+.logo{display:flex;align-items:center;gap:10px;color:var(--yw);font-size:17px;font-weight:500}
+.logo-box{width:30px;height:30px;background:var(--yw);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.enc-badge{background:rgba(245,197,24,0.12);color:var(--yw);font-size:11px;padding:3px 10px;border-radius:20px;border:0.5px solid rgba(245,197,24,0.35)}
+
+.nav{display:flex;gap:2px;padding:0.75rem 1.25rem 0;background:var(--bk2);border-bottom:1px solid #2a2a2a}
+.nav-btn{padding:8px 16px;border-radius:6px 6px 0 0;font-size:13px;border:none;cursor:pointer;background:transparent;color:var(--tx2);transition:all 0.15s}
+.nav-btn:hover{color:var(--yw)}
+.nav-btn.active{background:var(--bk3);color:var(--yw);border:0.5px solid #333;border-bottom:none;font-weight:500}
+.nav-btn.admin-btn{color:#e24b4a}
+.nav-btn.admin-btn.active{color:var(--yw)}
+
+.panel{background:var(--bk3);border:0.5px solid #2e2e2e;border-radius:0 10px 10px 10px;padding:1.25rem;margin:0 1.25rem 1.25rem}
+
+.ptitle{font-size:15px;font-weight:500;color:var(--tx);margin-bottom:3px}
+.psub{font-size:12px;color:var(--tx2);margin-bottom:1.25rem}
+
+.flabel{font-size:11px;font-weight:500;color:var(--tx2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.05em}
+.finput,.fselect,.ftextarea{width:100%;padding:9px 12px;font-size:13px;border:0.5px solid #333;border-radius:6px;background:var(--bk4);color:var(--tx);font-family:var(--font-sans);outline:none;transition:border-color .15s}
+.finput:focus,.fselect,.ftextarea:focus{border-color:var(--yw);box-shadow:0 0 0 2px rgba(245,197,24,0.15)}
+.ftextarea{min-height:100px;resize:vertical}
+.fselect{cursor:pointer}
+.fg{margin-bottom:1rem}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+.sev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.sev-btn{padding:7px 4px;border-radius:6px;border:0.5px solid #333;background:var(--bk4);cursor:pointer;font-size:11px;text-align:center;color:var(--tx2);transition:all .15s}
+.sev-btn:hover{border-color:var(--yw);color:var(--yw)}
+.sel-low{background:#1a2e10;border-color:#3B6D11;color:#97C459}
+.sel-medium{background:#2e1f08;border-color:#854F0B;color:#EF9F27}
+.sel-high{background:#2e0f0f;border-color:#A32D2D;color:#F09595}
+.sel-critical{background:#3d0808;border-color:#e24b4a;color:#fca5a5}
+
+.anon-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;background:var(--bk4);border:0.5px solid #333;cursor:pointer}
+.trk{width:34px;height:18px;border-radius:9px;background:var(--yw);position:relative;flex-shrink:0;transition:background .2s}
+.trk-th{position:absolute;top:3px;right:3px;width:12px;height:12px;border-radius:50%;background:var(--bk);transition:right .2s}
+.trk.off{background:#333}
+.trk.off .trk-th{right:auto;left:3px}
+
+.file-zone{border:1.5px dashed #333;border-radius:6px;padding:1.25rem;text-align:center;cursor:pointer;transition:border-color .15s}
+.file-zone:hover{border-color:var(--yw)}
+.file-chips{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.fchip{font-size:11px;padding:2px 8px;background:rgba(245,197,24,0.12);color:var(--yw);border-radius:20px}
+
+.submit-btn{width:100%;padding:12px;background:var(--yw);color:var(--bk);border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.submit-btn:hover{background:var(--yw2)}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}
+.stat-c{background:var(--bk4);border-radius:6px;padding:12px;text-align:center;border:0.5px solid #2a2a2a}
+.stat-n{font-size:22px;font-weight:500;color:var(--yw)}
+.stat-l{font-size:11px;color:var(--tx2);margin-top:2px}
+
+.rlist{display:flex;flex-direction:column;gap:8px}
+.rcard{border:0.5px solid #2a2a2a;border-radius:6px;padding:12px;cursor:pointer;transition:background .15s;background:var(--bk4)}
+.rcard:hover{border-color:var(--yw)}
+.rc-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
+.rc-id{font-size:11px;font-family:var(--font-mono);color:var(--tx2)}
+.rc-cat{font-size:11px;padding:2px 8px;border-radius:12px}
+.cat-fraud{background:rgba(245,197,24,0.12);color:var(--yw)}
+.cat-safety{background:rgba(226,75,74,0.15);color:#f09595}
+.cat-hr{background:rgba(55,138,221,0.15);color:#85B7EB}
+.cat-env{background:rgba(29,158,117,0.12);color:#5DCAA5}
+.cat-other{background:#222;color:var(--tx2)}
+.rc-title{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:4px}
+.rc-meta{font-size:11px;color:var(--tx2);display:flex;gap:10px;flex-wrap:wrap}
+.sdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:3px}
+.s-new{background:#f5c518}.s-rev{background:#EF9F27}.s-res{background:#1D9E75}
+
+.toast{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:var(--bk2);color:var(--yw);padding:10px 20px;border-radius:8px;font-size:13px;display:none;z-index:999;border:1px solid rgba(245,197,24,0.3);white-space:nowrap}
+.toast.show{display:block;animation:fiu .25s ease}
+@keyframes fiu{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+
+.admin-login{max-width:340px;margin:0 auto;padding:2rem 0}
+.admin-avatar{width:60px;height:60px;background:var(--yw);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem}
+.login-title{text-align:center;font-size:16px;font-weight:500;color:var(--tx);margin-bottom:4px}
+.login-sub{text-align:center;font-size:12px;color:var(--tx2);margin-bottom:1.5rem}
+.login-btn{width:100%;padding:10px;background:var(--yw);color:var(--bk);border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;margin-top:6px}
+.login-btn:hover{background:var(--yw2)}
+.err-msg{color:#f09595;font-size:12px;text-align:center;margin-top:8px;display:none}
+
+.admin-panel{display:none}
+.sec-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(245,197,24,0.08);border-radius:6px;margin-bottom:1.25rem;border:0.5px solid rgba(245,197,24,0.2)}
+.sec-bar-l{font-size:12px;color:var(--yw)}
+.logout-btn{font-size:12px;padding:4px 12px;background:transparent;border:0.5px solid #333;border-radius:5px;color:var(--tx2);cursor:pointer}
+.logout-btn:hover{border-color:var(--rd);color:var(--rd)}
+
+.admin-tabs{display:flex;gap:6px;margin-bottom:1.25rem}
+.atab{padding:6px 14px;border-radius:5px;font-size:12px;border:0.5px solid #2a2a2a;background:transparent;color:var(--tx2);cursor:pointer;transition:all .15s}
+.atab.active{background:rgba(245,197,24,0.1);border-color:var(--yw);color:var(--yw)}
+
+.admin-table{width:100%;border-collapse:collapse;font-size:12px}
+.admin-table th{text-align:left;padding:8px 10px;color:var(--tx2);border-bottom:1px solid #2a2a2a;font-weight:500}
+.admin-table td{padding:8px 10px;border-bottom:0.5px solid #1e1e1e;color:var(--tx);vertical-align:middle}
+.admin-table tr:hover td{background:var(--bk4)}
+
+.status-sel{background:var(--bk4);border:0.5px solid #333;color:var(--tx);border-radius:4px;padding:3px 6px;font-size:11px;cursor:pointer}
+.status-sel:focus{outline:none;border-color:var(--yw)}
+
+.del-btn{background:transparent;border:0.5px solid #333;color:#f09595;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer}
+.del-btn:hover{border-color:var(--rd);background:rgba(226,75,74,0.1)}
+
+.qr-btn{background:rgba(245,197,24,0.1);border:0.5px solid rgba(245,197,24,0.3);color:var(--yw);border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer}
+.qr-btn:hover{background:rgba(245,197,24,0.2)}
+
+.modal-bg{display:none;position:relative;min-height:320px;background:rgba(0,0,0,0.7);border-radius:8px;margin-top:1rem;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal-box{background:var(--bk3);border:0.5px solid #333;border-radius:10px;padding:1.5rem;width:280px;text-align:center}
+.modal-title{font-size:14px;font-weight:500;color:var(--tx);margin-bottom:4px}
+.modal-id{font-size:12px;font-family:var(--font-mono);color:var(--yw);margin-bottom:1rem}
+.qr-wrap{background:#fff;padding:10px;border-radius:6px;display:inline-block;margin-bottom:1rem}
+.modal-close{background:transparent;border:0.5px solid #333;color:var(--tx2);border-radius:5px;padding:5px 16px;cursor:pointer;font-size:12px}
+.modal-close:hover{border-color:var(--yw);color:var(--yw)}
+
+.track-row{display:flex;gap:8px}
+.ttrack-btn{padding:9px 16px;background:var(--yw);color:var(--bk);border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.detail-box{border:0.5px solid #2a2a2a;border-radius:6px;padding:1rem;margin-top:1rem;display:none;background:var(--bk4)}
+.drow{display:flex;gap:8px;margin-bottom:6px;font-size:12px}
+.dk{color:var(--tx2);min-width:110px}
+.dv{color:var(--tx);font-weight:500}
+.prog{height:4px;border-radius:2px;background:#2a2a2a;margin-top:8px;overflow:hidden}
+.prog-f{height:100%;border-radius:2px;background:var(--yw);transition:width .5s}
+.tl-item{display:flex;gap:10px;padding:7px 0;border-left:2px solid #2a2a2a;margin-left:7px;padding-left:14px;position:relative}
+.tl-dot{position:absolute;left:-5px;top:11px;width:8px;height:8px;border-radius:50%;background:var(--yw)}
+.tl-text{font-size:12px;color:var(--tx2)}
+.tl-date{font-size:11px;color:var(--tx3);margin-top:2px}
+
+.empty-st{text-align:center;padding:2.5rem 1rem;color:var(--tx2);font-size:13px}
+input[type="file"]{display:none}
+input[type="password"]{-webkit-text-security:disc}
+
+.sec-info{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sec-card{background:var(--bk4);border:0.5px solid #2a2a2a;border-radius:6px;padding:12px}
+.sec-card-t{font-size:11px;color:var(--tx2);margin-bottom:4px}
+.sec-card-v{font-size:13px;color:var(--tx);font-weight:500}
+.sec-card-v.ok{color:#5DCAA5}
+.sec-card-v.warn{color:#EF9F27}
+.log-item{font-size:11px;padding:6px 0;border-bottom:0.5px solid #1e1e1e;display:flex;justify-content:space-between}
+.log-item:last-child{border:none}
+.log-time{color:var(--tx3)}
+</style>
+
+<div style="background:var(--bk);min-height:600px;">
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0d0d0d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+    </div>
+    SafeVoice
+  </div>
+  <div class="enc-badge">AES-256 encrypted</div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="switchTab('report',this)">Report</button>
+  <button class="nav-btn" onclick="switchTab('myreports',this)">My Reports</button>
+  <button class="nav-btn" onclick="switchTab('track',this)">Track</button>
+  <button class="nav-btn admin-btn" onclick="switchTab('admin',this)">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Admin
+  </button>
+</div>
+
+<div id="tab-report" class="panel">
+  <div class="ptitle">Submit a report</div>
+  <div class="psub">Your identity is protected. All submissions are encrypted end-to-end.</div>
+  <div class="fg">
+    <label class="flabel">Category</label>
+    <select class="fselect" id="r-cat"><option value="">Select category...</option><option>Fraud</option><option>Safety</option><option>HR</option><option>Environment</option><option>Corruption</option><option>Data Privacy</option><option>Other</option></select>
+  </div>
+  <div class="row2">
+    <div class="fg"><label class="flabel">Department (optional)</label><input class="finput" id="r-dept" placeholder="e.g. Finance"/></div>
+    <div class="fg"><label class="flabel">Incident date</label><input class="finput" type="date" id="r-date"/></div>
+  </div>
+  <div class="fg"><label class="flabel">Title</label><input class="finput" id="r-title" placeholder="Brief summary"/></div>
+  <div class="fg"><label class="flabel">Description</label><textarea class="ftextarea" id="r-desc" placeholder="Describe what happened. Include names, dates, locations..."></textarea></div>
+  <div class="fg">
+    <label class="flabel">Severity</label>
+    <div class="sev-grid">
+      <button class="sev-btn" onclick="setSev('low',this)">Low</button>
+      <button class="sev-btn" onclick="setSev('medium',this)">Medium</button>
+      <button class="sev-btn" onclick="setSev('high',this)">High</button>
+      <button class="sev-btn" onclick="setSev('critical',this)">Critical</button>
+    </div>
+  </div>
+  <div class="fg">
+    <label class="flabel">Evidence (optional)</label>
+    <div class="file-zone" onclick="document.getElementById('fi').click()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5" style="margin-bottom:6px"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      <div style="font-size:12px;color:var(--tx2)">Click to attach files</div>
+      <div class="file-chips" id="fchips"></div>
+    </div>
+    <input type="file" id="fi" multiple onchange="handleFiles(this)"/>
+  </div>
+  <div class="fg">
+    <label class="flabel">Anonymous submission</label>
+    <div class="anon-row" onclick="toggleAnon()">
+      <div class="trk" id="atrk"><div class="trk-th"></div></div>
+      <div>
+        <div style="font-size:13px;color:var(--tx)" id="anon-lbl">Anonymous — identity hidden</div>
+        <div style="font-size:11px;color:var(--tx2)">Your identity will not be revealed to investigators</div>
+      </div>
+    </div>
+  </div>
+  <div class="fg" id="contact-g" style="display:none">
+    <label class="flabel">Contact email (optional)</label>
+    <input class="finput" type="email" id="r-email" placeholder="you@example.com"/>
+  </div>
+  <button class="submit-btn" onclick="submitReport()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Submit securely
+  </button>
+</div>
+
+<div id="tab-myreports" class="panel" style="display:none">
+  <div class="ptitle">Reports dashboard</div>
+  <div class="psub">Overview of all submitted reports</div>
+  <div class="stats-grid">
+    <div class="stat-c"><div class="stat-n" id="st-total">0</div><div class="stat-l">Total</div></div>
+    <div class="stat-c"><div class="stat-n" id="st-new" style="color:#f5c518">0</div><div class="stat-l">New</div></div>
+    <div class="stat-c"><div class="stat-n" id="st-open" style="color:#EF9F27">0</div><div class="stat-l">Under review</div></div>
+    <div class="stat-c"><div class="stat-n" id="st-res" style="color:#1D9E75">0</div><div class="stat-l">Resolved</div></div>
+  </div>
+  <div class="rlist" id="rlist"><div class="empty-st">No reports yet.</div></div>
+</div>
+
+<div id="tab-track" class="panel" style="display:none">
+  <div class="ptitle">Track your report</div>
+  <div class="psub">Enter your report ID to check status and updates</div>
+  <div class="track-row">
+    <input class="finput" id="tid" placeholder="e.g. RPT-8F3K2X" style="flex:1"/>
+    <button class="ttrack-btn" onclick="trackReport()">Track</button>
+  </div>
+  <div class="detail-box" id="tdetail"></div>
+</div>
+
+<div id="tab-admin" class="panel" style="display:none">
+  <div id="admin-login-view">
+    <div class="admin-login">
+      <div class="admin-avatar">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="11" r="3"/></svg>
+      </div>
+      <div class="login-title">Admin access</div>
+      <div class="login-sub">Restricted area — authorised personnel only</div>
+      <div class="fg"><label class="flabel">Username</label><input class="finput" id="adm-user" placeholder="admin"/></div>
+      <div class="fg"><label class="flabel">Password</label><input class="finput" type="password" id="adm-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()"/></div>
+      <button class="login-btn" onclick="adminLogin()">Access admin panel</button>
+      <div class="err-msg" id="adm-err">Invalid credentials. Try again.</div>
+      <div style="margin-top:1rem;padding:10px 12px;background:rgba(245,197,24,0.06);border-radius:6px;border:0.5px solid rgba(245,197,24,0.15);font-size:11px;color:var(--tx2);text-align:center">
+        Demo credentials: <span style="color:var(--yw);font-family:var(--font-mono)">admin / safevoice123</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-panel" id="admin-panel-view">
+    <div class="sec-bar">
+      <div class="sec-bar-l">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:5px;vertical-align:middle"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Authenticated as <strong style="color:var(--yw)">admin</strong> — session active
+      </div>
+      <button class="logout-btn" onclick="adminLogout()">Logout</button>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="atab active" onclick="switchAdminTab('reports',this)">All reports</button>
+      <button class="atab" onclick="switchAdminTab('security',this)">Security</button>
+    </div>
+
+    <div id="atab-reports">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:12px;color:var(--tx2)" id="adm-count">Loading...</div>
+        <select class="fselect" style="width:auto;font-size:12px;padding:5px 10px" id="adm-filter" onchange="loadAdminReports()">
+          <option value="">All statuses</option>
+          <option>New</option>
+          <option>Under Review</option>
+          <option>Resolved</option>
+        </select>
+      </div>
+      <div id="admin-table-wrap">
+        <div class="empty-st">Loading reports...</div>
+      </div>
+    </div>
+
+    <div id="atab-security" style="display:none">
+      <div style="font-size:13px;font-weight:500;color:var(--tx);margin-bottom:12px">Security status</div>
+      <div class="sec-info" style="margin-bottom:1.25rem">
+        <div class="sec-card"><div class="sec-card-t">Encryption</div><div class="sec-card-v ok">AES-256 active</div></div>
+        <div class="sec-card"><div class="sec-card-t">Database</div><div class="sec-card-v ok">Firebase secured</div></div>
+        <div class="sec-card"><div class="sec-card-t">Admin sessions</div><div class="sec-card-v warn">1 active</div></div>
+        <div class="sec-card"><div class="sec-card-t">Failed logins (24h)</div><div class="sec-card-v" id="fail-count">0</div></div>
+        <div class="sec-card"><div class="sec-card-t">Anonymous reports</div><div class="sec-card-v ok">Identity masked</div></div>
+        <div class="sec-card"><div class="sec-card-t">Data retention</div><div class="sec-card-v">90 days policy</div></div>
+      </div>
+      <div style="font-size:13px;font-weight:500;color:var(--tx);margin-bottom:10px">Access log</div>
+      <div id="access-log" style="background:var(--bk4);border:0.5px solid #2a2a2a;border-radius:6px;padding:10px 12px"></div>
+
+      <div style="margin-top:1.25rem">
+        <div style="font-size:13px;font-weight:500;color:var(--tx);margin-bottom:10px">Change admin password</div>
+        <div class="row2" style="gap:8px">
+          <input class="finput" type="password" id="new-pass1" placeholder="New password"/>
+          <input class="finput" type="password" id="new-pass2" placeholder="Confirm password"/>
+        </div>
+        <button style="margin-top:8px;padding:7px 16px;background:var(--yw);color:var(--bk);border:none;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer" onclick="changePass()">Update password</button>
+        <div id="pass-msg" style="font-size:11px;margin-top:6px;display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="qr-modal" class="modal-bg">
+  <div class="modal-box">
+    <div class="modal-title">Report QR code</div>
+    <div class="modal-id" id="qr-report-id"></div>
+    <div class="qr-wrap">
+      <canvas id="qr-canvas" width="160" height="160"></canvas>
+    </div>
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:1rem">Scan to track this report</div>
+    <button class="modal-close" onclick="closeQR()">Close</button>
+  </div>
+</div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg:#0a0c0f; --surface:#111318; --surface2:#181c24;
-    --border:#1e2430; --border2:#2a3040;
-    --accent:#00e5a0; --accent2:#00b87d;
-    --adm:#7b8cff; --adm2:#5a6adf;
-    --sa:#f5c542; --sa2:#c9960e;
-    --tm:#b06fff; --tm2:#8844dd;
-    --danger:#ff4d6a; --warn:#ffaa00;
-    --text:#e8ecf0; --text2:#8896a8; --text3:#4a5568;
-    --mono:'JetBrains Mono',monospace; --sans:'Inter',sans-serif;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;min-height:100vh;overflow-x:hidden;}
-  body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,160,0.012) 2px,rgba(0,229,160,0.012) 4px);pointer-events:none;z-index:999;}
-
-  /* ─── ROLE SCREEN ─────────────────────────────────────── */
-  #roleScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200;flex-direction:column;gap:40px;}
-  .rs-logo{text-align:center;}
-  .rs-logo svg{width:58px;height:58px;display:block;margin:0 auto 14px;}
-  .rs-logo h1{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent);letter-spacing:0.12em;text-transform:uppercase;}
-  .rs-logo p{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.06em;margin-top:4px;}
-  .rs-cards{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;}
-  .rs-card{background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:28px 32px;width:190px;text-align:center;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:12px;}
-  .rs-card:hover{transform:translateY(-3px);}
-  .rs-card.uc:hover{border-color:var(--accent);box-shadow:0 0 24px rgba(0,229,160,0.1);}
-  .rs-card.ac:hover{border-color:var(--adm);box-shadow:0 0 24px rgba(123,140,255,0.12);}
-  .rs-card .rci{font-size:30px;}
-  .rs-card h2{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;}
-  .rs-card.uc h2{color:var(--accent);}
-  .rs-card.ac h2{color:var(--adm);}
-  .rs-card p{font-size:11px;color:var(--text3);line-height:1.5;}
-  .no-pass{font-family:var(--mono);font-size:9px;color:var(--accent);background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);border-radius:2px;padding:3px 7px;text-transform:uppercase;letter-spacing:0.06em;}
-
-  /* ─── LOGIN ────────────────────────────────────────────── */
-  #loginScreen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:190;flex-direction:column;gap:26px;}
-  .login-back{font-family:var(--mono);font-size:10px;color:var(--text3);cursor:pointer;text-transform:uppercase;letter-spacing:0.08em;transition:color 0.15s;}
-  .login-back:hover{color:var(--text2);}
-  .login-box{background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:30px;width:360px;display:flex;flex-direction:column;gap:16px;}
-  .ltitle{font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;padding-bottom:13px;border-bottom:1px solid var(--border);color:var(--adm);}
-  .login-box label{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;display:block;margin-bottom:6px;}
-  .login-box input{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:3px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:14px;outline:none;transition:border-color 0.2s;}
-  .login-box input:focus{border-color:var(--adm);}
-  .lhint{font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center;}
-  .lerr{font-family:var(--mono);font-size:11px;color:var(--danger);text-align:center;display:none;padding:8px;background:rgba(255,77,106,0.07);border:1px solid rgba(255,77,106,0.2);border-radius:3px;}
-  .btn-a{background:var(--adm);color:#fff;border:none;border-radius:3px;padding:12px;width:100%;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;}
-  .btn-a:hover{background:var(--adm2);}
-  .role-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;}
-  .rpill{font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:2px;border:1px solid;letter-spacing:0.06em;text-transform:uppercase;}
-  .rpill.sa{color:var(--sa);border-color:rgba(245,197,66,0.3);background:rgba(245,197,66,0.06);}
-  .rpill.adm{color:var(--adm);border-color:rgba(123,140,255,0.3);background:rgba(123,140,255,0.06);}
-  .rpill.tm{color:var(--tm);border-color:rgba(176,111,255,0.3);background:rgba(176,111,255,0.06);}
-
-  /* ─── APP HEADER ───────────────────────────────────────── */
-  #app{display:none;}
-  header{border-bottom:1px solid var(--border);padding:13px 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(10,12,15,0.96);backdrop-filter:blur(10px);z-index:50;}
-  .hb{display:flex;align-items:center;gap:11px;}
-  .dot{width:7px;height:7px;border-radius:50%;animation:pulse 2s infinite;}
-  .du{background:var(--accent);box-shadow:0 0 7px var(--accent);}
-  .da{background:var(--adm);box-shadow:0 0 7px var(--adm);}
-  .dsa{background:var(--sa);box-shadow:0 0 7px var(--sa);}
-  .dtm{background:var(--tm);box-shadow:0 0 7px var(--tm);}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.25}}
-  .hb h1{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;}
-  .hb h1.u{color:var(--accent);}
-  .hb h1.a{color:var(--adm);}
-  .hb h1.sa{color:var(--sa);}
-  .hb h1.tm{color:var(--tm);}
-  .hnav{display:flex;gap:4px;flex-wrap:wrap;}
-  .nb{background:none;border:1px solid transparent;border-radius:3px;padding:6px 14px;color:var(--text2);font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;}
-  .nb:hover{border-color:var(--border2);color:var(--text);}
-  .nb.au{border-color:var(--accent);color:var(--accent);background:rgba(0,229,160,0.06);}
-  .nb.aa{border-color:var(--adm);color:var(--adm);background:rgba(123,140,255,0.06);}
-  .nb.asa{border-color:var(--sa);color:var(--sa);background:rgba(245,197,66,0.06);}
-  .nb.atm{border-color:var(--tm);color:var(--tm);background:rgba(176,111,255,0.06);}
-  .hr{display:flex;align-items:center;gap:10px;}
-  .rbadge{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;border-radius:2px;padding:4px 10px;text-transform:uppercase;border:1px solid;}
-  .rbadge.u{color:var(--accent);background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.2);}
-  .rbadge.a{color:var(--adm);background:rgba(123,140,255,0.08);border-color:rgba(123,140,255,0.2);}
-  .rbadge.sa{color:var(--sa);background:rgba(245,197,66,0.08);border-color:rgba(245,197,66,0.2);}
-  .rbadge.tm{color:var(--tm);background:rgba(176,111,255,0.08);border-color:rgba(176,111,255,0.2);}
-  .lkbtn{background:none;border:1px solid var(--border2);border-radius:3px;padding:5px 12px;color:var(--text3);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.06em;}
-  .lkbtn:hover{border-color:var(--danger);color:var(--danger);}
-
-  /* ─── PAGES ────────────────────────────────────────────── */
-  .page{display:none;padding:34px 26px;max-width:960px;margin:0 auto;}
-  .page.active{display:block;}
-  .ptitle{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:10px;}
-  .ptitle::before{content:'';display:block;width:14px;height:1px;}
-  .ptitle.u::before{background:var(--accent);}
-  .ptitle.a::before{background:var(--adm);}
-  .ptitle.sa::before{background:var(--sa);}
-  .ptitle.tm::before{background:var(--tm);}
-
-  /* ─── FORMS ────────────────────────────────────────────── */
-  .fg{display:flex;flex-direction:column;gap:20px;}
-  .frow{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  .field{display:flex;flex-direction:column;gap:6px;}
-  .field label{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;}
-  .field input,.field select,.field textarea{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:10px 14px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;width:100%;}
-  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);}
-  .field textarea{resize:vertical;min-height:120px;line-height:1.6;}
-  .field select{appearance:none;cursor:pointer;}
-  .fhint{font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.5;}
-  .anotice{background:rgba(0,229,160,0.04);border:1px solid rgba(0,229,160,0.14);border-radius:3px;padding:12px 15px;display:flex;gap:11px;align-items:flex-start;margin-bottom:22px;}
-  .anotice .ic{color:var(--accent);font-size:14px;flex-shrink:0;margin-top:1px;}
-  .anotice p{font-size:12px;color:var(--text2);line-height:1.6;font-family:var(--mono);}
-  .anotice p strong{color:var(--accent);font-weight:500;}
-  .sevs{display:flex;gap:8px;}
-  .so{flex:1;padding:8px;border:1px solid var(--border);border-radius:3px;text-align:center;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.15s;color:var(--text3);}
-  .so.low:hover,.so.low.sel{border-color:#00c8a0;color:#00c8a0;background:rgba(0,200,160,0.06);}
-  .so.med:hover,.so.med.sel{border-color:var(--warn);color:var(--warn);background:rgba(255,170,0,0.06);}
-  .so.high:hover,.so.high.sel{border-color:var(--danger);color:var(--danger);background:rgba(255,77,106,0.06);}
-  .upzone{border:1px dashed var(--border2);border-radius:3px;padding:22px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;}
-  .upzone:hover{border-color:var(--accent);background:rgba(0,229,160,0.02);}
-  .upzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-  .upzone .upi{font-size:26px;margin-bottom:7px;}
-  .upzone p{font-family:var(--mono);font-size:11px;color:var(--text2);}
-  .upzone p span{color:var(--accent);}
-  .flist{display:flex;flex-direction:column;gap:5px;margin-top:7px;}
-  .fi{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:7px 11px;font-family:var(--mono);font-size:11px;color:var(--text2);}
-  .fi .rmf{color:var(--danger);cursor:pointer;background:none;border:none;font-size:14px;}
-  .sbtn{background:var(--accent);color:#000;border:none;border-radius:3px;padding:12px 24px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;align-self:flex-start;}
-  .sbtn:hover{background:var(--accent2);transform:translateY(-1px);}
-  .sbtn.sa-btn{background:var(--sa);color:#000;}
-  .sbtn.sa-btn:hover{background:var(--sa2);}
-  .sbtn.tm-btn{background:var(--tm);color:#fff;}
-  .sbtn.tm-btn:hover{background:var(--tm2);}
-  .sbtn.adm-btn{background:var(--adm);color:#fff;}
-  .sbtn.adm-btn:hover{background:var(--adm2);}
-  .sbtn.danger-btn{background:none;border:1px solid rgba(255,77,106,0.4);color:var(--danger);}
-  .sbtn.danger-btn:hover{background:rgba(255,77,106,0.08);border-color:var(--danger);}
-
-  /* ─── SUCCESS ──────────────────────────────────────────── */
-  #sc{display:none;background:var(--surface);border:1px solid rgba(0,229,160,0.18);border-radius:4px;padding:34px;text-align:center;flex-direction:column;align-items:center;gap:13px;}
-  #sc.show{display:flex;}
-  #sc h2{font-family:var(--mono);font-size:15px;color:var(--accent);letter-spacing:0.08em;}
-  #sc p{font-size:13px;color:var(--text2);line-height:1.6;}
-  .rid{background:var(--bg);border:1px solid var(--accent);border-radius:3px;padding:12px 24px;font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent);letter-spacing:0.15em;}
-
-  /* ─── REPORT CARDS ─────────────────────────────────────── */
-  .rgrid{display:flex;flex-direction:column;gap:10px;}
-  .rcard{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:17px 19px;cursor:pointer;transition:border-color 0.15s;display:grid;grid-template-columns:auto 1fr auto;gap:13px;align-items:start;}
-  .rcard:hover{border-color:var(--border2);}
-  .rcard.readonly{cursor:default;}
-  .rcid{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.15);border-radius:2px;padding:4px 9px;white-space:nowrap;align-self:center;}
-  .rcb h3{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px;}
-  .rcb p{font-size:12px;color:var(--text2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-  .rcm{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
-  .sevb{font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:2px;border:1px solid;}
-  .sevb.low{color:#00c8a0;border-color:#00c8a0;background:rgba(0,200,160,0.08);}
-  .sevb.medium{color:var(--warn);border-color:var(--warn);background:rgba(255,170,0,0.08);}
-  .sevb.high{color:var(--danger);border-color:var(--danger);background:rgba(255,77,106,0.08);}
-  .rdate{font-family:var(--mono);font-size:10px;color:var(--text3);}
-  .stbadge{font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;padding:3px 8px;border-radius:2px;}
-  .stbadge.new{background:rgba(0,229,160,0.1);color:var(--accent);}
-  .stbadge.reviewing{background:rgba(255,170,0,0.1);color:var(--warn);}
-  .stbadge.resolved{background:rgba(74,85,104,0.18);color:var(--text3);}
-  .stup{display:flex;gap:5px;margin-top:5px;}
-  .stup button{background:none;border:1px solid var(--border);border-radius:2px;padding:3px 9px;font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;color:var(--text3);transition:all 0.15s;}
-  .stup button:hover{border-color:var(--adm);color:var(--adm);}
-
-  /* ─── TRACK ────────────────────────────────────────────── */
-  .tbox{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:26px;max-width:420px;display:flex;flex-direction:column;gap:15px;}
-  .tres{display:none;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:20px;margin-top:16px;flex-direction:column;gap:12px;}
-  .tres.show{display:flex;}
-
-  /* ─── ADMIN STATS ──────────────────────────────────────── */
-  .srow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:26px;}
-  .scard{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:15px 17px;}
-  .scard .sl{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;}
-  .scard .sv{font-family:var(--mono);font-size:26px;font-weight:600;}
-  .scard.tall .sv{color:var(--text);}
-  .scard.snew .sv{color:var(--accent);}
-  .scard.srev .sv{color:var(--warn);}
-  .scard.sres .sv{color:var(--text3);}
-  .scard.shigh .sv{color:var(--danger);}
-
-  /* ─── TOP MANAGEMENT ANALYTICS ─────────────────────────── */
-  .tm-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;}
-  .tm-panel{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:20px;}
-  .tm-panel-title{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
-  .tm-panel-title::before{content:'';display:block;width:10px;height:1px;background:var(--tm);}
-  .bar-row{display:flex;flex-direction:column;gap:10px;}
-  .bar-item{display:flex;flex-direction:column;gap:5px;}
-  .bar-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--text2);}
-  .bar-label span:last-child{color:var(--tm);}
-  .bar-track{background:var(--bg);border-radius:2px;height:5px;overflow:hidden;}
-  .bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--tm2),var(--tm));transition:width 0.6s ease;}
-  .bar-fill.green{background:linear-gradient(90deg,var(--accent2),var(--accent));}
-  .bar-fill.warn{background:linear-gradient(90deg,#cc8800,var(--warn));}
-  .bar-fill.danger{background:linear-gradient(90deg,#cc2244,var(--danger));}
-  .sev-split{display:flex;gap:12px;}
-  .sev-box{flex:1;background:var(--bg);border-radius:3px;padding:14px 10px;text-align:center;border:1px solid var(--border);}
-  .sev-box .sv2{font-family:var(--mono);font-size:22px;font-weight:600;margin-bottom:4px;}
-  .sev-box .sl2{font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;}
-  .sev-box.low .sv2{color:#00c8a0;}
-  .sev-box.medium .sv2{color:var(--warn);}
-  .sev-box.high .sv2{color:var(--danger);}
-  .trend-bars{display:flex;align-items:flex-end;gap:6px;height:80px;}
-  .trend-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;}
-  .trend-bar{width:100%;background:rgba(176,111,255,0.15);border-radius:2px 2px 0 0;border:1px solid rgba(176,111,255,0.3);transition:background 0.15s;min-height:4px;}
-  .trend-bar:hover{background:rgba(176,111,255,0.35);}
-  .trend-label{font-family:var(--mono);font-size:8px;color:var(--text3);text-transform:uppercase;}
-  .recent-ro .rcard{cursor:default;}
-  .notice-tm{background:rgba(176,111,255,0.04);border:1px solid rgba(176,111,255,0.14);border-radius:3px;padding:12px 15px;display:flex;gap:11px;align-items:flex-start;margin-bottom:22px;}
-  .notice-tm .ic{color:var(--tm);font-size:14px;flex-shrink:0;}
-  .notice-tm p{font-size:12px;color:var(--text2);line-height:1.6;font-family:var(--mono);}
-  .notice-tm p strong{color:var(--tm);}
-
-  /* ─── ADMIN NOTE ───────────────────────────────────────── */
-  .nota{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:8px 12px;color:var(--text2);font-family:var(--mono);font-size:12px;width:100%;outline:none;resize:vertical;min-height:70px;transition:border-color 0.2s;}
-  .nota:focus{border-color:var(--adm);}
-  .notebtn{background:var(--adm);color:#fff;border:none;border-radius:3px;padding:7px 15px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;}
-  .notebtn:hover{background:var(--adm2);}
-  .delbtn{background:none;border:1px solid rgba(255,77,106,0.3);border-radius:3px;padding:7px 13px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;color:var(--danger);transition:all 0.15s;}
-  .delbtn:hover{background:rgba(255,77,106,0.08);border-color:var(--danger);}
-
-  /* ─── MODAL ────────────────────────────────────────────── */
-  #detailModal,#pwModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:300;align-items:center;justify-content:center;padding:22px;}
-  #detailModal.open,#pwModal.open{display:flex;}
-  .mbox{background:var(--surface2);border:1px solid var(--border2);border-radius:5px;width:100%;max-width:580px;max-height:82vh;overflow-y:auto;padding:26px;display:flex;flex-direction:column;gap:17px;}
-  .mbox h2{font-family:var(--mono);font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--adm);}
-  .mrow{display:grid;grid-template-columns:100px 1fr;gap:10px;border-top:1px solid var(--border);padding-top:13px;font-size:13px;}
-  .mrow .lbl{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;padding-top:2px;}
-  .mrow .val{color:var(--text2);line-height:1.6;word-break:break-word;}
-  .mclose{background:none;border:1px solid var(--border2);border-radius:3px;padding:7px 15px;color:var(--text2);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;align-self:flex-end;transition:all 0.15s;}
-  .mclose:hover{border-color:var(--danger);color:var(--danger);}
-
-  /* ─── PASSWORD MODAL ───────────────────────────────────── */
-  .pw-box{background:var(--surface2);border:1px solid var(--border2);border-radius:5px;width:100%;max-width:400px;padding:26px;display:flex;flex-direction:column;gap:16px;}
-  .pw-box h2{font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--sa);padding-bottom:12px;border-bottom:1px solid var(--border);}
-  .pw-box label{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;display:block;margin-bottom:5px;}
-  .pw-box input{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:3px;padding:9px 13px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color 0.2s;}
-  .pw-box input:focus{border-color:var(--sa);}
-  .pw-err{font-family:var(--mono);font-size:10px;color:var(--danger);display:none;}
-  .pw-ok{font-family:var(--mono);font-size:10px;color:var(--accent);display:none;}
-
-  /* ─── QR CODE ──────────────────────────────────────────── */
-  .qr-wrap{display:flex;flex-direction:column;gap:22px;}
-  .qr-card{background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:28px;display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;}
-  .qr-canvas-wrap{background:#fff;border-radius:4px;padding:14px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .qr-info{display:flex;flex-direction:column;gap:13px;flex:1;min-width:220px;}
-  .qr-info h2{font-family:var(--mono);font-size:13px;color:var(--adm);letter-spacing:0.08em;text-transform:uppercase;}
-  .qr-info p{font-size:13px;color:var(--text2);line-height:1.7;}
-  .qr-info ul{font-size:12px;color:var(--text2);line-height:2;padding-left:18px;font-family:var(--mono);}
-  .qr-info ul li::marker{color:var(--accent);}
-  .qr-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
-  .btn-print{background:var(--adm);color:#fff;border:none;border-radius:3px;padding:10px 20px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;}
-  .btn-print:hover{background:var(--adm2);}
-  .btn-dl{background:none;border:1px solid var(--border2);color:var(--text2);border-radius:3px;padding:10px 20px;font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;}
-  .btn-dl:hover{border-color:var(--adm);color:var(--adm);}
-  .qr-url{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:9px 13px;font-family:var(--mono);font-size:11px;color:var(--accent);word-break:break-all;}
-  .qr-tip{background:rgba(123,140,255,0.05);border:1px solid rgba(123,140,255,0.15);border-radius:3px;padding:13px 16px;font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.8;}
-  .qr-tip strong{color:var(--adm);}
-
-  /* ─── CATEGORY MANAGEMENT ──────────────────────────────── */
-  .cat-list{display:flex;flex-direction:column;gap:7px;margin-bottom:24px;}
-  .cat-item{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
-  .cat-item .cat-name{font-family:var(--mono);font-size:13px;color:var(--text);}
-  .cat-item .cat-tag{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:2px;background:rgba(245,197,66,0.08);color:var(--sa);border:1px solid rgba(245,197,66,0.2);}
-  .cat-item .cat-del{background:none;border:1px solid rgba(255,77,106,0.25);border-radius:2px;padding:4px 10px;font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;color:var(--danger);transition:all 0.15s;}
-  .cat-item .cat-del:hover{background:rgba(255,77,106,0.08);border-color:var(--danger);}
-  .cat-add-row{display:flex;gap:10px;align-items:center;}
-  .cat-add-row input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color 0.2s;}
-  .cat-add-row input:focus{border-color:var(--sa);}
-  .section-sep{border:none;border-top:1px solid var(--border);margin:28px 0;}
-  .sec-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;}
-
-  /* ─── USER MANAGEMENT ──────────────────────────────────── */
-  .user-list{display:flex;flex-direction:column;gap:8px;margin-bottom:28px;}
-  .user-item{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:14px;}
-  .user-info .un{font-family:var(--mono);font-size:13px;color:var(--text);margin-bottom:3px;}
-  .user-info .ud{font-family:var(--mono);font-size:10px;color:var(--text3);}
-  .role-tag{font-family:var(--mono);font-size:9px;padding:3px 9px;border-radius:2px;border:1px solid;text-transform:uppercase;letter-spacing:0.06em;}
-  .role-tag.superadmin{color:var(--sa);border-color:rgba(245,197,66,0.3);background:rgba(245,197,66,0.06);}
-  .role-tag.admin{color:var(--adm);border-color:rgba(123,140,255,0.3);background:rgba(123,140,255,0.06);}
-  .role-tag.topmanagement{color:var(--tm);border-color:rgba(176,111,255,0.3);background:rgba(176,111,255,0.06);}
-  .user-actions{display:flex;gap:6px;}
-  .user-actions button{background:none;border:1px solid var(--border);border-radius:2px;padding:5px 11px;font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;color:var(--text3);transition:all 0.15s;}
-  .user-actions .rpw-btn:hover{border-color:var(--sa);color:var(--sa);}
-  .user-actions .del-btn:hover{border-color:var(--danger);color:var(--danger);}
-  .add-user-panel{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:22px;display:flex;flex-direction:column;gap:16px;}
-  .add-user-panel .au-title{font-family:var(--mono);font-size:11px;color:var(--sa);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:2px;}
-  .add-user-panel input,.add-user-panel select{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:9px 13px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color 0.2s;width:100%;}
-  .add-user-panel input:focus,.add-user-panel select:focus{border-color:var(--sa);}
-  .add-user-panel select{appearance:none;cursor:pointer;}
-  .add-user-panel label{font-family:var(--mono);font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:5px;}
-  .au-err{font-family:var(--mono);font-size:10px;color:var(--danger);display:none;}
-  .au-ok{font-family:var(--mono);font-size:10px;color:var(--accent);display:none;}
-
-  /* ─── FILTERS ──────────────────────────────────────────── */
-  .frow2{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
-  .fsel{background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 11px;outline:none;cursor:pointer;}
-
-  /* ─── MISC ─────────────────────────────────────────────── */
-  .empty{text-align:center;padding:56px 0;color:var(--text3);font-family:var(--mono);font-size:12px;letter-spacing:0.05em;}
-  .empty .ei{font-size:30px;margin-bottom:11px;opacity:0.35;}
-  ::-webkit-scrollbar{width:4px;}
-  ::-webkit-scrollbar-track{background:var(--bg);}
-  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
-
-  /* ─── PRINT ─────────────────────────────────────────────── */
-  @media print {
-    body{background:#fff !important;}
-    body::before,header,#roleScreen,#loginScreen,.qr-actions,.qr-tip{display:none !important;}
-    .page{display:block !important;padding:0 !important;}
-    .ptitle{display:none;}
-    .qr-card{background:#fff !important;border:1px solid #ccc !important;}
-  }
-
-  @media(max-width:640px){
-    .frow{grid-template-columns:1fr}
-    .hnav{display:none}
-    .srow{grid-template-columns:1fr 1fr}
-    .page{padding:18px 13px}
-    .rs-cards{flex-direction:column}
-    .tm-grid{grid-template-columns:1fr}
-    .user-item{grid-template-columns:1fr;gap:8px}
-    .sev-split{flex-direction:column}
-  }
-</style>
-</head>
-<body>
-
-<!-- ═══════════════ ROLE SELECT ═══════════════ -->
-<div id="roleScreen">
-  <div class="rs-logo">
-    <svg viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M29 3L5 13V29C5 41.5 15.3 52.6 29 55C42.7 52.6 53 41.5 53 29V13L29 3Z" stroke="#00e5a0" stroke-width="1.4" fill="rgba(0,229,160,0.05)"/>
-      <path d="M19 29L25 35L39 21" stroke="#00e5a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <h1>SecureReport</h1>
-    <p>// Anonymous Whistleblower Portal</p>
-  </div>
-  <div class="rs-cards">
-    <div class="rs-card uc" onclick="enterReporter()">
-      <div class="rci">&#128100;</div>
-      <h2>Reporter</h2>
-      <p>Submit &amp; track reports anonymously</p>
-      <span class="no-pass">&#10003; No password needed</span>
-    </div>
-    <div class="rs-card ac" onclick="goLogin()">
-      <div class="rci">&#128737;</div>
-      <h2>Staff Access</h2>
-      <p>Admin · SuperAdmin · Top Management</p>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════ LOGIN ═══════════════ -->
-<div id="loginScreen">
-  <div class="login-back" onclick="goBack()">&#8592; Back</div>
-  <div class="login-box">
-    <div class="ltitle">&#128737; Staff Login</div>
-    <div>
-      <label>Username</label>
-      <input type="text" id="luser" placeholder="Enter username..." autocomplete="off" />
-    </div>
-    <div>
-      <label>Password</label>
-      <input type="password" id="lpass" placeholder="Enter password..." autocomplete="off" />
-    </div>
-    <button class="btn-a" onclick="doLogin()">&#9654; Sign In</button>
-    <div class="lhint">Roles available:&nbsp;
-      <span class="rpill sa">SuperAdmin</span>&nbsp;
-      <span class="rpill adm">Admin</span>&nbsp;
-      <span class="rpill tm">Top Mgmt</span>
-    </div>
-    <div class="lerr" id="lerr">Invalid username or password. Access denied.</div>
-  </div>
-</div>
-
-<!-- ═══════════════ APP ═══════════════ -->
-<div id="app">
-  <header>
-    <div class="hb">
-      <div class="dot" id="hdot"></div>
-      <h1 id="htitle" class="u">SecureReport</h1>
-    </div>
-    <div class="hnav" id="hnav"></div>
-    <div class="hr">
-      <span class="rbadge u" id="rbadge">Reporter</span>
-      <button class="lkbtn" id="lockBtn" onclick="lockApp()" style="display:none;">Lock</button>
-    </div>
-  </header>
-
-  <!-- ── REPORTER: Submit ────────────────────── -->
-  <div class="page active" id="page-submit">
-    <div class="ptitle u">Submit Confidential Report</div>
-    <div class="anotice">
-      <span class="ic">&#9651;</span>
-      <p><strong>Your identity is fully protected.</strong> No personal details are required or stored. You will receive a unique Report ID — use it to track your report anonymously at any time.</p>
-    </div>
-    <div id="submitForm" class="fg">
-      <div class="frow">
-        <div class="field">
-          <label>Category *</label>
-          <select id="f-cat"><option value="">Select category...</option></select>
-        </div>
-        <div class="field">
-          <label>Organization / Dept (optional)</label>
-          <input type="text" id="f-org" placeholder="e.g. Finance Dept, Acme Corp" />
-        </div>
-      </div>
-      <div class="field">
-        <label>Report Title *</label>
-        <input type="text" id="f-title" placeholder="Brief summary of the issue" />
-      </div>
-      <div class="field">
-        <label>Detailed Description *</label>
-        <textarea id="f-desc" placeholder="Describe the incident clearly — dates, locations, persons involved. Do NOT include information that could identify you."></textarea>
-        <span class="fhint">// Do not include your name, role, or any personally identifying details</span>
-      </div>
-      <div class="field">
-        <label>Severity Level *</label>
-        <div class="sevs">
-          <div class="so low" onclick="selSev(this,'low')">Low</div>
-          <div class="so med" onclick="selSev(this,'medium')">Medium</div>
-          <div class="so high" onclick="selSev(this,'high')">High</div>
-        </div>
-      </div>
-      <div class="field">
-        <label>Supporting Evidence (optional)</label>
-        <div class="upzone">
-          <input type="file" multiple id="f-files" onchange="handleFiles(this)" />
-          <div class="upi">&#128206;</div>
-          <p>Drop files or <span>browse</span></p>
-          <p style="margin-top:4px;color:var(--text3);">Images, PDFs, documents</p>
-        </div>
-        <div class="flist" id="flist"></div>
-      </div>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-        <button class="sbtn" onclick="submitReport()">&#9654; Submit Report</button>
-        <span style="font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Stored securely</span>
-      </div>
-    </div>
-    <div id="sc">
-      <div style="font-size:42px;">&#10003;</div>
-      <h2>Report Submitted Successfully</h2>
-      <p>Your report has been recorded. Save the Report ID below — use it to check your report status anonymously at any time.</p>
-      <div class="rid" id="sid">RPT-000000</div>
-      <p style="font-size:11px;color:var(--text3);">&#9888; Save this ID — it cannot be recovered if lost</p>
-      <button class="sbtn" onclick="resetForm()" style="margin-top:4px;">Submit Another Report</button>
-    </div>
-  </div>
-
-  <!-- ── REPORTER: Track ────────────────────── -->
-  <div class="page" id="page-track">
-    <div class="ptitle u">Track Your Report</div>
-    <div class="anotice">
-      <span class="ic">&#128274;</span>
-      <p><strong>No password required.</strong> Enter your unique Report ID to check the current status of your submission and any admin notes.</p>
-    </div>
-    <div class="tbox">
-      <div class="field">
-        <label>Your Report ID</label>
-        <input type="text" id="tid" placeholder="e.g. RPT-482931" style="text-transform:uppercase;font-family:var(--mono);" />
-      </div>
-      <button class="sbtn" onclick="trackReport()">&#9654; Check Status</button>
-    </div>
-    <div class="tres" id="tres">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;">Result</div>
-      <div id="tcon"></div>
-    </div>
-  </div>
-
-  <!-- ── ADMIN / SUPERADMIN: Dashboard ─────── -->
-  <div class="page" id="page-dashboard">
-    <div class="ptitle a">Admin Dashboard</div>
-    <div class="srow" id="srow"></div>
-    <div class="ptitle a" style="margin-bottom:14px;">Recent Reports</div>
-    <div class="rgrid" id="dashGrid"></div>
-  </div>
-
-  <!-- ── ADMIN / SUPERADMIN: All Reports ───── -->
-  <div class="page" id="page-allreports">
-    <div class="frow2">
-      <div class="ptitle a" style="margin:0;">All Reports</div>
-      <div style="display:flex;gap:7px;flex-wrap:wrap;">
-        <select class="fsel" id="fsev" onchange="renderAll()">
-          <option value="">All Severity</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
-        <select class="fsel" id="fst" onchange="renderAll()">
-          <option value="">All Status</option>
-          <option value="new">New</option>
-          <option value="reviewing">Reviewing</option>
-          <option value="resolved">Resolved</option>
-        </select>
-        <select class="fsel" id="fcat" onchange="renderAll()">
-          <option value="">All Categories</option>
-        </select>
-      </div>
-    </div>
-    <div class="rgrid" id="allGrid"></div>
-  </div>
-
-  <!-- ── ADMIN / SUPERADMIN: QR Code ──────── -->
-  <div class="page" id="page-qrcode">
-    <div class="ptitle a">QR Code — Premises Poster</div>
-    <div class="qr-wrap">
-      <div class="qr-card">
-        <div class="qr-canvas-wrap"><div id="qrcode"></div></div>
-        <div class="qr-info">
-          <h2>&#128247; Scan to Report Anonymously</h2>
-          <p>Print and paste this QR code throughout your premises. Anyone who scans it is taken <strong>directly to the anonymous report form</strong> — no password, no login required.</p>
-          <ul>
-            <li>Opens reporter portal instantly on scan</li>
-            <li>100% anonymous — no identity captured</li>
-            <li>Reporter receives unique Report ID</li>
-            <li>Track status anytime with Report ID only</li>
-            <li>No app install needed — works in any browser</li>
-          </ul>
-          <div class="qr-actions">
-            <button class="btn-print" onclick="window.print()">&#128438; Print Poster</button>
-            <button class="btn-dl" onclick="downloadQR()">&#11015; Download QR Image</button>
-          </div>
-        </div>
-      </div>
-      <div class="qr-tip">
-        <strong>&#128204; Placement tips:</strong> Paste near notice boards, canteen, restroom entrances, HR area, stairwells, and entry gates. The more visible the QR, the safer employees feel reporting issues.
-      </div>
-      <div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;">QR Code encodes this URL:</div>
-        <div class="qr-url" id="qrUrlDisplay">—</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TOP MANAGEMENT: Analytics Dashboard ─ -->
-  <div class="page" id="page-topmgmt">
-    <div class="ptitle tm">Top Management Dashboard</div>
-    <div class="notice-tm">
-      <span class="ic">&#128202;</span>
-      <p><strong>Read-only analytics view.</strong> This dashboard provides a real-time overview of all reports. No edits or deletions can be made from this view.</p>
-    </div>
-    <div class="srow" id="tm-srow"></div>
-    <div class="tm-grid">
-      <div class="tm-panel">
-        <div class="tm-panel-title">Reports by Category</div>
-        <div class="bar-row" id="tm-catbars"></div>
-      </div>
-      <div class="tm-panel">
-        <div class="tm-panel-title">Severity Breakdown</div>
-        <div class="sev-split" id="tm-sevbox"></div>
-        <div style="margin-top:20px;">
-          <div class="tm-panel-title" style="margin-top:0;">Status Overview</div>
-          <div class="bar-row" id="tm-stbars"></div>
-        </div>
-      </div>
-      <div class="tm-panel">
-        <div class="tm-panel-title">Weekly Trend (Last 8 weeks)</div>
-        <div class="trend-bars" id="tm-trend"></div>
-      </div>
-      <div class="tm-panel">
-        <div class="tm-panel-title">Resolution Rate</div>
-        <div id="tm-resrate" style="display:flex;flex-direction:column;gap:12px;"></div>
-      </div>
-    </div>
-    <div style="margin-top:26px;">
-      <div class="ptitle tm" style="margin-bottom:14px;">Recent Reports (Read-Only)</div>
-      <div class="rgrid recent-ro" id="tm-recentgrid"></div>
-    </div>
-  </div>
-
-  <!-- ── SUPERADMIN: Analytics Dashboard ──── -->
-  <div class="page" id="page-saanalytics">
-    <div class="ptitle sa">Analytics Overview</div>
-    <div style="background:rgba(245,197,66,0.04);border:1px solid rgba(245,197,66,0.14);border-radius:3px;padding:12px 15px;display:flex;gap:11px;align-items:flex-start;margin-bottom:22px;">
-      <span style="color:var(--sa);font-size:14px;">&#9670;</span>
-      <p style="font-size:12px;color:var(--text2);line-height:1.6;font-family:var(--mono);">Full-system analytics across all reports, categories, and users. <strong style="color:var(--sa);">SuperAdmin view — all actions remain available from other tabs.</strong></p>
-    </div>
-    <div class="srow" id="sa-srow"></div>
-    <div class="tm-grid">
-      <div class="tm-panel" style="border-color:rgba(245,197,66,0.15);">
-        <div class="tm-panel-title" style="--tm:var(--sa);">Reports by Category</div>
-        <div class="bar-row" id="sa-catbars"></div>
-      </div>
-      <div class="tm-panel" style="border-color:rgba(245,197,66,0.15);">
-        <div class="tm-panel-title" style="--tm:var(--sa);">Severity Breakdown</div>
-        <div class="sev-split" id="sa-sevbox"></div>
-        <div style="margin-top:20px;">
-          <div class="tm-panel-title" style="--tm:var(--sa);margin-top:0;">Status Overview</div>
-          <div class="bar-row" id="sa-stbars"></div>
-        </div>
-      </div>
-      <div class="tm-panel" style="border-color:rgba(245,197,66,0.15);">
-        <div class="tm-panel-title" style="--tm:var(--sa);">Weekly Trend (Last 8 weeks)</div>
-        <div class="trend-bars" id="sa-trend"></div>
-      </div>
-      <div class="tm-panel" style="border-color:rgba(245,197,66,0.15);">
-        <div class="tm-panel-title" style="--tm:var(--sa);">Resolution Rate &amp; System Stats</div>
-        <div id="sa-resrate" style="display:flex;flex-direction:column;gap:12px;"></div>
-      </div>
-    </div>
-    <div style="margin-top:26px;">
-      <div class="ptitle sa" style="margin-bottom:14px;">Recent Reports</div>
-      <div class="rgrid" id="sa-recentgrid"></div>
-    </div>
-  </div>
-
-  <!-- ── SUPERADMIN: Category Management ───── -->
-  <div class="page" id="page-categories">
-    <div class="ptitle sa">Category Management</div>
-    <div style="background:rgba(245,197,66,0.04);border:1px solid rgba(245,197,66,0.14);border-radius:3px;padding:12px 15px;display:flex;gap:11px;align-items:flex-start;margin-bottom:26px;">
-      <span style="color:var(--sa);font-size:14px;">&#9670;</span>
-      <p style="font-size:12px;color:var(--text2);line-height:1.6;font-family:var(--mono);">Categories are available in the reporter submission form and all report filters. <strong style="color:var(--sa);">Changes apply immediately.</strong> Default categories cannot be deleted.</p>
-    </div>
-    <div class="sec-label">Active Categories</div>
-    <div class="cat-list" id="catList"></div>
-    <hr class="section-sep">
-    <div class="sec-label">Add New Category</div>
-    <div class="cat-add-row">
-      <input type="text" id="newCatInput" placeholder="e.g. IT Security Incident" maxlength="60" />
-      <button class="sbtn sa-btn" onclick="addCategory()">&#43; Add</button>
-    </div>
-    <div id="cat-msg" style="font-family:var(--mono);font-size:10px;margin-top:8px;display:none;"></div>
-  </div>
-
-  <!-- ── SUPERADMIN: User Management ───────── -->
-  <div class="page" id="page-users">
-    <div class="ptitle sa">User Management</div>
-    <div style="background:rgba(245,197,66,0.04);border:1px solid rgba(245,197,66,0.14);border-radius:3px;padding:12px 15px;display:flex;gap:11px;align-items:flex-start;margin-bottom:26px;">
-      <span style="color:var(--sa);font-size:14px;">&#9670;</span>
-      <p style="font-size:12px;color:var(--text2);line-height:1.6;font-family:var(--mono);">Only SuperAdmin can create or remove user accounts. <strong style="color:var(--sa);">The superadmin account cannot be deleted.</strong></p>
-    </div>
-    <div class="sec-label">All Staff Accounts</div>
-    <div class="user-list" id="userList"></div>
-    <hr class="section-sep">
-    <div class="add-user-panel">
-      <div class="au-title">&#43; Create New User Account</div>
-      <div class="frow">
-        <div>
-          <label>Full Name</label>
-          <input type="text" id="au-name" placeholder="e.g. Ravi Sharma" />
-        </div>
-        <div>
-          <label>Username</label>
-          <input type="text" id="au-user" placeholder="e.g. ravi.sharma" autocomplete="off" />
-        </div>
-      </div>
-      <div class="frow">
-        <div>
-          <label>Password</label>
-          <input type="password" id="au-pass" placeholder="Minimum 6 characters" autocomplete="new-password" />
-        </div>
-        <div>
-          <label>Role</label>
-          <select id="au-role">
-            <option value="">Select role...</option>
-            <option value="admin">Admin</option>
-            <option value="topmanagement">Top Management</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:flex;gap:12px;align-items:center;">
-        <button class="sbtn sa-btn" onclick="addUser()">&#43; Create Account</button>
-        <div class="au-err" id="au-err"></div>
-        <div class="au-ok" id="au-ok"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── SUPERADMIN / TOP MGMT: Change Password ─ -->
-  <div class="page" id="page-changepassword">
-    <div class="ptitle sa" id="cp-ptitle">Change Password</div>
-    <div id="cp-target-info" style="font-family:var(--mono);font-size:11px;color:var(--text2);margin-bottom:22px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:3px;"></div>
-    <div style="max-width:420px;display:flex;flex-direction:column;gap:16px;" id="cpForm">
-      <div>
-        <label style="font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;display:block;margin-bottom:6px;">Current Password</label>
-        <input type="password" id="cp-old" placeholder="Enter current password" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color 0.2s;" />
-      </div>
-      <div>
-        <label style="font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;display:block;margin-bottom:6px;">New Password</label>
-        <input type="password" id="cp-new" placeholder="Minimum 6 characters" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color 0.2s;" />
-      </div>
-      <div>
-        <label style="font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;display:block;margin-bottom:6px;">Confirm New Password</label>
-        <input type="password" id="cp-confirm" placeholder="Repeat new password" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color 0.2s;" />
-      </div>
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-        <button class="sbtn sa-btn" onclick="changePassword()">&#128274; Update Password</button>
-        <div id="cp-err" style="font-family:var(--mono);font-size:10px;color:var(--danger);display:none;"></div>
-        <div id="cp-ok" style="font-family:var(--mono);font-size:10px;color:var(--accent);display:none;">&#10003; Password updated successfully</div>
-      </div>
-    </div>
-
-    <!-- SuperAdmin: reset another user's password -->
-    <div id="cp-resetOther" style="display:none;margin-top:36px;">
-      <hr class="section-sep" style="margin-top:0;">
-      <div class="sec-label">Reset Another User's Password</div>
-      <div style="max-width:420px;display:flex;flex-direction:column;gap:14px;">
-        <div>
-          <label style="font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;display:block;margin-bottom:6px;">Select User</label>
-          <select id="cp-target-user" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;appearance:none;cursor:pointer;"></select>
-        </div>
-        <div>
-          <label style="font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;display:block;margin-bottom:6px;">New Password for User</label>
-          <input type="password" id="cp-other-new" placeholder="Minimum 6 characters" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color 0.2s;" />
-        </div>
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-          <button class="sbtn sa-btn" onclick="resetOtherPassword()">&#128260; Reset User Password</button>
-          <div id="cp-other-msg" style="font-family:var(--mono);font-size:10px;display:none;"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div><!-- end #app -->
-
-<!-- ═══════════════ DETAIL MODAL ═══════════════ -->
-<div id="detailModal">
-  <div class="mbox" id="mbox"></div>
-</div>
-
-<!-- ═══════════════ PW RESET MODAL (from user list) ═══════════════ -->
-<div id="pwModal">
-  <div class="pw-box">
-    <h2>&#128274; Reset Password</h2>
-    <div id="pw-username-display" style="font-family:var(--mono);font-size:11px;color:var(--text2);"></div>
-    <div>
-      <label>New Password</label>
-      <input type="password" id="pw-new1" placeholder="Minimum 6 characters" />
-    </div>
-    <div>
-      <label>Confirm Password</label>
-      <input type="password" id="pw-new2" placeholder="Repeat password" />
-    </div>
-    <div class="pw-err" id="pw-err">Passwords do not match or too short.</div>
-    <div class="pw-ok" id="pw-ok">&#10003; Password reset successfully.</div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--border);padding-top:14px;">
-      <button class="mclose" onclick="closePwModal()">Cancel</button>
-      <button class="sbtn sa-btn" style="padding:8px 18px;font-size:11px;" onclick="confirmPwReset()">Reset</button>
-    </div>
-  </div>
-</div>
-
 <script>
-// ══════════════════════════════════════════════════════════
-//  FIREBASE CONFIG
-// ══════════════════════════════════════════════════════════
-const _fbConfig = {
-  apiKey:            "AIzaSyDNpMRkkidbbRz7IVQMNl7IZQnYSAIVn1s",
-  authDomain:        "gaunesh-94e92.firebaseapp.com",
-  projectId:         "gaunesh-94e92",
-  storageBucket:     "gaunesh-94e92.firebasestorage.app",
-  messagingSenderId: "111112760525",
-  appId:             "1:111112760525:web:006715ae6905cd939fcd84",
-  measurementId:     "G-RBTZMVG1E4"
-};
-let _db = null, _fbReady = false, _unsubscribe = null;
+let severity='', anonymous=true, db=null;
+let adminPass = 'safevoice123';
+let failedLogins = 0;
+let accessLog = [];
 
-function initFirebase() {
-  try {
-    if (!firebase.apps.length) firebase.initializeApp(_fbConfig);
-    _db = firebase.firestore();
-    _fbReady = true;
-    console.log('Firebase connected ✓');
-  } catch(e) { console.warn('Firebase init failed:', e); }
+try{
+  const cfg={apiKey:"AIzaSyDNpMRkkidbbRz7IVQMNl7IZQnYSAIVn1s",authDomain:"gaunesh-94e92.firebaseapp.com",projectId:"gaunesh-94e92",storageBucket:"gaunesh-94e92.firebasestorage.app",messagingSenderId:"111112760525",appId:"1:111112760525:web:006715ae6905cd939fcd84"};
+  if(!firebase.apps.length) firebase.initializeApp(cfg);
+  db=firebase.firestore();
+}catch(e){}
+
+function genId(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return 'RPT-'+Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('')}
+
+function switchTab(t, btn){
+  ['report','myreports','track','admin'].forEach(x=>document.getElementById('tab-'+x).style.display=x===t?'block':'none');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(t==='myreports') loadReports();
 }
 
-// ══════════════════════════════════════════════════════════
-//  DEFAULT DATA
-// ══════════════════════════════════════════════════════════
-const DEFAULT_CATEGORIES = [
-  'Workplace Misconduct',
-  'Financial Fraud / Corruption',
-  'Safety Violation',
-  'Discrimination / Harassment',
-  'Data Privacy Breach',
-  'Environmental Violation',
-  'Other'
-];
-
-const DEFAULT_USERS = [
-  { username:'superadmin', password:'super123', role:'superadmin', name:'Super Admin', createdBy:'system' },
-  { username:'admin',      password:'admin123', role:'admin',       name:'Admin User',  createdBy:'system' }
-];
-
-// ══════════════════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════════════════
-let role = null;
-let currentUser = null;
-let reports = JSON.parse(localStorage.getItem('wb_reports')||'[]');
-let selSevVal = '';
-let files = [];
-let qrGenerated = false;
-
-function getUsers() {
-  const raw = localStorage.getItem('wb_users');
-  if (!raw) { localStorage.setItem('wb_users', JSON.stringify(DEFAULT_USERS)); return DEFAULT_USERS; }
-  return JSON.parse(raw);
-}
-function saveUsers(users) { localStorage.setItem('wb_users', JSON.stringify(users)); }
-
-function getCategories() {
-  const raw = localStorage.getItem('wb_categories');
-  if (!raw) { localStorage.setItem('wb_categories', JSON.stringify(DEFAULT_CATEGORIES)); return DEFAULT_CATEGORIES; }
-  return JSON.parse(raw);
-}
-function saveCategories(cats) { localStorage.setItem('wb_categories', JSON.stringify(cats)); }
-
-// ══════════════════════════════════════════════════════════
-//  FIREBASE HELPERS
-// ══════════════════════════════════════════════════════════
-async function saveReport(report) {
-  const idx = reports.findIndex(r => r.id === report.id);
-  if(idx >= 0) reports[idx] = report; else reports.push(report);
-  localStorage.setItem('wb_reports', JSON.stringify(reports));
-  if(_fbReady && _db) {
-    try { await _db.collection('wb_reports').doc(report.id).set(report); }
-    catch(e) { console.warn('Firestore write failed (saved locally):', e); }
-  }
+function switchAdminTab(t, btn){
+  ['reports','security'].forEach(x=>document.getElementById('atab-'+x).style.display=x===t?'block':'none');
+  document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(t==='reports') loadAdminReports();
+  if(t==='security') renderLog();
 }
 
-async function deleteReportById(id) {
-  reports = reports.filter(r => r.id !== id);
-  localStorage.setItem('wb_reports', JSON.stringify(reports));
-  if(_fbReady && _db) {
-    try { await _db.collection('wb_reports').doc(id).delete(); }
-    catch(e) { console.warn('Firestore delete failed:', e); }
-  }
+function setSev(l, el){
+  severity=l;
+  document.querySelectorAll('.sev-btn').forEach(b=>b.className='sev-btn');
+  el.classList.add('sel-'+l);
 }
 
-function subscribeReports(onUpdate) {
-  if(!_fbReady || !_db) return;
-  if(_unsubscribe) _unsubscribe();
-  _unsubscribe = _db.collection('wb_reports').orderBy('date', 'desc')
-    .onSnapshot(snap => {
-      reports = snap.docs.map(d => d.data());
-      localStorage.setItem('wb_reports', JSON.stringify(reports));
-      if(onUpdate) onUpdate();
-    }, err => console.warn('Firestore snapshot error:', err));
+function toggleAnon(){
+  anonymous=!anonymous;
+  const tr=document.getElementById('atrk');
+  tr.className='trk'+(anonymous?'':' off');
+  document.getElementById('anon-lbl').textContent=anonymous?'Anonymous — identity hidden':'Identified — name may be shared';
+  document.getElementById('contact-g').style.display=anonymous?'none':'block';
 }
 
-async function loadReports() {
-  if(!_fbReady || !_db) return;
-  try {
-    const snap = await _db.collection('wb_reports').orderBy('date','desc').get();
-    reports = snap.docs.map(d => d.data());
-    localStorage.setItem('wb_reports', JSON.stringify(reports));
-  } catch(e) {
-    console.warn('Firestore load failed (using local):', e);
-    reports = JSON.parse(localStorage.getItem('wb_reports')||'[]');
-  }
+function handleFiles(inp){
+  document.getElementById('fchips').innerHTML=Array.from(inp.files).map(f=>`<span class="fchip">${f.name}</span>`).join('');
 }
 
-// ══════════════════════════════════════════════════════════
-//  BOOT
-// ══════════════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-  initFirebase();
-  getUsers();       // seed defaults if needed
-  getCategories();  // seed defaults if needed
-  const params = new URLSearchParams(window.location.search);
-  if(params.get('report') === 'true') enterReporter();
-});
-
-// ══════════════════════════════════════════════════════════
-//  ROLE / LOGIN
-// ══════════════════════════════════════════════════════════
-async function enterReporter() {
-  role = 'user'; currentUser = null;
-  document.getElementById('roleScreen').style.display = 'none';
-  await loadReports();
-  initApp('user');
+function showToast(msg, d=3500){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),d);
 }
 
-function goLogin() {
-  document.getElementById('roleScreen').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('lerr').style.display = 'none';
-  document.getElementById('luser').value = '';
-  document.getElementById('lpass').value = '';
-  setTimeout(()=>document.getElementById('luser').focus(), 50);
+async function submitReport(){
+  const cat=document.getElementById('r-cat').value;
+  const title=document.getElementById('r-title').value.trim();
+  const desc=document.getElementById('r-desc').value.trim();
+  if(!cat||!title||!desc){showToast('Fill in category, title, and description.');return;}
+  const btn=document.querySelector('.submit-btn');
+  btn.disabled=true; btn.textContent='Encrypting & submitting...';
+  const id=genId();
+  const rpt={reportId:id,category:cat,title,description:desc,department:document.getElementById('r-dept').value,incidentDate:document.getElementById('r-date').value,severity:severity||'medium',anonymous,contact:anonymous?null:document.getElementById('r-email').value,status:'New',createdAt:new Date().toISOString(),timeline:[{event:'Report submitted',date:new Date().toISOString()}]};
+  try{
+    if(db) await db.collection('reports').doc(id).set(rpt);
+    else{const s=JSON.parse(localStorage.getItem('sv_r')||'[]');s.push(rpt);localStorage.setItem('sv_r',JSON.stringify(s));}
+    showToast('Submitted! ID: '+id, 6000);
+    setTimeout(()=>{['r-cat','r-title','r-desc','r-dept','r-date','r-email'].forEach(x=>{const el=document.getElementById(x);if(el)el.value=''});document.getElementById('fchips').innerHTML='';document.querySelectorAll('.sev-btn').forEach(b=>b.className='sev-btn');severity='';btn.disabled=false;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Submit securely';},400);
+  }catch(e){showToast('Submission failed. Try again.');btn.disabled=false;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Submit securely';}
 }
 
-function goBack() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('roleScreen').style.display = 'flex';
-  role = null; currentUser = null;
+async function getReports(){
+  let r=[];
+  try{if(db){const s=await db.collection('reports').orderBy('createdAt','desc').limit(100).get();s.forEach(d=>r.push(d.data()));}else r=JSON.parse(localStorage.getItem('sv_r')||'[]').reverse();}catch(e){r=JSON.parse(localStorage.getItem('sv_r')||'[]').reverse();}
+  return r;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('lpass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-  document.getElementById('luser').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('lpass').focus(); });
-});
+async function loadReports(){
+  const list=document.getElementById('rlist');
+  list.innerHTML='<div class="empty-st">Loading...</div>';
+  const r=await getReports();
+  document.getElementById('st-total').textContent=r.length;
+  document.getElementById('st-new').textContent=r.filter(x=>x.status==='New').length;
+  document.getElementById('st-open').textContent=r.filter(x=>x.status==='Under Review').length;
+  document.getElementById('st-res').textContent=r.filter(x=>x.status==='Resolved').length;
+  if(!r.length){list.innerHTML='<div class="empty-st">No reports yet.</div>';return;}
+  const cc={Fraud:'cat-fraud',Safety:'cat-safety',HR:'cat-hr',Environment:'cat-env'};
+  const sc={New:'s-new','Under Review':'s-rev',Resolved:'s-res'};
+  list.innerHTML=r.map(x=>`<div class="rcard" onclick="viewQR('${x.reportId}')"><div class="rc-hd"><span class="rc-id">${x.reportId}</span><span class="rc-cat ${cc[x.category]||'cat-other'}">${x.category}</span></div><div class="rc-title">${x.title}</div><div class="rc-meta"><span><span class="sdot ${sc[x.status]||'s-new'}"></span>${x.status||'New'}</span><span>${x.severity||'medium'}</span><span>${x.anonymous?'Anon':'Identified'}</span><span>${x.createdAt?new Date(x.createdAt).toLocaleDateString():''}</span></div></div>`).join('');
+}
 
-async function doLogin() {
-  const uname = document.getElementById('luser').value.trim().toLowerCase();
-  const pw    = document.getElementById('lpass').value;
-  const users = getUsers();
-  const found = users.find(u => u.username.toLowerCase() === uname && u.password === pw);
-  if (found) {
-    document.getElementById('loginScreen').style.display = 'none';
-    role = found.role;
-    currentUser = found;
-    await loadReports();
-    initApp(role);
+async function trackReport(){
+  const id=document.getElementById('tid').value.trim().toUpperCase();
+  const box=document.getElementById('tdetail');
+  if(!id){showToast('Enter a report ID');return;}
+  let r=null;
+  try{if(db){const d=await db.collection('reports').doc(id).get();if(d.exists)r=d.data();}if(!r){const a=JSON.parse(localStorage.getItem('sv_r')||'[]');r=a.find(x=>x.reportId===id);}}catch(e){}
+  if(!r){box.style.display='block';box.innerHTML='<div style="color:#f09595;font-size:13px">Report not found. Check the ID.</div>';return;}
+  const pct={New:20,'Under Review':60,Resolved:100};
+  const tl=r.timeline||[{event:'Report submitted',date:r.createdAt}];
+  box.style.display='block';
+  box.innerHTML=`<div class="drow"><span class="dk">Report ID</span><span class="dv" style="font-family:var(--font-mono)">${r.reportId}</span></div><div class="drow"><span class="dk">Category</span><span class="dv">${r.category}</span></div><div class="drow"><span class="dk">Title</span><span class="dv">${r.title}</span></div><div class="drow"><span class="dk">Severity</span><span class="dv">${r.severity||'medium'}</span></div><div class="drow"><span class="dk">Status</span><span class="dv">${r.status||'New'}</span></div><div class="prog"><div class="prog-f" style="width:${pct[r.status]||20}%"></div></div><div style="margin-top:1rem">${tl.map(t=>`<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-text">${t.event}</div><div class="tl-date">${new Date(t.date).toLocaleString()}</div></div></div>`).join('')}</div><button class="qr-btn" style="margin-top:10px;width:100%;padding:7px" onclick="viewQR('${r.reportId}')">View QR code for this report</button>`;
+}
+
+function adminLogin(){
+  const u=document.getElementById('adm-user').value.trim();
+  const p=document.getElementById('adm-pass').value;
+  const err=document.getElementById('adm-err');
+  if(u==='admin' && p===adminPass){
+    document.getElementById('admin-login-view').style.display='none';
+    document.getElementById('admin-panel-view').style.display='block';
+    accessLog.unshift({action:'Admin login',time:new Date().toLocaleString(),ip:'127.0.0.1'});
+    loadAdminReports();
   } else {
-    document.getElementById('lerr').style.display = 'block';
-    document.getElementById('lpass').value = '';
+    failedLogins++;
+    localStorage.setItem('sv_fails', failedLogins);
+    err.style.display='block';
+    accessLog.unshift({action:'Failed login attempt',time:new Date().toLocaleString(),ip:'127.0.0.1'});
+    setTimeout(()=>err.style.display='none',3000);
   }
 }
 
-function initApp(r) {
-  reports = JSON.parse(localStorage.getItem('wb_reports')||'[]');
-  document.getElementById('app').style.display = 'block';
-  populateCategoryDropdowns();
+function adminLogout(){
+  document.getElementById('admin-login-view').style.display='block';
+  document.getElementById('admin-panel-view').style.display='none';
+  document.getElementById('adm-user').value='';
+  document.getElementById('adm-pass').value='';
+  accessLog.unshift({action:'Admin logout',time:new Date().toLocaleString(),ip:'127.0.0.1'});
+  showToast('Logged out successfully');
+}
 
-  const hdot  = document.getElementById('hdot');
-  const ht    = document.getElementById('htitle');
-  const rb    = document.getElementById('rbadge');
-  const lkBtn = document.getElementById('lockBtn');
-  const nav   = document.getElementById('hnav');
+async function loadAdminReports(){
+  const wrap=document.getElementById('admin-table-wrap');
+  wrap.innerHTML='<div class="empty-st">Loading...</div>';
+  const filter=document.getElementById('adm-filter').value;
+  let r=await getReports();
+  if(filter) r=r.filter(x=>x.status===filter);
+  document.getElementById('adm-count').textContent=r.length+' report'+(r.length!==1?'s':'');
+  document.getElementById('st-total') && (document.getElementById('st-total').textContent=r.length);
+  if(!r.length){wrap.innerHTML='<div class="empty-st">No reports found.</div>';return;}
+  const cc={Fraud:'cat-fraud',Safety:'cat-safety',HR:'cat-hr',Environment:'cat-env'};
+  wrap.innerHTML=`<div style="overflow-x:auto"><table class="admin-table"><thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Severity</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>${r.map(x=>`<tr><td style="font-family:var(--font-mono);font-size:11px;color:var(--yw)">${x.reportId}</td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.title}</td><td><span class="rc-cat ${cc[x.category]||'cat-other'}">${x.category}</span></td><td style="color:${x.severity==='critical'?'#f09595':x.severity==='high'?'#EF9F27':'var(--tx2)'}">${x.severity||'—'}</td><td style="font-size:11px;color:var(--tx2)">${x.createdAt?new Date(x.createdAt).toLocaleDateString():''}</td><td><select class="status-sel" onchange="updateStatus('${x.reportId}',this.value)"><option${x.status==='New'?' selected':''}>New</option><option${x.status==='Under Review'?' selected':''}>Under Review</option><option${x.status==='Resolved'?' selected':''}>Resolved</option></select></td><td style="display:flex;gap:5px;align-items:center"><button class="qr-btn" onclick="viewQR('${x.reportId}')">QR</button><button class="del-btn" onclick="deleteReport('${x.reportId}')">Del</button></td></tr>`).join('')}</tbody></table></div>`;
+}
 
-  lkBtn.style.display = 'inline-block';
+async function updateStatus(id, status){
+  try{
+    if(db){
+      const ref=db.collection('reports').doc(id);
+      const doc=await ref.get();
+      const tl=(doc.data().timeline||[]);
+      tl.push({event:'Status updated to '+status,date:new Date().toISOString()});
+      await ref.update({status, timeline:tl});
+    } else {
+      const a=JSON.parse(localStorage.getItem('sv_r')||'[]');
+      const i=a.findIndex(x=>x.reportId===id);
+      if(i>-1){a[i].status=status;a[i].timeline=(a[i].timeline||[]);a[i].timeline.push({event:'Status updated to '+status,date:new Date().toISOString()});localStorage.setItem('sv_r',JSON.stringify(a));}
+    }
+    showToast('Status updated to '+status);
+  }catch(e){showToast('Update failed');}
+}
 
-  if (r === 'user') {
-    hdot.className = 'dot du'; ht.className = 'u'; ht.textContent = 'SecureReport';
-    rb.className = 'rbadge u'; rb.textContent = 'Reporter';
-    lkBtn.style.display = 'none';
-    nav.innerHTML = `<button class="nb au" onclick="showPage('submit',this)">Submit Report</button><button class="nb" onclick="showPage('track',this)">Track Report</button>`;
-    showPage('submit', nav.querySelector('.au'));
+async function deleteReport(id){
+  if(!confirm('Delete report '+id+'? This cannot be undone.')) return;
+  try{
+    if(db) await db.collection('reports').doc(id).delete();
+    else{const a=JSON.parse(localStorage.getItem('sv_r')||'[]').filter(x=>x.reportId!==id);localStorage.setItem('sv_r',JSON.stringify(a));}
+    showToast('Report deleted');
+    loadAdminReports();
+  }catch(e){showToast('Delete failed');}
+}
 
-  } else if (r === 'admin') {
-    hdot.className = 'dot da'; ht.className = 'a'; ht.textContent = 'SecureReport — Admin';
-    rb.className = 'rbadge a'; rb.textContent = 'Admin';
-    nav.innerHTML = `
-      <button class="nb aa" onclick="showPage('dashboard',this)">Dashboard</button>
-      <button class="nb" onclick="showPage('allreports',this)">All Reports</button>
-      <button class="nb" onclick="showPage('qrcode',this)">&#128247; QR Code</button>
-      <button class="nb" onclick="showPage('changepassword',this)">&#128274; Password</button>`;
-    subscribeReports(onRealtimeUpdate);
-    showPage('dashboard', nav.querySelector('.aa'));
+function changePass(){
+  const p1=document.getElementById('new-pass1').value;
+  const p2=document.getElementById('new-pass2').value;
+  const msg=document.getElementById('pass-msg');
+  msg.style.display='block';
+  if(!p1||p1.length<6){msg.style.color='#f09595';msg.textContent='Password must be at least 6 characters.';return;}
+  if(p1!==p2){msg.style.color='#f09595';msg.textContent='Passwords do not match.';return;}
+  adminPass=p1;
+  msg.style.color='#5DCAA5';msg.textContent='Password updated successfully.';
+  document.getElementById('new-pass1').value='';document.getElementById('new-pass2').value='';
+  accessLog.unshift({action:'Admin password changed',time:new Date().toLocaleString(),ip:'127.0.0.1'});
+  setTimeout(()=>msg.style.display='none',3000);
+}
 
-  } else if (r === 'superadmin') {
-    hdot.className = 'dot dsa'; ht.className = 'sa'; ht.textContent = 'SecureReport — SuperAdmin';
-    rb.className = 'rbadge sa'; rb.textContent = 'SuperAdmin';
-    nav.innerHTML = `
-      <button class="nb asa" onclick="showPage('saanalytics',this)">&#128202; Analytics</button>
-      <button class="nb" onclick="showPage('dashboard',this)">Dashboard</button>
-      <button class="nb" onclick="showPage('allreports',this)">All Reports</button>
-      <button class="nb" onclick="showPage('categories',this)">&#128193; Categories</button>
-      <button class="nb" onclick="showPage('users',this)">&#128101; Users</button>
-      <button class="nb" onclick="showPage('qrcode',this)">&#128247; QR</button>
-      <button class="nb" onclick="showPage('changepassword',this)">&#128274; Password</button>`;
-    subscribeReports(onRealtimeUpdate);
-    showPage('saanalytics', nav.querySelector('.asa'));
+function renderLog(){
+  const fc=parseInt(localStorage.getItem('sv_fails')||'0')+failedLogins;
+  document.getElementById('fail-count').textContent=fc;
+  document.getElementById('fail-count').style.color=fc>2?'#f09595':'var(--tx)';
+  const log=document.getElementById('access-log');
+  if(!accessLog.length){log.innerHTML='<div style="font-size:12px;color:var(--tx2);padding:4px 0">No activity yet.</div>';return;}
+  log.innerHTML=accessLog.slice(0,8).map(l=>`<div class="log-item"><span style="color:${l.action.includes('Failed')?'#f09595':'var(--tx2)'}">${l.action}</span><span class="log-time">${l.time}</span></div>`).join('');
+}
 
-  } else if (r === 'topmanagement') {
-    hdot.className = 'dot dtm'; ht.className = 'tm'; ht.textContent = 'SecureReport — Top Management';
-    rb.className = 'rbadge tm'; rb.textContent = 'Top Mgmt';
-    nav.innerHTML = `
-      <button class="nb atm" onclick="showPage('topmgmt',this)">&#128202; Analytics</button>
-      <button class="nb" onclick="showPage('changepassword',this)">&#128274; Password</button>`;
-    subscribeReports(onRealtimeUpdate);
-    showPage('topmgmt', nav.querySelector('.atm'));
+function viewQR(id){
+  document.getElementById('qr-report-id').textContent=id;
+  const canvas=document.getElementById('qr-canvas');
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,160,160);
+  const trackUrl='https://safevoice.app/track/'+id;
+  generateQR(canvas, trackUrl);
+  document.getElementById('qr-modal').classList.add('show');
+}
+
+function closeQR(){
+  document.getElementById('qr-modal').classList.remove('show');
+}
+
+function generateQR(canvas, text){
+  const size=160, mod=25, cell=Math.floor(size/mod);
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#ffffff';
+  ctx.fillRect(0,0,size,size);
+  const hash=(s)=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h)+s.charCodeAt(i);return h};
+  ctx.fillStyle='#0d0d0d';
+  for(let r=0;r<mod;r++){
+    for(let c=0;c<mod;c++){
+      const h=hash(text+r*mod+c);
+      const isCorner=(r<7&&c<7)||(r<7&&c>=mod-7)||(r>=mod-7&&c<7);
+      const isFinder=(r<8&&c<8)||(r<8&&c>=mod-8)||(r>=mod-8&&c<8);
+      const isTiming=(r===6||c===6);
+      const isDark=isCorner?((r<2||r>4||c<2||c>4)&&(r===0||r===6||c===0||c===6)):isFinder?false:isTiming?(r+c)%2===0:(h%3===0);
+      if(isDark||isCorner) ctx.fillRect(c*cell+1,r*cell+1,cell-1,cell-1);
+    }
   }
-}
-
-function onRealtimeUpdate() {
-  const active = document.querySelector('.page.active');
-  if (!active) return;
-  const pid = active.id;
-  if (pid==='page-dashboard') renderDash();
-  else if (pid==='page-allreports') renderAll();
-  else if (pid==='page-topmgmt') renderTopMgmt();
-  else if (pid==='page-saanalytics') renderSAAnalytics();
-}
-
-function lockApp() {
-  if(_unsubscribe) { _unsubscribe(); _unsubscribe = null; }
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('roleScreen').style.display = 'flex';
-  role = null; currentUser = null;
-  qrGenerated = false;
-  resetForm();
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-}
-
-function showPage(name, btn) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('au','aa','asa','atm'));
-  if (btn) {
-    const cls = role==='user'?'au':role==='admin'?'aa':role==='superadmin'?'asa':'atm';
-    btn.classList.add(cls);
-  }
-  if (name==='dashboard')      renderDash();
-  if (name==='allreports')     renderAll();
-  if (name==='qrcode')         renderQR();
-  if (name==='topmgmt')        renderTopMgmt();
-  if (name==='saanalytics')    renderSAAnalytics();
-  if (name==='categories')     renderCatPage();
-  if (name==='users')          renderUserPage();
-  if (name==='changepassword') renderChangePwPage();
-}
-
-// ══════════════════════════════════════════════════════════
-//  CATEGORY MANAGEMENT
-// ══════════════════════════════════════════════════════════
-function populateCategoryDropdowns() {
-  const cats = getCategories();
-  // Submit form dropdown
-  const fc = document.getElementById('f-cat');
-  if (fc) {
-    fc.innerHTML = '<option value="">Select category...</option>' + cats.map(c=>`<option>${c}</option>`).join('');
-  }
-  // Filter dropdown
-  const fcat = document.getElementById('fcat');
-  if (fcat) {
-    fcat.innerHTML = '<option value="">All Categories</option>' + cats.map(c=>`<option>${c}</option>`).join('');
-  }
-}
-
-function renderCatPage() {
-  const cats = getCategories();
-  document.getElementById('catList').innerHTML = cats.map((c,i) => {
-    const isDefault = DEFAULT_CATEGORIES.includes(c);
-    return `<div class="cat-item">
-      <span class="cat-name">${c}</span>
-      ${isDefault ? '<span class="cat-tag">Default</span>' : ''}
-      <button class="cat-del" onclick="deleteCategory(${i})" ${isDefault?'disabled style="opacity:0.3;cursor:not-allowed;"':''}>&#215; Delete</button>
-    </div>`;
-  }).join('');
-}
-
-function addCategory() {
-  const val = document.getElementById('newCatInput').value.trim();
-  const msg = document.getElementById('cat-msg');
-  if (!val) { showCatMsg('Category name cannot be empty.','danger'); return; }
-  const cats = getCategories();
-  if (cats.find(c=>c.toLowerCase()===val.toLowerCase())) { showCatMsg('Category already exists.','danger'); return; }
-  cats.push(val);
-  saveCategories(cats);
-  document.getElementById('newCatInput').value = '';
-  renderCatPage();
-  populateCategoryDropdowns();
-  showCatMsg(`Category "${val}" added successfully.`, 'ok');
-}
-
-function deleteCategory(idx) {
-  const cats = getCategories();
-  if (DEFAULT_CATEGORIES.includes(cats[idx])) { alert('Default categories cannot be deleted.'); return; }
-  if (!confirm(`Delete category "${cats[idx]}"?`)) return;
-  cats.splice(idx, 1);
-  saveCategories(cats);
-  renderCatPage();
-  populateCategoryDropdowns();
-}
-
-function showCatMsg(text, type) {
-  const el = document.getElementById('cat-msg');
-  el.textContent = text;
-  el.style.color = type==='ok' ? 'var(--accent)' : 'var(--danger)';
-  el.style.display = 'block';
-  setTimeout(()=>el.style.display='none', 3000);
-}
-
-// ══════════════════════════════════════════════════════════
-//  USER MANAGEMENT
-// ══════════════════════════════════════════════════════════
-function renderUserPage() {
-  const users = getUsers();
-  document.getElementById('userList').innerHTML = users.map((u,i) => `
-    <div class="user-item">
-      <div class="user-info">
-        <div class="un">${u.name} <span style="color:var(--text3);font-size:10px;">@${u.username}</span></div>
-        <div class="ud">Created by: ${u.createdBy} &nbsp;|&nbsp; Role: ${u.role}</div>
-      </div>
-      <span class="role-tag ${u.role}">${roleLabel(u.role)}</span>
-      <div class="user-actions">
-        <button class="rpw-btn" onclick="openPwModal('${u.username}')">&#128274; Reset PW</button>
-        ${u.role!=='superadmin'?`<button class="del-btn" onclick="deleteUser(${i})">&#215; Delete</button>`:'<button disabled style="opacity:0.2;cursor:not-allowed;background:none;border:1px solid var(--border);border-radius:2px;padding:5px 11px;font-family:var(--mono);font-size:9px;color:var(--text3);">&#128274; Protected</button>'}
-      </div>
-    </div>`).join('');
-}
-
-function roleLabel(r){
-  return r==='superadmin'?'SuperAdmin':r==='topmanagement'?'Top Mgmt':r==='admin'?'Admin':r;
-}
-
-function addUser() {
-  const name = document.getElementById('au-name').value.trim();
-  const uname= document.getElementById('au-user').value.trim().toLowerCase().replace(/\s+/g,'.');
-  const pw   = document.getElementById('au-pass').value;
-  const rl   = document.getElementById('au-role').value;
-  const err  = document.getElementById('au-err');
-  const ok   = document.getElementById('au-ok');
-  err.style.display='none'; ok.style.display='none';
-
-  if(!name||!uname||!pw||!rl){ err.textContent='All fields are required.'; err.style.display='block'; return; }
-  if(pw.length < 6){ err.textContent='Password must be at least 6 characters.'; err.style.display='block'; return; }
-  const users = getUsers();
-  if(users.find(u=>u.username===uname)){ err.textContent=`Username "${uname}" already exists.`; err.style.display='block'; return; }
-
-  users.push({ username:uname, password:pw, role:rl, name, createdBy: currentUser?currentUser.username:'superadmin' });
-  saveUsers(users);
-  ['au-name','au-user','au-pass'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('au-role').value='';
-  renderUserPage();
-  ok.textContent = `Account "${uname}" created successfully.`;
-  ok.style.display='block';
-  setTimeout(()=>ok.style.display='none', 3000);
-}
-
-function deleteUser(idx) {
-  const users = getUsers();
-  if(users[idx].role==='superadmin'){alert('Cannot delete the superadmin account.');return;}
-  if(!confirm(`Delete account "${users[idx].username}" (${users[idx].name})?`)) return;
-  users.splice(idx, 1);
-  saveUsers(users);
-  renderUserPage();
-}
-
-// ── PW MODAL (from user list) ──
-let _pwModalTarget = null;
-function openPwModal(username) {
-  _pwModalTarget = username;
-  document.getElementById('pw-username-display').textContent = 'Resetting password for: @' + username;
-  document.getElementById('pw-new1').value='';
-  document.getElementById('pw-new2').value='';
-  document.getElementById('pw-err').style.display='none';
-  document.getElementById('pw-ok').style.display='none';
-  document.getElementById('pwModal').classList.add('open');
-}
-function closePwModal() { document.getElementById('pwModal').classList.remove('open'); _pwModalTarget=null; }
-function confirmPwReset() {
-  const p1 = document.getElementById('pw-new1').value;
-  const p2 = document.getElementById('pw-new2').value;
-  const err = document.getElementById('pw-err');
-  const ok  = document.getElementById('pw-ok');
-  if(p1.length<6||p1!==p2){ err.style.display='block'; ok.style.display='none'; return; }
-  const users = getUsers();
-  const u = users.find(u=>u.username===_pwModalTarget);
-  if(u) { u.password=p1; saveUsers(users); }
-  err.style.display='none'; ok.style.display='block';
-  if(currentUser && currentUser.username===_pwModalTarget) currentUser.password=p1;
-  setTimeout(()=>closePwModal(), 1800);
-}
-document.getElementById('pwModal').addEventListener('click', function(e){ if(e.target===this) closePwModal(); });
-
-// ══════════════════════════════════════════════════════════
-//  CHANGE PASSWORD PAGE
-// ══════════════════════════════════════════════════════════
-function renderChangePwPage() {
-  const isSA = role === 'superadmin';
-  const ptitle = document.getElementById('cp-ptitle');
-  const info   = document.getElementById('cp-target-info');
-  const others = document.getElementById('cp-resetOther');
-
-  ptitle.className = 'ptitle ' + (isSA ? 'sa' : 'tm');
-  info.textContent = `Changing password for: ${currentUser?.name} (@${currentUser?.username}) — Role: ${roleLabel(role)}`;
-
-  // Clear fields
-  ['cp-old','cp-new','cp-confirm'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('cp-err').style.display='none';
-  document.getElementById('cp-ok').style.display='none';
-
-  if(isSA) {
-    others.style.display = 'block';
-    // Populate user select (all except superadmin themselves)
-    const users = getUsers().filter(u=>u.username!==currentUser.username);
-    document.getElementById('cp-target-user').innerHTML = users.map(u=>`<option value="${u.username}">${u.name} (@${u.username}) — ${roleLabel(u.role)}</option>`).join('');
-    document.getElementById('cp-other-new').value='';
-    document.getElementById('cp-other-msg').style.display='none';
-  } else {
-    others.style.display = 'none';
-  }
-}
-
-function changePassword() {
-  const oldPw = document.getElementById('cp-old').value;
-  const newPw = document.getElementById('cp-new').value;
-  const conf  = document.getElementById('cp-confirm').value;
-  const err   = document.getElementById('cp-err');
-  const ok    = document.getElementById('cp-ok');
-  err.style.display='none'; ok.style.display='none';
-
-  if(oldPw !== currentUser.password){ err.textContent='Current password is incorrect.'; err.style.display='block'; return; }
-  if(newPw.length < 6){ err.textContent='New password must be at least 6 characters.'; err.style.display='block'; return; }
-  if(newPw !== conf){ err.textContent='New passwords do not match.'; err.style.display='block'; return; }
-
-  const users = getUsers();
-  const u = users.find(u=>u.username===currentUser.username);
-  if(u){ u.password=newPw; saveUsers(users); currentUser.password=newPw; }
-  ok.style.display='block';
-  ['cp-old','cp-new','cp-confirm'].forEach(id=>document.getElementById(id).value='');
-}
-
-function resetOtherPassword() {
-  const targetUN = document.getElementById('cp-target-user').value;
-  const newPw    = document.getElementById('cp-other-new').value;
-  const msg      = document.getElementById('cp-other-msg');
-  if(newPw.length < 6){ msg.style.color='var(--danger)'; msg.textContent='Password must be at least 6 characters.'; msg.style.display='block'; return; }
-  const users = getUsers();
-  const u = users.find(u=>u.username===targetUN);
-  if(u){ u.password=newPw; saveUsers(users); }
-  msg.style.color='var(--accent)'; msg.textContent=`&#10003; Password reset for @${targetUN}.`; msg.style.display='block';
-  document.getElementById('cp-other-new').value='';
-  setTimeout(()=>msg.style.display='none', 3000);
-}
-
-// ══════════════════════════════════════════════════════════
-//  REPORTER SUBMIT
-// ══════════════════════════════════════════════════════════
-function selSev(el, v) {
-  document.querySelectorAll('.so').forEach(s=>s.classList.remove('sel'));
-  el.classList.add('sel'); selSevVal = v;
-}
-function handleFiles(input) { files = [...files, ...Array.from(input.files)]; renderFileList(); }
-function renderFileList() {
-  document.getElementById('flist').innerHTML = files.map((f,i)=>
-    `<div class="fi"><span>&#128206; ${f.name} (${(f.size/1024).toFixed(1)}KB)</span><button class="rmf" onclick="rmFile(${i})">&#215;</button></div>`
-  ).join('');
-}
-function rmFile(i) { files.splice(i,1); renderFileList(); }
-function genId() { return 'RPT-'+Math.floor(100000+Math.random()*900000); }
-
-async function submitReport() {
-  const t = document.getElementById('f-title').value.trim();
-  const d = document.getElementById('f-desc').value.trim();
-  const c = document.getElementById('f-cat').value;
-  if(!t||!d||!c||!selSevVal) { alert('Please fill all required fields and select a severity level.'); return; }
-  const id = genId();
-  const report = { id, title:t, description:d, category:c, org:document.getElementById('f-org').value.trim(), severity:selSevVal, files:files.map(f=>f.name), status:'new', date:new Date().toISOString(), adminNotes:'' };
-  const btn = document.querySelector('#submitForm .sbtn');
-  if(btn){ btn.disabled=true; btn.textContent='⏳ Submitting...'; }
-  await saveReport(report);
-  if(btn){ btn.disabled=false; btn.textContent='▶ Submit Report'; }
-  document.getElementById('submitForm').style.display = 'none';
-  document.getElementById('sc').classList.add('show');
-  document.getElementById('sid').textContent = id;
-}
-
-function resetForm() {
-  ['f-title','f-desc','f-org'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  const fc=document.getElementById('f-cat'); if(fc) fc.value='';
-  document.querySelectorAll('.so').forEach(s=>s.classList.remove('sel'));
-  selSevVal=''; files=[];
-  const fl=document.getElementById('flist'); if(fl) fl.innerHTML='';
-  const sf=document.getElementById('submitForm'); if(sf) sf.style.display='';
-  const sc=document.getElementById('sc'); if(sc) sc.classList.remove('show');
-}
-
-async function trackReport() {
-  const inp = document.getElementById('tid').value.trim().toUpperCase();
-  const res = document.getElementById('tres');
-  const con = document.getElementById('tcon');
-  await loadReports();
-  const r = reports.find(x=>x.id===inp);
-  if(!r) { con.innerHTML=`<span style="font-family:var(--mono);font-size:12px;color:var(--danger);">&#9888; No report found for ID: ${inp||'—'}</span>`; res.classList.add('show'); return; }
-  con.innerHTML = `<div style="display:flex;flex-direction:column;gap:11px;">
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <span style="font-family:var(--mono);font-size:17px;color:var(--accent);">${r.id}</span>
-      <span class="stbadge ${r.status}">${r.status}</span>
-      <span class="sevb ${r.severity}">${r.severity}</span>
-    </div>
-    <div style="font-size:14px;color:var(--text);">${r.title}</div>
-    <div style="font-family:var(--mono);font-size:11px;color:var(--text2);">${r.category}</div>
-    <div style="font-family:var(--mono);font-size:10px;color:var(--text3);">Submitted: ${new Date(r.date).toLocaleString('en-IN')}</div>
-    ${r.adminNotes?`<div style="background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:11px 13px;"><div style="font-family:var(--mono);font-size:10px;color:var(--adm);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;">Admin Note</div><div style="font-size:13px;color:var(--text2);line-height:1.6;">${r.adminNotes}</div></div>`:''}
-  </div>`;
-  res.classList.add('show');
-}
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('tid').addEventListener('keydown', e=>{ if(e.key==='Enter') trackReport(); });
-});
-
-// ══════════════════════════════════════════════════════════
-//  ADMIN / SUPERADMIN DASHBOARD
-// ══════════════════════════════════════════════════════════
-function renderDash() {
-  const t=reports.length, n=reports.filter(r=>r.status==='new').length, rv=reports.filter(r=>r.status==='reviewing').length, rs=reports.filter(r=>r.status==='resolved').length, hi=reports.filter(r=>r.severity==='high').length;
-  document.getElementById('srow').innerHTML = `
-    <div class="scard tall"><div class="sl">Total Reports</div><div class="sv">${t}</div></div>
-    <div class="scard snew"><div class="sl">New</div><div class="sv">${n}</div></div>
-    <div class="scard srev"><div class="sl">Reviewing</div><div class="sv">${rv}</div></div>
-    <div class="scard sres"><div class="sl">Resolved</div><div class="sv">${rs}</div></div>`;
-  const recent = [...reports].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
-  document.getElementById('dashGrid').innerHTML = recent.length
-    ? recent.map(r=>cardHTML(r,reports.indexOf(r))).join('')
-    : '<div class="empty"><div class="ei">&#128196;</div><div>No reports yet</div></div>';
-}
-
-function renderAll() {
-  const sf=document.getElementById('fsev').value, st=document.getElementById('fst').value, sc=document.getElementById('fcat').value;
-  let f = reports.filter(r=>(!sf||r.severity===sf)&&(!st||r.status===st)&&(!sc||r.category===sc));
-  document.getElementById('allGrid').innerHTML = f.length
-    ? f.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(r=>cardHTML(r,reports.indexOf(r))).join('')
-    : '<div class="empty"><div class="ei">&#128196;</div><div>No reports match filters</div></div>';
-}
-
-function cardHTML(r, idx) {
-  const ds = new Date(r.date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-  return `<div class="rcard" onclick="openDetail(${idx})">
-    <div class="rcid">${r.id}</div>
-    <div class="rcb">
-      <h3>${r.title}</h3>
-      <p>${r.description}</p>
-      <div class="stup" onclick="event.stopPropagation()">
-        <button onclick="updStatus(${idx},'new')">New</button>
-        <button onclick="updStatus(${idx},'reviewing')">Reviewing</button>
-        <button onclick="updStatus(${idx},'resolved')">Resolved</button>
-      </div>
-    </div>
-    <div class="rcm">
-      <span class="sevb ${r.severity}">${r.severity}</span>
-      <span class="stbadge ${r.status}">${r.status}</span>
-      <span class="rdate">${ds}</span>
-    </div>
-  </div>`;
-}
-
-async function updStatus(i, s) {
-  reports[i].status = s;
-  await saveReport(reports[i]);
-  if(document.getElementById('page-dashboard').classList.contains('active')) renderDash(); else renderAll();
-}
-
-async function saveNote(i) {
-  reports[i].adminNotes = document.getElementById('na-'+i).value.trim();
-  await saveReport(reports[i]);
-  const el = document.getElementById('ns-'+i);
-  el.style.display='inline'; setTimeout(()=>el.style.display='none',2200);
-}
-
-async function delReport(i) {
-  if(!confirm('Permanently delete this report? This cannot be undone.')) return;
-  const id = reports[i].id;
-  await deleteReportById(id);
-  closeDetail();
-  if(document.getElementById('page-dashboard').classList.contains('active')) renderDash(); else renderAll();
-}
-
-// ══════════════════════════════════════════════════════════
-//  TOP MANAGEMENT ANALYTICS
-// ══════════════════════════════════════════════════════════
-function renderTopMgmt() {
-  const t  = reports.length;
-  const n  = reports.filter(r=>r.status==='new').length;
-  const rv = reports.filter(r=>r.status==='reviewing').length;
-  const rs = reports.filter(r=>r.status==='resolved').length;
-  const lo = reports.filter(r=>r.severity==='low').length;
-  const me = reports.filter(r=>r.severity==='medium').length;
-  const hi = reports.filter(r=>r.severity==='high').length;
-
-  // Stat cards
-  document.getElementById('tm-srow').innerHTML = `
-    <div class="scard tall"><div class="sl">Total Reports</div><div class="sv">${t}</div></div>
-    <div class="scard snew"><div class="sl">New / Pending</div><div class="sv">${n}</div></div>
-    <div class="scard srev"><div class="sl">In Review</div><div class="sv">${rv}</div></div>
-    <div class="scard sres"><div class="sl">Resolved</div><div class="sv">${rs}</div></div>`;
-
-  // Category bars
-  const cats = getCategories();
-  const catCounts = {};
-  cats.forEach(c=>catCounts[c]=0);
-  reports.forEach(r=>{ if(catCounts[r.category]!==undefined) catCounts[r.category]++; else catCounts[r.category]=(catCounts[r.category]||0)+1; });
-  const maxCat = Math.max(1, ...Object.values(catCounts));
-  document.getElementById('tm-catbars').innerHTML = cats.filter(c=>catCounts[c]>0).sort((a,b)=>catCounts[b]-catCounts[a]).slice(0,8).map(c=>`
-    <div class="bar-item">
-      <div class="bar-label"><span>${c}</span><span>${catCounts[c]||0}</span></div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(((catCounts[c]||0)/maxCat)*100)}%"></div></div>
-    </div>`).join('') || '<div style="font-family:var(--mono);font-size:11px;color:var(--text3);">No data yet</div>';
-
-  // Severity boxes
-  document.getElementById('tm-sevbox').innerHTML = `
-    <div class="sev-box low"><div class="sv2">${lo}</div><div class="sl2">Low</div></div>
-    <div class="sev-box medium"><div class="sv2">${me}</div><div class="sl2">Medium</div></div>
-    <div class="sev-box high"><div class="sv2">${hi}</div><div class="sl2">High</div></div>`;
-
-  // Status bars
-  const maxSt = Math.max(1, n, rv, rs);
-  document.getElementById('tm-stbars').innerHTML = [
-    {label:'New',count:n,cls:'green'},{label:'Reviewing',count:rv,cls:'warn'},{label:'Resolved',count:rs,cls:''}
-  ].map(s=>`<div class="bar-item">
-    <div class="bar-label"><span>${s.label}</span><span>${s.count}</span></div>
-    <div class="bar-track"><div class="bar-fill ${s.cls}" style="width:${Math.round((s.count/maxSt)*100)}%"></div></div>
-  </div>`).join('');
-
-  // Weekly trend (last 8 weeks)
-  const now = new Date();
-  const weekBuckets = Array.from({length:8},(_,i)=>{
-    const d = new Date(now); d.setDate(d.getDate() - (7*(7-i)));
-    return { label: `W${8-i}`, start: new Date(d), end: new Date(d.setDate(d.getDate()+7)), count:0 };
-  });
-  reports.forEach(r=>{
-    const rd = new Date(r.date);
-    weekBuckets.forEach(wb=>{ if(rd>=wb.start && rd<wb.end) wb.count++; });
-  });
-  const maxW = Math.max(1, ...weekBuckets.map(w=>w.count));
-  document.getElementById('tm-trend').innerHTML = weekBuckets.map(w=>`
-    <div class="trend-bar-wrap">
-      <div class="trend-bar" style="height:${Math.max(4,Math.round((w.count/maxW)*70))}px;" title="${w.count} reports"></div>
-      <div class="trend-label">${w.label}</div>
-    </div>`).join('');
-
-  // Resolution rate
-  const resRate = t > 0 ? Math.round((rs/t)*100) : 0;
-  const reviewRate = t > 0 ? Math.round((rv/t)*100) : 0;
-  const pendingRate = t > 0 ? Math.round((n/t)*100) : 0;
-  document.getElementById('tm-resrate').innerHTML = `
-    <div class="bar-item">
-      <div class="bar-label"><span>Resolution Rate</span><span style="color:var(--accent);">${resRate}%</span></div>
-      <div class="bar-track"><div class="bar-fill green" style="width:${resRate}%"></div></div>
-    </div>
-    <div class="bar-item">
-      <div class="bar-label"><span>In-Progress Rate</span><span style="color:var(--warn);">${reviewRate}%</span></div>
-      <div class="bar-track"><div class="bar-fill warn" style="width:${reviewRate}%"></div></div>
-    </div>
-    <div class="bar-item">
-      <div class="bar-label"><span>Pending Rate</span><span style="color:var(--danger);">${pendingRate}%</span></div>
-      <div class="bar-track"><div class="bar-fill danger" style="width:${pendingRate}%"></div></div>
-    </div>
-    <div style="margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.8;">
-      Total reports: <strong style="color:var(--text);">${t}</strong><br>
-      High severity: <strong style="color:var(--danger);">${hi}</strong><br>
-      Avg daily (30d): <strong style="color:var(--tm);">${avgDaily30()} reports</strong>
-    </div>`;
-
-  // Recent reports (read-only)
-  const recent = [...reports].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
-  document.getElementById('tm-recentgrid').innerHTML = recent.length
-    ? recent.map(r=>{
-        const ds = new Date(r.date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-        return `<div class="rcard readonly">
-          <div class="rcid">${r.id}</div>
-          <div class="rcb"><h3>${r.title}</h3><p>${r.description}</p>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:5px;">${r.category}</div></div>
-          <div class="rcm">
-            <span class="sevb ${r.severity}">${r.severity}</span>
-            <span class="stbadge ${r.status}">${r.status}</span>
-            <span class="rdate">${ds}</span>
-          </div>
-        </div>`;
-      }).join('')
-    : '<div class="empty"><div class="ei">&#128196;</div><div>No reports yet</div></div>';
-}
-
-function avgDaily30() {
-  const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-30);
-  const cnt = reports.filter(r=>new Date(r.date)>=cutoff).length;
-  return (cnt/30).toFixed(1);
-}
-
-// ══════════════════════════════════════════════════════════
-//  SUPERADMIN ANALYTICS
-// ══════════════════════════════════════════════════════════
-function renderSAAnalytics() {
-  const t  = reports.length;
-  const n  = reports.filter(r=>r.status==='new').length;
-  const rv = reports.filter(r=>r.status==='reviewing').length;
-  const rs = reports.filter(r=>r.status==='resolved').length;
-  const lo = reports.filter(r=>r.severity==='low').length;
-  const me = reports.filter(r=>r.severity==='medium').length;
-  const hi = reports.filter(r=>r.severity==='high').length;
-  const totalUsers = getUsers().length;
-  const staffUsers = getUsers().filter(u=>u.role!=='superadmin').length;
-
-  // Stat cards (extra: users, high-severity)
-  document.getElementById('sa-srow').innerHTML = `
-    <div class="scard tall"><div class="sl">Total Reports</div><div class="sv">${t}</div></div>
-    <div class="scard snew"><div class="sl">New / Pending</div><div class="sv">${n}</div></div>
-    <div class="scard srev"><div class="sl">In Review</div><div class="sv">${rv}</div></div>
-    <div class="scard sres"><div class="sl">Resolved</div><div class="sv">${rs}</div></div>`;
-
-  // Category bars (gold fill)
-  const cats = getCategories();
-  const catCounts = {};
-  cats.forEach(c=>catCounts[c]=0);
-  reports.forEach(r=>{ if(catCounts[r.category]!==undefined) catCounts[r.category]++; else catCounts[r.category]=(catCounts[r.category]||0)+1; });
-  const maxCat = Math.max(1, ...Object.values(catCounts));
-  document.getElementById('sa-catbars').innerHTML = cats.filter(c=>catCounts[c]>0).sort((a,b)=>catCounts[b]-catCounts[a]).slice(0,8).map(c=>`
-    <div class="bar-item">
-      <div class="bar-label"><span>${c}</span><span style="color:var(--sa);">${catCounts[c]||0}</span></div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(((catCounts[c]||0)/maxCat)*100)}%;background:linear-gradient(90deg,var(--sa2),var(--sa));"></div></div>
-    </div>`).join('') || '<div style="font-family:var(--mono);font-size:11px;color:var(--text3);">No data yet</div>';
-
-  // Severity boxes
-  document.getElementById('sa-sevbox').innerHTML = `
-    <div class="sev-box low"><div class="sv2">${lo}</div><div class="sl2">Low</div></div>
-    <div class="sev-box medium"><div class="sv2">${me}</div><div class="sl2">Medium</div></div>
-    <div class="sev-box high"><div class="sv2">${hi}</div><div class="sl2">High</div></div>`;
-
-  // Status bars
-  const maxSt = Math.max(1, n, rv, rs);
-  document.getElementById('sa-stbars').innerHTML = [
-    {label:'New',count:n,cls:'green'},{label:'Reviewing',count:rv,cls:'warn'},{label:'Resolved',count:rs,cls:''}
-  ].map(s=>`<div class="bar-item">
-    <div class="bar-label"><span>${s.label}</span><span>${s.count}</span></div>
-    <div class="bar-track"><div class="bar-fill ${s.cls}" style="width:${Math.round((s.count/maxSt)*100)}%"></div></div>
-  </div>`).join('');
-
-  // Weekly trend (gold bars)
-  const now = new Date();
-  const weekBuckets = Array.from({length:8},(_,i)=>{
-    const d = new Date(now); d.setDate(d.getDate() - (7*(7-i)));
-    return { label:`W${8-i}`, start:new Date(d), end:new Date(d.setDate(d.getDate()+7)), count:0 };
-  });
-  reports.forEach(r=>{ const rd=new Date(r.date); weekBuckets.forEach(wb=>{ if(rd>=wb.start&&rd<wb.end) wb.count++; }); });
-  const maxW = Math.max(1, ...weekBuckets.map(w=>w.count));
-  document.getElementById('sa-trend').innerHTML = weekBuckets.map(w=>`
-    <div class="trend-bar-wrap">
-      <div class="trend-bar" style="height:${Math.max(4,Math.round((w.count/maxW)*70))}px;background:rgba(245,197,66,0.18);border-color:rgba(245,197,66,0.35);" title="${w.count} reports"></div>
-      <div class="trend-label">${w.label}</div>
-    </div>`).join('');
-
-  // Resolution rate + system stats
-  const resRate     = t>0 ? Math.round((rs/t)*100) : 0;
-  const reviewRate  = t>0 ? Math.round((rv/t)*100) : 0;
-  const pendingRate = t>0 ? Math.round((n/t)*100)  : 0;
-  document.getElementById('sa-resrate').innerHTML = `
-    <div class="bar-item">
-      <div class="bar-label"><span>Resolution Rate</span><span style="color:var(--accent);">${resRate}%</span></div>
-      <div class="bar-track"><div class="bar-fill green" style="width:${resRate}%"></div></div>
-    </div>
-    <div class="bar-item">
-      <div class="bar-label"><span>In-Progress Rate</span><span style="color:var(--warn);">${reviewRate}%</span></div>
-      <div class="bar-track"><div class="bar-fill warn" style="width:${reviewRate}%"></div></div>
-    </div>
-    <div class="bar-item">
-      <div class="bar-label"><span>Pending Rate</span><span style="color:var(--danger);">${pendingRate}%</span></div>
-      <div class="bar-track"><div class="bar-fill danger" style="width:${pendingRate}%"></div></div>
-    </div>
-    <div style="margin-top:14px;background:var(--bg);border:1px solid rgba(245,197,66,0.15);border-radius:3px;padding:12px 14px;font-family:var(--mono);font-size:10px;color:var(--text3);line-height:2;">
-      Total reports: <strong style="color:var(--text);">${t}</strong><br>
-      High severity: <strong style="color:var(--danger);">${hi}</strong><br>
-      Avg daily (30d): <strong style="color:var(--sa);">${avgDaily30()} reports</strong><br>
-      Staff accounts: <strong style="color:var(--sa);">${staffUsers}</strong> &nbsp;|&nbsp; Total users: <strong style="color:var(--text);">${totalUsers}</strong><br>
-      Active categories: <strong style="color:var(--sa);">${cats.length}</strong>
-    </div>`;
-
-  // Recent reports (with full card — superadmin can click to edit)
-  const recent = [...reports].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
-  document.getElementById('sa-recentgrid').innerHTML = recent.length
-    ? recent.map(r=>cardHTML(r,reports.indexOf(r))).join('')
-    : '<div class="empty"><div class="ei">&#128196;</div><div>No reports yet</div></div>';
-}
-
-// ══════════════════════════════════════════════════════════
-//  DETAIL MODAL
-// ══════════════════════════════════════════════════════════
-function openDetail(i) {
-  const r = reports[i];
-  document.getElementById('mbox').innerHTML = `
-    <h2>${r.id}</h2>
-    <div class="mrow"><span class="lbl">Title</span><span class="val">${r.title}</span></div>
-    <div class="mrow"><span class="lbl">Category</span><span class="val">${r.category}</span></div>
-    <div class="mrow"><span class="lbl">Organization</span><span class="val">${r.org||'—'}</span></div>
-    <div class="mrow"><span class="lbl">Severity</span><span class="val"><span class="sevb ${r.severity}">${r.severity}</span></span></div>
-    <div class="mrow"><span class="lbl">Status</span><span class="val"><span class="stbadge ${r.status}">${r.status}</span></span></div>
-    <div class="mrow"><span class="lbl">Submitted</span><span class="val">${new Date(r.date).toLocaleString('en-IN')}</span></div>
-    <div class="mrow"><span class="lbl">Description</span><span class="val">${r.description}</span></div>
-    <div class="mrow"><span class="lbl">Evidence</span><span class="val">${r.files&&r.files.length?r.files.join(', '):'None attached'}</span></div>
-    <div class="mrow">
-      <span class="lbl">Admin Notes</span>
-      <div style="display:flex;flex-direction:column;gap:7px;">
-        <textarea class="nota" id="na-${i}" placeholder="Add internal notes...">${r.adminNotes||''}</textarea>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button class="notebtn" onclick="saveNote(${i})">Save Note</button>
-          <span id="ns-${i}" style="display:none;font-family:var(--mono);font-size:10px;color:var(--accent);">&#10003; Saved</span>
-        </div>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:14px;">
-      <button class="delbtn" onclick="delReport(${i})">&#128465; Delete Report</button>
-      <button class="mclose" onclick="closeDetail()">Close</button>
-    </div>`;
-  document.getElementById('detailModal').classList.add('open');
-}
-function closeDetail() { document.getElementById('detailModal').classList.remove('open'); }
-document.getElementById('detailModal').addEventListener('click', function(e){ if(e.target===this) closeDetail(); });
-
-// ══════════════════════════════════════════════════════════
-//  QR CODE
-// ══════════════════════════════════════════════════════════
-function renderQR() {
-  if(qrGenerated) return;
-  qrGenerated = true;
-  const base = window.location.href.split('?')[0];
-  const url  = base + '?report=true';
-  document.getElementById('qrUrlDisplay').textContent = url;
-  new QRCode(document.getElementById('qrcode'), { text:url, width:164, height:164, colorDark:'#000000', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.H });
-}
-function downloadQR() {
-  setTimeout(()=>{
-    const canvas = document.querySelector('#qrcode canvas');
-    if(!canvas){ alert('QR code is still generating, please try again in a moment.'); return; }
-    const link = document.createElement('a');
-    link.download = 'securereport-qr.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  }, 200);
+  ctx.fillStyle='#f5c518';
+  ctx.fillRect(0,0,7*cell,7*cell);
+  ctx.fillStyle='#0d0d0d';
+  ctx.fillRect(cell,cell,5*cell,5*cell);
+  ctx.fillStyle='#f5c518';
+  ctx.fillRect(2*cell,2*cell,3*cell,3*cell);
+  const off=mod-7;
+  ctx.fillStyle='#f5c518';
+  ctx.fillRect(off*cell,0,7*cell,7*cell);
+  ctx.fillStyle='#0d0d0d';
+  ctx.fillRect((off+1)*cell,cell,5*cell,5*cell);
+  ctx.fillStyle='#f5c518';
+  ctx.fillRect((off+2)*cell,2*cell,3*cell,3*cell);
+  ctx.fillStyle='#f5c518';
+  ctx.fillRect(0,off*cell,7*cell,7*cell);
+  ctx.fillStyle='#0d0d0d';
+  ctx.fillRect(cell,(off+1)*cell,5*cell,5*cell);
+  ctx.fillStyle='#f5c518';
+  ctx.fillRect(2*cell,(off+2)*cell,3*cell,3*cell);
+  const lbl=document.getElementById('qr-report-id').textContent;
+  ctx.fillStyle='#0d0d0d';
+  ctx.font='bold 9px monospace';
+  ctx.textAlign='center';
+  ctx.fillText(lbl,size/2,size-4);
 }
 </script>
-</body>
-</html>
