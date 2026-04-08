@@ -369,7 +369,8 @@ function toast(m,d){
 function switchTab(t,btn){
   ['report','reports','track','admin'].forEach(function(x){
     var el=document.getElementById('tab-'+x);
-    if(el) el.className=el.className.replace(' hidden','')+(x===t?'':' hidden');
+    if(!el) return;
+    if(x===t){ el.classList.remove('hidden'); } else { el.classList.add('hidden'); }
   });
   document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
@@ -416,7 +417,8 @@ async function submitReport(){
   var desc=document.getElementById('rdesc').value.trim();
   if(!cat||!title||!desc){toast('Please fill in category, title, and description.');return;}
   var btn=document.getElementById('sbtn');
-  btn.disabled=true; btn.textContent='Encrypting & submitting...';
+  btn.disabled=true;
+  btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Submitting...';
   var rid=gid();
   var rep={
     reportId:rid, category:cat, title:title, description:desc,
@@ -427,37 +429,51 @@ async function submitReport(){
     status:'New', createdAt:new Date().toISOString(),
     timeline:[{event:'Report submitted',date:new Date().toISOString()}]
   };
+  /* Always save locally first — never block on Firebase */
   try{
-    if(db) await db.collection('reports').doc(rid).set(rep);
     var stored=JSON.parse(localStorage.getItem('sv_r')||'[]');
     stored.push(rep);
     localStorage.setItem('sv_r',JSON.stringify(stored));
-    toast('Submitted successfully! Your ID: '+rid,5000);
-    document.getElementById('report-qr').style.display='block';
-    setTimeout(function(){makeQR('qr-c1',rid,'qr-id1');},300);
-    ['category','rtitle','rdesc','dept','idate','cemail'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-    document.getElementById('flist').innerHTML='';
-    document.querySelectorAll('.sev-btn').forEach(function(b){b.className='sev-btn';});
-    sev='';
-  }catch(e){toast('Submission failed. Please try again.');}
+  }catch(e){console.error('localStorage error:',e);}
+  /* Attempt Firebase in background — don't await, don't block UI */
+  if(db){
+    db.collection('reports').doc(rid).set(rep).catch(function(e){console.warn('Firebase sync failed:',e);});
+  }
+  /* Immediately show success */
+  toast('Submitted successfully! Your ID: '+rid,5000);
+  document.getElementById('report-qr').style.display='block';
+  setTimeout(function(){makeQR('qr-c1',rid,'qr-id1');},300);
+  ['category','rtitle','rdesc','dept','idate','cemail'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('flist').innerHTML='';
+  document.querySelectorAll('.sev-btn').forEach(function(b){b.className='sev-btn';});
+  sev='';
   btn.disabled=false;
   btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Submit Securely';
 }
 
 async function loadReports(){
   var el=document.getElementById('rlist');
-  el.innerHTML='<div class="empty">Loading...</div>';
-  var rpts=[];
-  try{
-    if(db){
-      var s=await db.collection('reports').orderBy('createdAt','desc').limit(100).get();
-      s.forEach(function(d){rpts.push(d.data());});
-    }
-  }catch(e){}
-  if(!rpts.length) rpts=JSON.parse(localStorage.getItem('sv_r')||'[]').reverse();
+  var rpts=JSON.parse(localStorage.getItem('sv_r')||'[]').reverse();
+  renderReports(rpts);
+  /* Try Firebase in background */
+  if(db){
+    try{
+      var s=await Promise.race([
+        db.collection('reports').orderBy('createdAt','desc').limit(100).get(),
+        new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},5000);})
+      ]);
+      var fbR=[];
+      s.forEach(function(d){fbR.push(d.data());});
+      if(fbR.length) renderReports(fbR);
+    }catch(e){console.warn('Firebase load failed:',e);}
+  }
+}
+
+function renderReports(rpts){
   document.getElementById('s-tot').textContent=rpts.length;
   document.getElementById('s-open').textContent=rpts.filter(function(r){return r.status!=='Resolved';}).length;
   document.getElementById('s-res2').textContent=rpts.filter(function(r){return r.status==='Resolved';}).length;
+  var el=document.getElementById('rlist');
   if(!rpts.length){el.innerHTML='<div class="empty">No reports yet. Submit your first report.</div>';return;}
   var sc={New:'s-New','Under Review':'s-Under-Review',Resolved:'s-Resolved'};
   el.innerHTML=rpts.map(function(r){
@@ -484,13 +500,18 @@ async function trackReport(){
   var id=document.getElementById('tid').value.trim().toUpperCase();
   var box=document.getElementById('tresult');
   if(!id){toast('Please enter a report ID');return;}
-  var rep=null;
-  try{
-    if(db){var d=await db.collection('reports').doc(id).get();if(d.exists)rep=d.data();}
-  }catch(e){}
-  if(!rep){
-    var all=JSON.parse(localStorage.getItem('sv_r')||'[]');
-    rep=all.find(function(r){return r.reportId===id;});
+  /* Check localStorage first — instant */
+  var all=JSON.parse(localStorage.getItem('sv_r')||'[]');
+  var rep=all.find(function(r){return r.reportId===id;})||null;
+  /* Try Firebase with timeout */
+  if(!rep&&db){
+    try{
+      var result=await Promise.race([
+        db.collection('reports').doc(id).get(),
+        new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},5000);})
+      ]);
+      if(result.exists) rep=result.data();
+    }catch(e){console.warn('Firebase track failed:',e);}
   }
   if(!rep){
     box.style.display='block';
@@ -555,19 +576,31 @@ function adminOut(){
 
 /* ADMIN DATA */
 async function loadAdm(){
-  allR=[];
-  try{
-    if(db){
-      var s=await db.collection('reports').orderBy('createdAt','desc').get();
-      s.forEach(function(d){allR.push(d.data());});
-    }
-  }catch(e){}
-  if(!allR.length) allR=JSON.parse(localStorage.getItem('sv_r')||'[]').reverse();
+  allR=JSON.parse(localStorage.getItem('sv_r')||'[]').reverse();
   document.getElementById('a-tot').textContent=allR.length;
   document.getElementById('a-new').textContent=allR.filter(function(r){return !r.status||r.status==='New';}).length;
   document.getElementById('a-rev').textContent=allR.filter(function(r){return r.status==='Under Review';}).length;
   document.getElementById('a-crit').textContent=allR.filter(function(r){return r.severity==='critical';}).length;
   renderAdm();
+  /* Try to sync from Firebase in background */
+  if(db){
+    try{
+      var s=await Promise.race([
+        db.collection('reports').orderBy('createdAt','desc').get(),
+        new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},5000);})
+      ]);
+      var fbR=[];
+      s.forEach(function(d){fbR.push(d.data());});
+      if(fbR.length){
+        allR=fbR;
+        document.getElementById('a-tot').textContent=allR.length;
+        document.getElementById('a-new').textContent=allR.filter(function(r){return !r.status||r.status==='New';}).length;
+        document.getElementById('a-rev').textContent=allR.filter(function(r){return r.status==='Under Review';}).length;
+        document.getElementById('a-crit').textContent=allR.filter(function(r){return r.severity==='critical';}).length;
+        renderAdm();
+      }
+    }catch(e){console.warn('Firebase load failed, using local data:',e);}
+  }
 }
 
 function renderAdm(){
