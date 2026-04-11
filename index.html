@@ -2259,15 +2259,42 @@ function genId() {
   return 'SV-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 8999);
 }
 
-function submitReport() {
+async function submitReport() {
   const cat = document.getElementById('cat').value;
   const desc = document.getElementById('desc').value;
   if (!cat || !desc.trim()) { alert('Please select a category and provide a description.'); return; }
   const tid = genId();
+  const isAnon = document.getElementById('anon').checked;
+  const complaint = {
+    id: tid,
+    cat,
+    dept: document.getElementById('dept').value || 'Not specified',
+    date: new Date().toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}),
+    status: 'New',
+    risk: 'Pending',
+    anon: isAnon,
+    reporter: isAnon ? '' : (document.querySelector('#id-fields input[type=text]')?.value || ''),
+    assigned: '',
+    desc,
+    audit: [new Date().toLocaleString('en-GB') + ' — Complaint received · System'],
+    createdAt: Date.now()
+  };
+
+  // Save to local DB for immediate display
+  DB[tid] = complaint;
   document.getElementById('tid-display').textContent = tid;
-  DB[tid] = { cat, dept: document.getElementById('dept').value || 'Not specified', date: new Date().toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}), status: 'New', risk: 'Pending', anon: document.getElementById('anon').checked, assigned: '', desc, audit: [new Date().toLocaleString('en-GB') + ' — Complaint received · System'] };
   document.getElementById('complaint-form').style.display = 'none';
   document.getElementById('success-view').style.display = 'block';
+
+  // Save to Firestore
+  if (db) {
+    try {
+      await db.collection('complaints').doc(tid).set(complaint);
+      console.log('Complaint saved to Firestore:', tid);
+    } catch(e) {
+      console.error('Firestore save error:', e);
+    }
+  }
 }
 
 function resetForm() {
@@ -2277,16 +2304,36 @@ function resetForm() {
   document.getElementById('desc').value = '';
 }
 
-function trackReport() {
+async function trackReport() {
   const id = document.getElementById('track-id').value.trim().toUpperCase();
-  const c = DB[id];
   const res = document.getElementById('track-result');
-  if (!c) { alert('Tracking ID not found. Try: SV-2025-7834'); return; }
+  const cls = {New:'sp-new','In review':'sp-review','In progress':'sp-progress','Escalated':'sp-escalated','Closed':'sp-closed'};
+
+  // Try Firestore first
+  if (db) {
+    try {
+      const doc = await db.collection('complaints').doc(id).get();
+      if (doc.exists) {
+        const c = doc.data();
+        DB[id] = c; // sync to local
+        res.classList.add('show');
+        document.getElementById('tr-id-label').textContent = id;
+        const pill = document.getElementById('tr-status');
+        pill.textContent = c.status;
+        pill.className = 'status-pill ' + (cls[c.status] || 'sp-progress');
+        document.getElementById('tr-info').textContent = `Category: ${c.cat}  ·  Department: ${c.dept}  ·  Submitted: ${c.date}  ·  Reporter: ${c.anon ? 'Anonymous' : (c.reporter || 'Identified')}`;
+        return;
+      }
+    } catch(e) { console.error('Firestore track error:', e); }
+  }
+
+  // Fallback to local DB
+  const c = DB[id];
+  if (!c) { alert('Tracking ID not found. Check your ID and try again.'); return; }
   res.classList.add('show');
   document.getElementById('tr-id-label').textContent = id;
   const pill = document.getElementById('tr-status');
   pill.textContent = c.status;
-  const cls = {New:'sp-new','In review':'sp-review','In progress':'sp-progress','Escalated':'sp-escalated','Closed':'sp-closed'};
   pill.className = 'status-pill ' + (cls[c.status] || 'sp-progress');
   document.getElementById('tr-info').textContent = `Category: ${c.cat}  ·  Department: ${c.dept}  ·  Submitted: ${c.date}  ·  Reporter: ${c.anon ? 'Anonymous' : (c.reporter || 'Identified')}`;
 }
@@ -2337,10 +2384,25 @@ function showAdminTab(name, btn) {
 const riskClass = { Low: 'risk-low', Medium: 'risk-med', High: 'risk-high', Critical: 'risk-crit', Pending: 'risk-low' };
 const statusClass = { New: 'sp-new', 'In review': 'sp-review', 'In progress': 'sp-progress', Escalated: 'sp-escalated', Closed: 'sp-closed' };
 
-function buildComplaintsTable(filterStatus = '', filterCat = '') {
+async function buildComplaintsTable(filterStatus = '', filterCat = '') {
   const tbody = document.getElementById('complaints-tbody');
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">Loading from Firestore…</td></tr>';
+
+  // Load from Firestore
+  if (db) {
+    try {
+      const snapshot = await db.collection('complaints').orderBy('createdAt', 'desc').get();
+      snapshot.forEach(doc => { DB[doc.id] = doc.data(); });
+    } catch(e) { console.error('Firestore load error:', e); }
+  }
+
   tbody.innerHTML = '';
-  Object.entries(DB).forEach(([id, c]) => {
+  const entries = Object.entries(DB);
+  if (entries.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No complaints yet.</td></tr>';
+    return;
+  }
+  entries.forEach(([id, c]) => {
     if (filterStatus && c.status !== filterStatus) return;
     if (filterCat && c.cat !== filterCat) return;
     const tr = document.createElement('tr');
@@ -2411,7 +2473,7 @@ function buildDpAudit(id) {
   }).join('');
 }
 
-function updateStatus(btn, status) {
+async function updateStatus(btn, status) {
   if (!currentDetailId) return;
   DB[currentDetailId].status = status;
   document.querySelectorAll('.st-btn').forEach(b => b.classList.remove('active'));
@@ -2424,9 +2486,17 @@ function updateStatus(btn, status) {
   buildDpAudit(currentDetailId);
   addAuditEntry(`${currentDetailId} status changed → ${status}`);
   buildComplaintsTable();
+  if (db) {
+    try {
+      await db.collection('complaints').doc(currentDetailId).update({
+        status,
+        audit: DB[currentDetailId].audit
+      });
+    } catch(e) { console.error('Firestore update error:', e); }
+  }
 }
 
-function logAssign() {
+async function logAssign() {
   if (!currentDetailId) return;
   const val = document.getElementById('dp-assign').value;
   DB[currentDetailId].assigned = val;
@@ -2437,9 +2507,17 @@ function logAssign() {
     addAuditEntry(`${currentDetailId} assigned to ${val}`);
   }
   buildComplaintsTable();
+  if (db) {
+    try {
+      await db.collection('complaints').doc(currentDetailId).update({
+        assigned: val,
+        audit: DB[currentDetailId].audit
+      });
+    } catch(e) { console.error('Firestore assign error:', e); }
+  }
 }
 
-function addNote() {
+async function addNote() {
   if (!currentDetailId) return;
   const note = document.getElementById('dp-note').value.trim();
   if (!note) return;
@@ -2448,6 +2526,13 @@ function addNote() {
   buildDpAudit(currentDetailId);
   addAuditEntry(`Note added to ${currentDetailId}`);
   document.getElementById('dp-note').value = '';
+  if (db) {
+    try {
+      await db.collection('complaints').doc(currentDetailId).update({
+        audit: DB[currentDetailId].audit
+      });
+    } catch(e) { console.error('Firestore note error:', e); }
+  }
 }
 
 function addAuditEntry(action) {
