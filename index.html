@@ -3,690 +3,2380 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SafeVoice — Whistleblower Portal</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<title>Reporter — Secure Anonymous Whistleblowing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --y:#f5c518;--yd:#c9a000;
-  --blk:#0d0d0d;--blk2:#141414;--blk3:#1e1e1e;--blk4:#282828;
-  --txt:#f0f0f0;--txt2:#999;--txt3:#555;
-  --brd:rgba(245,197,24,0.15);--brd2:rgba(245,197,24,0.32);
-}
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--blk);color:var(--txt);}
-/* ── topbar ── */
-.topbar{background:var(--blk);border-bottom:1.5px solid var(--y);padding:0 1.5rem;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
-.logo{display:flex;align-items:center;gap:10px;color:var(--y);font-size:18px;font-weight:600;letter-spacing:.01em;}
-.logo-box{width:32px;height:32px;background:var(--y);border-radius:7px;display:flex;align-items:center;justify-content:center;}
-.enc-badge{background:rgba(245,197,24,0.08);color:var(--y);font-size:11px;padding:3px 12px;border-radius:20px;border:0.5px solid var(--brd2);letter-spacing:.03em;}
-/* ── nav ── */
-.nav{display:flex;gap:3px;padding:1rem 1.5rem 0;background:var(--blk);}
-.nav-btn{padding:9px 18px;border-radius:8px 8px 0 0;font-size:12px;font-weight:500;border:0.5px solid transparent;cursor:pointer;background:var(--blk3);color:var(--txt2);transition:all .15s;letter-spacing:.02em;}
-.nav-btn.active{background:var(--blk2);color:var(--y);border:0.5px solid var(--brd2);border-bottom:none;}
-.nav-btn:hover:not(.active){background:var(--blk4);color:var(--txt);}
-/* ── panel ── */
-.panel{background:var(--blk2);border:0.5px solid var(--brd);border-radius:0 12px 12px 12px;padding:1.75rem;margin:0 1.5rem 1.5rem;}
-.ptitle{font-size:16px;font-weight:600;color:var(--y);margin-bottom:4px;}
-.psub{font-size:13px;color:var(--txt2);margin-bottom:1.5rem;line-height:1.5;}
-/* ── forms ── */
-.flabel{font-size:11px;font-weight:600;color:var(--txt2);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.06em;}
-.finput,.fselect,.ftextarea{width:100%;padding:10px 14px;font-size:13px;border:0.5px solid var(--brd2);border-radius:8px;background:var(--blk3);color:var(--txt);font-family:inherit;outline:none;transition:border-color .15s;}
-.finput:focus,.ftextarea:focus{border-color:var(--y);box-shadow:0 0 0 3px rgba(245,197,24,0.1);}
-.fselect{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
-.ftextarea{min-height:120px;resize:vertical;line-height:1.6;}
-.fgroup{margin-bottom:1.2rem;}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
-/* ── severity ── */
-.sev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.sev-btn{padding:8px 4px;border-radius:8px;border:0.5px solid var(--brd);background:var(--blk3);cursor:pointer;font-size:12px;font-weight:500;text-align:center;color:var(--txt2);transition:all .15s;}
-.sev-btn:hover{border-color:var(--y);color:var(--y);}
-.sev-btn.sel-low{background:#173404;border-color:#639922;color:#C0DD97;}
-.sev-btn.sel-medium{background:#412402;border-color:#EF9F27;color:#FAC775;}
-.sev-btn.sel-high{background:#501313;border-color:#E24B4A;color:#F7C1C1;}
-.sev-btn.sel-critical{background:var(--y);border-color:var(--yd);color:#0d0d0d;font-weight:700;}
-/* ── anon toggle ── */
-.anon-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;background:var(--blk3);border:0.5px solid var(--brd);cursor:pointer;user-select:none;}
-.ttrack{width:38px;height:21px;border-radius:11px;background:var(--y);position:relative;flex-shrink:0;transition:background .2s;}
-.tthumb{position:absolute;top:3px;right:3px;width:15px;height:15px;border-radius:50%;background:var(--blk);transition:all .2s;}
-.ttrack.off{background:var(--blk4);}
-.ttrack.off .tthumb{right:auto;left:3px;background:var(--txt2);}
-/* ── file zone ── */
-.file-zone{border:1.5px dashed var(--brd2);border-radius:8px;padding:1.5rem;text-align:center;cursor:pointer;transition:background .15s;}
-.file-zone:hover{background:var(--blk3);}
-.fchip{font-size:11px;padding:3px 10px;background:rgba(245,197,24,0.1);color:var(--y);border-radius:20px;border:0.5px solid var(--brd2);}
-/* ── submit button ── */
-.submit-btn{width:100%;padding:13px;background:var(--y);color:var(--blk);border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.01em;transition:background .15s;}
-.submit-btn:hover{background:var(--yd);}
-.submit-btn:disabled{opacity:.5;cursor:not-allowed;}
-/* ── qr section ── */
-.qr-section{margin-top:1.5rem;padding:1.25rem;background:var(--blk3);border-radius:8px;border:0.5px solid var(--brd);text-align:center;display:none;}
-.qr-lbl{font-size:11px;color:var(--txt2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;}
-.qr-wrap{display:inline-block;background:#fff;padding:12px;border-radius:10px;line-height:0;}
-.qr-id{font-size:13px;font-family:'Courier New',monospace;color:var(--y);margin-top:10px;font-weight:600;}
-.qr-note{font-size:11px;color:var(--txt2);margin-top:4px;}
-.qr-dl{margin-top:10px;padding:7px 20px;background:transparent;border:0.5px solid var(--brd2);color:var(--y);border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:background .15s;}
-.qr-dl:hover{background:rgba(245,197,24,0.08);}
-/* ── stats cards ── */
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
-.stat-card{background:var(--blk3);border-radius:8px;padding:14px;text-align:center;border:0.5px solid var(--brd);}
-.stat-num{font-size:26px;font-weight:700;color:var(--y);}
-.stat-lbl{font-size:11px;color:var(--txt2);margin-top:3px;text-transform:uppercase;letter-spacing:.04em;}
-/* ── report cards ── */
-.rcard{border:0.5px solid var(--brd);border-radius:8px;padding:14px;cursor:pointer;margin-bottom:8px;transition:background .15s;}
-.rcard:hover{background:var(--blk3);}
-.rc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
-.rc-id{font-size:11px;font-family:'Courier New',monospace;color:var(--txt3);}
-.rc-cat{font-size:11px;padding:2px 9px;border-radius:12px;font-weight:500;}
-.cat-Fraud{background:rgba(245,197,24,0.15);color:var(--y);}
-.cat-Safety{background:#501313;color:#F7C1C1;}
-.cat-HR{background:#26215C;color:#AFA9EC;}
-.cat-Environment{background:#173404;color:#C0DD97;}
-.cat-Corruption{background:#412402;color:#FAC775;}
-.cat-Data,.cat-Other{background:var(--blk4);color:var(--txt2);}
-.rc-title{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:5px;}
-.rc-meta{font-size:11px;color:var(--txt2);display:flex;gap:12px;flex-wrap:wrap;}
-.sdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;}
-.s-New{background:var(--y);}.s-Under-Review{background:#EF9F27;}.s-Resolved{background:#1D9E75;}
-/* ── track ── */
-.track-row{display:flex;gap:8px;}
-.track-btn{padding:10px 18px;background:var(--y);color:var(--blk);border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s;}
-.track-btn:hover{background:var(--yd);}
-.detail-box{border:0.5px solid var(--brd);border-radius:8px;padding:1.25rem;margin-top:1.25rem;display:none;}
-.drow{display:flex;gap:8px;margin-bottom:8px;font-size:13px;}
-.dk{color:var(--txt2);min-width:120px;}
-.dv{color:var(--txt);font-weight:500;}
-.prog-bar{height:5px;border-radius:3px;background:var(--blk4);margin-top:10px;overflow:hidden;}
-.prog-fill{height:100%;border-radius:3px;background:var(--y);transition:width .6s;}
-.tl-item{padding:8px 0 8px 16px;border-left:1.5px solid var(--brd2);margin-left:8px;position:relative;}
-.tl-dot{position:absolute;left:-5px;top:12px;width:8px;height:8px;border-radius:50%;background:var(--y);}
-.tl-txt{font-size:12px;color:var(--txt2);}
-.tl-dt{font-size:11px;color:var(--txt3);margin-top:2px;}
-/* ── admin lock ── */
-.lock-wrap{text-align:center;padding:2.5rem 1rem;}
-.lock-circle{width:70px;height:70px;border-radius:50%;background:rgba(245,197,24,0.08);border:2px solid var(--y);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;}
-.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:1.75rem;}
-.pin-dot{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--brd2);background:transparent;transition:background .2s;}
-.pin-dot.filled{background:var(--y);border-color:var(--y);}
-.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:230px;margin:0 auto;}
-.pin-key{padding:15px 0;background:var(--blk3);border:0.5px solid var(--brd);border-radius:9px;font-size:18px;font-weight:500;color:var(--txt);cursor:pointer;text-align:center;transition:all .15s;}
-.pin-key:hover{background:var(--blk4);border-color:var(--y);color:var(--y);}
-.pin-key:active{transform:scale(.95);}
-.pin-err{font-size:12px;color:#F09595;margin-top:10px;min-height:18px;}
-/* ── admin dash ── */
-.adm-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:0.5px solid var(--brd);}
-.adm-badge{font-size:11px;padding:3px 12px;background:rgba(245,197,24,0.1);color:var(--y);border-radius:12px;border:0.5px solid var(--brd2);font-weight:500;}
-.logout-btn{padding:7px 16px;background:transparent;border:0.5px solid var(--brd2);color:var(--txt2);border-radius:7px;font-size:12px;cursor:pointer;transition:all .15s;}
-.logout-btn:hover{color:var(--y);border-color:var(--y);}
-.adm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem;}
-.search-bar{display:flex;gap:8px;margin-bottom:1.25rem;}
-.filter-sel{padding:10px 13px;font-size:12px;border:0.5px solid var(--brd2);border-radius:8px;background:var(--blk3);color:var(--txt2);outline:none;cursor:pointer;}
-.adm-rrow{border:0.5px solid var(--brd);border-radius:8px;padding:14px;margin-bottom:10px;transition:background .15s;}
-.adm-rrow:hover{background:var(--blk3);}
-.adm-rrow-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px;}
-.adm-acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
-.adm-btn{padding:5px 13px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:0.5px solid var(--brd2);background:transparent;color:var(--y);transition:all .15s;}
-.adm-btn:hover{background:rgba(245,197,24,0.08);}
-.adm-btn.del{color:#F09595;border-color:#7a2020;}
-.adm-btn.del:hover{background:#501313;}
-.status-sel{font-size:11px;padding:4px 9px;border-radius:6px;border:0.5px solid var(--brd2);background:var(--blk3);color:var(--y);cursor:pointer;outline:none;}
-/* ── misc ── */
-.empty{text-align:center;padding:3rem 1rem;color:var(--txt2);font-size:13px;}
-.hidden{display:none;}
-/* ── toast ── */
-.toast{position:fixed;bottom:1.75rem;left:50%;transform:translateX(-50%);background:var(--blk2);color:var(--y);padding:11px 24px;border-radius:10px;font-size:13px;font-weight:500;display:none;z-index:999;border:1px solid var(--brd2);white-space:nowrap;}
-.toast.show{display:block;animation:fiu .3s ease;}
-@keyframes fiu{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
-input[type="file"]{display:none;}
-@media(max-width:500px){.row2{grid-template-columns:1fr;}.adm-stats{grid-template-columns:repeat(2,1fr);}.sev-grid{grid-template-columns:repeat(2,1fr);}}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080b0a;
+    --bg2: #0d1210;
+    --bg3: #111815;
+    --border: rgba(255,255,255,0.07);
+    --border-hi: rgba(255,255,255,0.14);
+    --accent: #00e87b;
+    --accent-dim: rgba(0,232,123,0.12);
+    --accent-glow: rgba(0,232,123,0.25);
+    --text: #e8ede9;
+    --muted: #6b7a6e;
+    --muted2: #9aab9d;
+    --red: #ff4444;
+    --red-dim: rgba(255,68,68,0.1);
+    --display: 'Bebas Neue', sans-serif;
+    --body: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* NOISE TEXTURE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* SCANLINES */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5rem;
+    height: 60px;
+    background: rgba(8,11,10,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--display);
+    font-size: 22px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  .nav-cta {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border: 1px solid var(--accent);
+    color: var(--accent) !important;
+    border-radius: 2px;
+    transition: all 0.2s !important;
+  }
+
+  .nav-cta:hover {
+    background: var(--accent) !important;
+    color: var(--bg) !important;
+  }
+
+  .nav-admin-link {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border: 1px solid rgba(255,68,68,0.4);
+    color: #ff6b6b !important;
+    border-radius: 2px;
+    transition: all 0.2s !important;
+    cursor: pointer;
+  }
+  .nav-admin-link:hover { background: rgba(255,68,68,0.1) !important; border-color: #ff4444 !important; }
+
+  /* ═══════════════════════════════════════
+     ADMIN LOGIN
+  ═══════════════════════════════════════ */
+  #admin-login-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: var(--bg);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  #admin-login-screen.show { display: flex; }
+
+  .login-box {
+    width: 100%;
+    max-width: 420px;
+    background: var(--bg3);
+    border: 1px solid var(--border-hi);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .login-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .login-header-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #ff6b6b;
+  }
+
+  .login-body { padding: 2rem 1.5rem; }
+
+  .login-logo {
+    font-family: var(--display);
+    font-size: 32px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .login-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .login-err {
+    display: none;
+    padding: 10px 14px;
+    background: rgba(255,68,68,0.08);
+    border: 1px solid rgba(255,68,68,0.2);
+    border-radius: 2px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #ff6b6b;
+    margin-bottom: 1rem;
+  }
+  .login-err.show { display: block; }
+
+  .login-submit {
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    border: 1px solid rgba(255,68,68,0.4);
+    border-radius: 2px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #ff6b6b;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 1.25rem;
+  }
+  .login-submit:hover { background: rgba(255,68,68,0.1); border-color: #ff4444; }
+
+  .login-hint {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 1rem;
+    letter-spacing: 0.06em;
+  }
+
+  /* ═══════════════════════════════════════
+     ADMIN DASHBOARD
+  ═══════════════════════════════════════ */
+  #admin-dashboard {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: var(--bg);
+    overflow-y: auto;
+  }
+  #admin-dashboard.show { display: block; }
+
+  .admin-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(8,11,10,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-hi);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 56px;
+  }
+
+  .admin-nav-left { display: flex; align-items: center; gap: 1.5rem; }
+
+  .admin-logo {
+    font-family: var(--display);
+    font-size: 20px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+
+  .admin-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid rgba(255,68,68,0.3);
+    border-radius: 2px;
+    color: #ff6b6b;
+  }
+
+  .admin-nav-tabs { display: flex; gap: 2px; }
+  .admin-tab {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    color: var(--muted2);
+    background: none;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .admin-tab:hover { color: var(--text); background: var(--bg3); }
+  .admin-tab.active { color: var(--accent); border-color: rgba(0,232,123,0.25); background: var(--accent-dim); }
+
+  .admin-nav-right { display: flex; align-items: center; gap: 1rem; }
+
+  .admin-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted2);
+    letter-spacing: 0.06em;
+  }
+
+  .admin-avatar {
+    width: 30px; height: 30px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(0,232,123,0.25);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--display);
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  .btn-logout {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1px solid var(--border-hi);
+    border-radius: 2px;
+    color: var(--muted);
+    background: none;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-logout:hover { color: #ff6b6b; border-color: rgba(255,68,68,0.3); }
+
+  /* ADMIN PANELS */
+  .admin-panel { display: none; padding: 2rem; }
+  .admin-panel.active { display: block; }
+
+  /* METRICS ROW */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .adm-metric {
+    background: var(--bg2);
+    padding: 1.25rem 1.5rem;
+    transition: background 0.2s;
+  }
+  .adm-metric:hover { background: var(--bg3); }
+
+  .adm-metric-val {
+    font-family: var(--display);
+    font-size: 36px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    display: block;
+  }
+
+  .adm-metric-lbl {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 6px;
+    display: block;
+  }
+
+  .adm-metric-trend {
+    font-family: var(--mono);
+    font-size: 10px;
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* COMPLAINTS TABLE */
+  .adm-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .adm-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+  }
+
+  .adm-card-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .adm-card-title::before {
+    content: '//';
+    color: var(--accent);
+    font-size: 10px;
+  }
+
+  .adm-card-actions { display: flex; gap: 8px; align-items: center; }
+
+  .adm-select {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 5px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border-hi);
+    border-radius: 2px;
+    color: var(--muted2);
+    cursor: pointer;
+    outline: none;
+  }
+
+  .adm-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border: 1px solid var(--border-hi);
+    border-radius: 2px;
+    background: none;
+    color: var(--muted2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .adm-btn:hover { color: var(--accent); border-color: rgba(0,232,123,0.3); }
+  .adm-btn-accent { border-color: rgba(0,232,123,0.3); color: var(--accent); background: var(--accent-dim); }
+  .adm-btn-accent:hover { background: rgba(0,232,123,0.2); }
+
+  /* TABLE */
+  .adm-table { width: 100%; border-collapse: collapse; }
+  .adm-table th {
+    text-align: left;
+    padding: 10px 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .adm-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  .adm-table tr:last-child td { border-bottom: none; }
+  .adm-table tr:hover td { background: rgba(255,255,255,0.02); cursor: pointer; }
+
+  .adm-id { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: 0.06em; }
+  .adm-cat { color: var(--text); font-size: 13px; }
+  .adm-dept { color: var(--muted2); font-size: 12px; font-family: var(--mono); }
+  .adm-date { color: var(--muted); font-size: 12px; font-family: var(--mono); white-space: nowrap; }
+
+  /* STATUS PILLS */
+  .sp { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border-radius: 2px; white-space: nowrap; }
+  .sp-new { background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
+  .sp-review { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+  .sp-progress { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(0,232,123,0.25); }
+  .sp-closed { background: rgba(107,122,110,0.1); color: var(--muted2); border: 1px solid var(--border); }
+  .sp-escalated { background: rgba(255,68,68,0.1); color: #ff6b6b; border: 1px solid rgba(255,68,68,0.25); }
+
+  /* RISK INDICATOR */
+  .risk-wrap { display: flex; align-items: center; gap: 8px; }
+  .risk-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .risk-low { background: var(--accent); }
+  .risk-med { background: #fbbf24; }
+  .risk-high { background: #fb923c; }
+  .risk-crit { background: #ff4444; }
+  .risk-label { font-family: var(--mono); font-size: 11px; color: var(--muted2); }
+
+  /* DETAIL PANEL */
+  .detail-panel {
+    display: none;
+    position: fixed;
+    top: 56px; right: 0; bottom: 0;
+    width: 480px;
+    background: var(--bg2);
+    border-left: 1px solid var(--border-hi);
+    z-index: 40;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  .detail-panel.open { display: block; transform: translateX(0); }
+
+  .dp-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg3);
+    z-index: 5;
+  }
+
+  .dp-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .dp-id { font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; color: var(--accent); }
+  .dp-close { background: none; border: 1px solid var(--border-hi); border-radius: 2px; color: var(--muted); font-size: 16px; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-family: var(--mono); }
+  .dp-close:hover { color: #ff6b6b; border-color: rgba(255,68,68,0.3); }
+
+  .dp-body { padding: 1.5rem; }
+
+  .dp-section { margin-bottom: 1.5rem; }
+  .dp-section-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .dp-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .dp-row { display: flex; gap: 1rem; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .dp-row:last-child { border-bottom: none; }
+  .dp-lbl { font-family: var(--mono); font-size: 11px; color: var(--muted); min-width: 110px; padding-top: 1px; letter-spacing: 0.04em; }
+  .dp-val { color: var(--text); flex: 1; line-height: 1.5; }
+
+  .dp-desc { background: var(--bg); border: 1px solid var(--border); border-radius: 2px; padding: 1rem; font-size: 13px; color: var(--muted2); line-height: 1.7; }
+
+  /* AI ANALYSIS BOX */
+  .ai-box {
+    background: var(--bg);
+    border: 1px solid rgba(0,232,123,0.2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .ai-box-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(0,232,123,0.15);
+    background: var(--accent-dim);
+  }
+
+  .ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease infinite; }
+  .ai-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+
+  .ai-body { padding: 1rem 14px; }
+  .ai-body p { font-size: 13px; color: var(--muted2); line-height: 1.7; }
+  .ai-loading { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  .spinner { width: 14px; height: 14px; border: 1.5px solid rgba(0,232,123,0.3); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ASSIGN SELECT */
+  .dp-assign {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border-hi);
+    border-radius: 2px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .dp-assign:focus { border-color: var(--accent); }
+
+  /* STATUS UPDATE */
+  .status-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .st-btn { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 12px; border-radius: 2px; border: 1px solid var(--border-hi); background: none; color: var(--muted2); cursor: pointer; transition: all 0.15s; }
+  .st-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .st-btn.active { background: var(--accent-dim); border-color: rgba(0,232,123,0.4); color: var(--accent); }
+
+  /* AUDIT LOG */
+  .audit-row { display: flex; gap: 1rem; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+  .audit-row:last-child { border-bottom: none; }
+  .audit-ts { font-family: var(--mono); font-size: 11px; color: var(--muted); min-width: 120px; white-space: nowrap; }
+  .audit-action { font-size: 13px; color: var(--text); flex: 1; }
+  .audit-by { font-family: var(--mono); font-size: 11px; color: var(--muted2); white-space: nowrap; }
+
+  /* INVESTIGATORS TAB */
+  .inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .inv-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.25rem; transition: all 0.2s; }
+  .inv-card:hover { border-color: var(--border-hi); }
+  .inv-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-dim); border: 1px solid rgba(0,232,123,0.2); display: flex; align-items: center; justify-content: center; font-family: var(--display); font-size: 18px; color: var(--accent); margin-bottom: 10px; }
+  .inv-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .inv-role { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .inv-stats { display: flex; gap: 1rem; }
+  .inv-stat-val { font-family: var(--display); font-size: 22px; color: var(--accent); display: block; }
+  .inv-stat-lbl { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.06em; }
+  .inv-status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 5px; }
+
+  /* ANALYTICS TAB */
+  .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.5rem; }
+  .chart-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; }
+
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+  .bar-label { font-family: var(--mono); font-size: 11px; color: var(--muted2); min-width: 120px; }
+  .bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 1s ease; }
+  .bar-val { font-family: var(--mono); font-size: 11px; color: var(--muted); min-width: 24px; text-align: right; }
+
+  .donut-wrap { display: flex; align-items: center; gap: 1.5rem; }
+  .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; color: var(--muted2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* OVERLAY */
+  .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 35; }
+  .admin-overlay.show { display: block; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 2.5rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,232,123,0.08) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(0,232,123,0.3);
+    border-radius: 2px;
+    padding: 6px 14px;
+    margin-bottom: 2rem;
+    width: fit-content;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  .hero h1 {
+    font-family: var(--display);
+    font-size: clamp(72px, 12vw, 160px);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero h1 .accent-word { color: var(--accent); }
+  .hero h1 .stroke-word {
+    -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+    color: transparent;
+  }
+
+  .hero-sub {
+    max-width: 520px;
+    font-size: 16px;
+    color: var(--muted2);
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .btn-primary {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+
+  .btn-primary:hover {
+    background: #00ff88;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 30px rgba(0,232,123,0.3);
+  }
+
+  .btn-ghost {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    background: transparent;
+    color: var(--muted2);
+    border: 1px solid var(--border-hi);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-top: 5rem;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .stat {
+    padding: 2rem 0;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .stat:last-child { border-right: none; }
+
+  .stat-val {
+    font-family: var(--display);
+    font-size: 52px;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    line-height: 1;
+    display: block;
+  }
+
+  .stat-lbl {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 6px;
+    display: block;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTIONS */
+  section { padding: 6rem 2.5rem; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .section-title {
+    font-family: var(--display);
+    font-size: clamp(48px, 6vw, 88px);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    margin-bottom: 1.5rem;
+  }
+
+  /* HOW IT WORKS */
+  .how-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .step {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    transition: all 0.2s;
+  }
+
+  .step:first-child { border-top: 1px solid var(--border); }
+
+  .step:hover { padding-left: 8px; }
+
+  .step-num {
+    font-family: var(--display);
+    font-size: 48px;
+    color: var(--border-hi);
+    line-height: 1;
+    min-width: 48px;
+    transition: color 0.2s;
+  }
+
+  .step:hover .step-num { color: var(--accent); }
+
+  .step-content h3 {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .step-content p { font-size: 14px; color: var(--muted2); line-height: 1.6; }
+
+  .how-visual {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .how-visual::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 2rem; right: 2rem;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .terminal {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 2;
+  }
+
+  .t-line { display: flex; gap: 10px; }
+  .t-prompt { color: var(--accent); }
+  .t-cmd { color: var(--text); }
+  .t-comment { color: var(--muted); }
+  .t-out { color: var(--muted2); padding-left: 20px; }
+  .t-ok { color: var(--accent); }
+  .t-err { color: var(--red); }
+
+  /* FEATURES */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .feature {
+    background: var(--bg);
+    padding: 2.5rem;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature:hover { background: var(--bg3); }
+
+  .feature::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .feature:hover::after { opacity: 1; }
+
+  .feat-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(0,232,123,0.2);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .feat-icon svg { width: 20px; height: 20px; stroke: var(--accent); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  .feature h3 {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+
+  .feature p { font-size: 14px; color: var(--muted2); line-height: 1.7; margin-bottom: 1rem; }
+
+  .feat-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .feat-list li {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .feat-list li::before { content: '//'; color: var(--accent); font-size: 10px; }
+
+  /* REPORT FORM SECTION */
+  .report-section {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .report-inner {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 5rem;
+    align-items: start;
+  }
+
+  .report-info h2 { margin-bottom: 1.5rem; }
+  .report-info p { color: var(--muted2); font-size: 15px; line-height: 1.7; margin-bottom: 1.5rem; }
+
+  .security-badges { display: flex; flex-direction: column; gap: 10px; margin-top: 2rem; }
+
+  .sec-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--muted2);
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+
+  .sec-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* FORM */
+  .complaint-form {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .form-header-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted2);
+  }
+
+  .form-dots { display: flex; gap: 6px; }
+  .form-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border-hi); }
+  .form-dot:first-child { background: #ff5f57; }
+  .form-dot:nth-child(2) { background: #febc2e; }
+  .form-dot:nth-child(3) { background: #28c840; }
+
+  .form-body { padding: 1.5rem; }
+
+  .fld { margin-bottom: 1.25rem; }
+
+  .fld label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .fld input,
+  .fld select,
+  .fld textarea {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border-hi);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+  }
+
+  .fld input:focus,
+  .fld select:focus,
+  .fld textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,232,123,0.1);
+  }
+
+  .fld select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7a6e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+  .fld textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+  .two-col-form { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .anon-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(0,232,123,0.2);
+    border-radius: 2px;
+    margin-bottom: 1.25rem;
+    cursor: pointer;
+  }
+
+  .anon-row input { width: auto; accent-color: var(--accent); }
+  .anon-row span { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0.06em; }
+
+  .upload-zone {
+    border: 1px dashed rgba(255,255,255,0.15);
+    border-radius: 2px;
+    padding: 1.25rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .upload-zone:hover { border-color: var(--accent); background: var(--accent-dim); }
+
+  .upload-zone p { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-top: 6px; }
+
+  .form-submit {
+    margin-top: 1.5rem;
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 2px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .form-submit:hover { background: #00ff88; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,232,123,0.3); }
+
+  /* SUCCESS */
+  .success-overlay {
+    display: none;
+    text-align: center;
+    padding: 3rem 1.5rem;
+  }
+
+  .success-overlay.show { display: block; }
+
+  .success-ring {
+    width: 70px; height: 70px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    animation: ringPulse 0.5s ease;
+  }
+
+  @keyframes ringPulse {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .success-ring svg { width: 28px; height: 28px; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .tid-box {
+    background: var(--bg);
+    border: 1px solid rgba(0,232,123,0.3);
+    border-radius: 2px;
+    padding: 1rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 20px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin: 1.5rem 0;
+  }
+
+  /* TRACK SECTION */
+  .track-section { background: var(--bg); }
+
+  .track-inner { max-width: 640px; }
+
+  .track-input-group { display: flex; gap: 0; margin: 2rem 0; }
+  .track-input-group input { flex: 1; padding: 14px 18px; background: var(--bg3); border: 1px solid var(--border-hi); border-right: none; border-radius: 2px 0 0 2px; color: var(--text); font-family: var(--mono); font-size: 14px; letter-spacing: 0.08em; outline: none; }
+  .track-input-group input:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .track-input-group button { padding: 14px 24px; background: var(--accent); border: none; color: var(--bg); font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; border-radius: 0 2px 2px 0; cursor: pointer; transition: background 0.2s; }
+  .track-input-group button:hover { background: #00ff88; }
+
+  .track-result { display: none; margin-top: 2rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .track-result.show { display: block; }
+
+  .tr-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
+  .tr-id { font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; color: var(--muted2); }
+
+  .status-pill { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 12px; border-radius: 2px; }
+  .sp-progress { background: rgba(0,232,123,0.12); color: var(--accent); border: 1px solid rgba(0,232,123,0.25); }
+  .sp-new { background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
+
+  .tr-body { padding: 1.5rem; }
+
+  .tl { position: relative; padding-left: 1.5rem; }
+  .tl::before { content: ''; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 1px; background: var(--border-hi); }
+
+  .tl-item { position: relative; margin-bottom: 1.25rem; }
+  .tl-item:last-child { margin-bottom: 0; }
+  .tl-dot { position: absolute; left: -1.5rem; top: 3px; width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--border-hi); background: var(--bg); }
+  .tl-dot.done { background: var(--accent); border-color: var(--accent); }
+  .tl-dot.active { background: transparent; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,232,123,0.15); }
+  .tl-name { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--text); }
+  .tl-date { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* LEGAL / PROTECTION */
+  .protect-section { background: var(--bg2); border-top: 1px solid var(--border); }
+
+  .protect-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 4rem; }
+
+  .protect-card {
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .protect-card:hover { border-color: var(--border-hi); transform: translateY(-3px); }
+
+  .protect-num {
+    font-family: var(--display);
+    font-size: 72px;
+    line-height: 1;
+    color: var(--border);
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    transition: color 0.2s;
+  }
+
+  .protect-card:hover .protect-num { color: var(--accent-dim); }
+
+  .protect-card h3 {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .protect-card p { font-size: 14px; color: var(--muted2); line-height: 1.7; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo { font-family: var(--display); font-size: 20px; letter-spacing: 0.12em; color: var(--accent); }
+  .footer-text { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-top: 4px; }
+  .footer-copy { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.04em; text-align: right; }
+
+  /* SCROLL REVEAL */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* MARQUEE */
+  .marquee-wrap { overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 1rem 0; background: var(--bg2); }
+  .marquee-inner { display: flex; gap: 3rem; animation: marquee 20s linear infinite; width: max-content; }
+  .marquee-item { font-family: var(--display); font-size: 18px; letter-spacing: 0.1em; color: var(--muted); white-space: nowrap; display: flex; align-items: center; gap: 3rem; }
+  .marquee-item::after { content: '◆'; color: var(--accent); font-size: 10px; }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  @media (max-width: 900px) {
+    .how-grid, .report-inner, .protect-grid { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(2) { border-right: none; }
+    nav { padding: 0 1.5rem; }
+    .nav-links { gap: 1rem; }
+    section { padding: 4rem 1.5rem; }
+    .hero { padding: 100px 1.5rem 3rem; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+    .footer-copy { text-align: center; }
+  }
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="logo">
-    <div class="logo-box">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d0d0d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-    </div>
-    SafeVoice
-  </div>
-  <div class="enc-badge">AES-256 Encrypted</div>
-</div>
-
 <!-- NAV -->
-<div class="nav">
-  <button class="nav-btn active" onclick="switchTab('report',this)">Report</button>
-  <button class="nav-btn" onclick="switchTab('reports',this)">My Reports</button>
-  <button class="nav-btn" onclick="switchTab('track',this)">Track</button>
-  <button class="nav-btn" onclick="switchTab('admin',this)">Admin</button>
+<nav>
+  <div class="nav-logo">REPORTER</div>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#features">Protections</a></li>
+    <li><a href="#track">Track</a></li>
+    <li><a href="#report" class="nav-cta">Raise complaint</a></li>
+    <li><a class="nav-admin-link" onclick="openAdminLogin()">Admin ⬡</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-badge">Anonymous &amp; Encrypted</div>
+  <h1>SPEAK<br><span class="accent-word">TRUTH.</span><br><span class="stroke-word">STAY SAFE.</span></h1>
+  <p class="hero-sub">Report misconduct, corruption, or wrongdoing with complete anonymity. Your identity is protected by end-to-end encryption and zero-knowledge architecture.</p>
+  <div class="hero-actions">
+    <a href="#report"><button class="btn-primary">Raise a complaint</button></a>
+    <a href="#how"><button class="btn-ghost">How it works</button></a>
+  </div>
+  <div class="stats-bar">
+    <div class="stat"><span class="stat-val">100%</span><span class="stat-lbl">Anonymous</span></div>
+    <div class="stat"><span class="stat-val">256</span><span class="stat-lbl">-bit encryption</span></div>
+    <div class="stat"><span class="stat-val">0</span><span class="stat-lbl">data stored</span></div>
+    <div class="stat"><span class="stat-val">24/7</span><span class="stat-lbl">Available</span></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-inner">
+    <span class="marquee-item">End-to-end encrypted</span>
+    <span class="marquee-item">Zero-knowledge architecture</span>
+    <span class="marquee-item">Anonymous reporting</span>
+    <span class="marquee-item">Legal protection</span>
+    <span class="marquee-item">Secure evidence upload</span>
+    <span class="marquee-item">Audit-proof tracking</span>
+    <span class="marquee-item">End-to-end encrypted</span>
+    <span class="marquee-item">Zero-knowledge architecture</span>
+    <span class="marquee-item">Anonymous reporting</span>
+    <span class="marquee-item">Legal protection</span>
+    <span class="marquee-item">Secure evidence upload</span>
+    <span class="marquee-item">Audit-proof tracking</span>
+  </div>
 </div>
 
-<!-- REPORT TAB -->
-<div id="tab-report" class="panel">
-  <div class="ptitle">Submit a Report</div>
-  <div class="psub">Your identity is fully protected. All submissions are encrypted end-to-end before reaching our servers.</div>
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-label">Process</div>
+  <div class="section-title reveal">HOW IT<br>WORKS</div>
+  <div class="how-grid reveal">
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3>Submit your report</h3>
+          <p>Fill in the secure form with details of the misconduct. Attach any evidence. Choose anonymous or identified submission.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3>Encryption &amp; storage</h3>
+          <p>Your report is encrypted client-side before transmission. Only authorized reviewers hold decryption keys.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3>Receive your tracking ID</h3>
+          <p>You get a unique cryptographic token. Use it to check status and communicate — without revealing your identity.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <h3>Investigation &amp; resolution</h3>
+          <p>A qualified investigator reviews your complaint, takes action, and updates the status in your tracking dashboard.</p>
+        </div>
+      </div>
+    </div>
 
-  <div class="fgroup">
-    <label class="flabel">Category</label>
-    <select class="fselect" id="category" style="background:var(--blk3);color:var(--txt);">
-      <option value="">Select a category...</option>
-      <option>Fraud</option><option>Safety</option><option>HR</option>
-      <option>Environment</option><option>Corruption</option><option>Data</option><option>Other</option>
-    </select>
+    <div class="how-visual reveal">
+      <div class="terminal">
+        <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd"> reporter --submit --anon</span></div>
+        <div class="t-line"><span class="t-out t-comment">// Initialising secure session...</span></div>
+        <div class="t-line"><span class="t-out t-ok">✓ No IP logged</span></div>
+        <div class="t-line"><span class="t-out t-ok">✓ Browser fingerprint cleared</span></div>
+        <div class="t-line"><span class="t-out t-ok">✓ Tor circuit established</span></div>
+        <div class="t-line" style="margin-top:8px"><span class="t-prompt">$</span><span class="t-cmd"> encrypt --key=AES256 ./report.enc</span></div>
+        <div class="t-line"><span class="t-out t-ok">✓ Encrypted at rest</span></div>
+        <div class="t-line"><span class="t-out t-ok">✓ Encrypted in transit</span></div>
+        <div class="t-line"><span class="t-out t-ok">✓ Metadata stripped</span></div>
+        <div class="t-line" style="margin-top:8px"><span class="t-prompt">$</span><span class="t-cmd"> submit --zero-knowledge</span></div>
+        <div class="t-line"><span class="t-out" style="color:var(--accent);font-weight:500">→ Tracking ID: SV-2025-9K7X</span></div>
+        <div class="t-line"><span class="t-out t-comment">// Identity: unknown · Report: received</span></div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="row2">
-    <div class="fgroup"><label class="flabel">Department (optional)</label><input class="finput" id="dept" placeholder="e.g. Finance, Operations" /></div>
-    <div class="fgroup"><label class="flabel">Incident Date</label><input class="finput" type="date" id="idate" /></div>
+<!-- FEATURES -->
+<section id="features" style="padding-top:0">
+  <div class="section-label reveal">Protections</div>
+  <div class="section-title reveal">BUILT FOR<br>SAFETY</div>
+  <div class="features-grid reveal">
+    <div class="feature">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L4 6v6c0 5.1 3.4 9.9 8 11 4.6-1.1 8-5.9 8-11V6l-8-4z"/></svg>
+      </div>
+      <h3>Complete anonymity</h3>
+      <p>Your identity is never recorded. We use zero-knowledge architecture so that even we cannot determine who submitted a report.</p>
+      <ul class="feat-list">
+        <li>No IP logging or browser fingerprinting</li>
+        <li>No account or login required</li>
+        <li>Tor-compatible submission process</li>
+      </ul>
+    </div>
+    <div class="feature">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h3>End-to-end encryption</h3>
+      <p>Every report is encrypted the moment you submit it. Only authorized reviewers with the decryption key can read your submission.</p>
+      <ul class="feat-list">
+        <li>256-bit AES encryption standard</li>
+        <li>Encrypted at rest and in transit</li>
+        <li>Keys rotated automatically</li>
+      </ul>
+    </div>
+    <div class="feature">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      </div>
+      <h3>Evidence support</h3>
+      <p>Attach documents, images, and files to substantiate your report. All attachments are encrypted with the same standards.</p>
+      <ul class="feat-list">
+        <li>Support for documents, images, and audio</li>
+        <li>Metadata automatically stripped from files</li>
+        <li>Secure file storage with expiration</li>
+      </ul>
+    </div>
+    <div class="feature">
+      <div class="feat-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h3>Legal protection</h3>
+      <p>Whistleblower protection laws shield you from retaliation. We provide guidance on your rights and the legal frameworks that protect you.</p>
+      <ul class="feat-list">
+        <li>Compliant with EU Whistleblower Directive</li>
+        <li>Guidance on national protection statutes</li>
+        <li>Connection to legal support resources</li>
+      </ul>
+    </div>
   </div>
+</section>
 
-  <div class="fgroup"><label class="flabel">Report Title</label><input class="finput" id="rtitle" placeholder="Brief summary of the incident" /></div>
-  <div class="fgroup"><label class="flabel">Description</label><textarea class="ftextarea" id="rdesc" placeholder="Describe what happened in detail — include names, dates, locations, and any other relevant information..."></textarea></div>
+<!-- REPORT FORM -->
+<section id="report" class="report-section">
+  <div class="report-inner">
+    <div class="report-info">
+      <div class="section-label">Submit</div>
+      <h2 class="section-title reveal">RAISE A<br>COMPLAINT</h2>
+      <p class="reveal">Your submission is encrypted before it leaves your device. We have no access to your identity — only authorized investigators can decrypt and read your report.</p>
+      <div class="security-badges reveal">
+        <div class="sec-badge"><span class="dot"></span>End-to-end encrypted · AES-256</div>
+        <div class="sec-badge"><span class="dot"></span>Zero data retention on submission</div>
+        <div class="sec-badge"><span class="dot"></span>Anonymous tracking token issued</div>
+        <div class="sec-badge"><span class="dot"></span>Tor-compatible · No IP logged</div>
+      </div>
+    </div>
 
-  <div class="fgroup">
-    <label class="flabel">Severity Level</label>
-    <div class="sev-grid">
-      <button class="sev-btn" onclick="setSev('low',this)">Low</button>
-      <button class="sev-btn" onclick="setSev('medium',this)">Medium</button>
-      <button class="sev-btn" onclick="setSev('high',this)">High</button>
-      <button class="sev-btn" onclick="setSev('critical',this)">Critical</button>
+    <div class="reveal">
+      <!-- FORM VIEW -->
+      <div class="complaint-form" id="complaint-form">
+        <div class="form-header">
+          <span class="form-header-title">Secure report · Encrypted</span>
+          <div class="form-dots"><div class="form-dot"></div><div class="form-dot"></div><div class="form-dot"></div></div>
+        </div>
+        <div class="form-body">
+          <div class="two-col-form">
+            <div class="fld">
+              <label>Category</label>
+              <select id="cat">
+                <option value="">Select...</option>
+                <option>Financial fraud</option>
+                <option>Safety violation</option>
+                <option>Workplace harassment</option>
+                <option>Data privacy breach</option>
+                <option>Bribery / corruption</option>
+                <option>Environmental violation</option>
+                <option>Discrimination</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="fld">
+              <label>Incident date</label>
+              <input type="date" id="inc-date" />
+            </div>
+          </div>
+          <div class="fld">
+            <label>Department / Location</label>
+            <input type="text" id="dept" placeholder="e.g. Finance dept, Mumbai HQ" />
+          </div>
+          <div class="fld">
+            <label>Parties involved (optional)</label>
+            <input type="text" id="parties" placeholder="Names, roles, or teams involved" />
+          </div>
+          <div class="fld">
+            <label>Description</label>
+            <textarea id="desc" placeholder="Describe the incident in as much detail as possible. The more context you provide, the better we can investigate."></textarea>
+          </div>
+          <div class="upload-zone" onclick="document.getElementById('f-upload').click()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7a6e" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            <p>Click to upload evidence · PDF, images, audio</p>
+            <input type="file" id="f-upload" style="display:none" multiple />
+          </div>
+          <label class="anon-row">
+            <input type="checkbox" id="anon" checked />
+            <span>Submit anonymously — identity not recorded</span>
+          </label>
+          <div id="id-fields" style="display:none">
+            <div class="two-col-form">
+              <div class="fld"><label>Your name</label><input type="text" placeholder="Full name" /></div>
+              <div class="fld"><label>Email</label><input type="email" placeholder="your@email.com" /></div>
+            </div>
+          </div>
+          <button class="form-submit" onclick="submitReport()">Submit encrypted report →</button>
+        </div>
+      </div>
+
+      <!-- SUCCESS VIEW -->
+      <div class="complaint-form" id="success-view" style="display:none">
+        <div class="form-header">
+          <span class="form-header-title">Report submitted · Encrypted</span>
+          <div class="form-dots"><div class="form-dot"></div><div class="form-dot"></div><div class="form-dot"></div></div>
+        </div>
+        <div class="success-overlay show">
+          <div class="success-ring">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;">Report received &amp; encrypted</div>
+          <p style="color:var(--muted2);font-size:14px;line-height:1.7;">Save your tracking ID. This is the only way to check status and communicate securely. Your anonymity is guaranteed.</p>
+          <div class="tid-box" id="tid-display">SV-2025-0000</div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.06em;margin-bottom:1.5rem;">Average response time: 3–5 business days</p>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+            <button class="btn-primary" onclick="document.getElementById('track-id').value=document.getElementById('tid-display').textContent;document.getElementById('track').scrollIntoView({behavior:'smooth'})">Track my complaint →</button>
+            <button class="btn-ghost" onclick="resetForm()">Submit another</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRACK -->
+<section id="track" class="track-section">
+  <div class="track-inner">
+    <div class="section-label reveal">Status</div>
+    <div class="section-title reveal">TRACK YOUR<br>COMPLAINT</div>
+    <p class="reveal" style="color:var(--muted2);font-size:15px;line-height:1.7;margin-bottom:0;">Enter your unique tracking ID to check the status of your report. Your anonymity is fully preserved during tracking — no login required.</p>
+    <div class="track-input-group reveal">
+      <input type="text" id="track-id" placeholder="Enter tracking ID · e.g. SV-2025-7834" />
+      <button onclick="trackReport()">Look up →</button>
+    </div>
+    <div class="track-result" id="track-result">
+      <div class="tr-header">
+        <span class="tr-id" id="tr-id-label">SV-2025-7834</span>
+        <span class="status-pill sp-progress" id="tr-status">In progress</span>
+      </div>
+      <div class="tr-body">
+        <div id="tr-info" style="font-size:14px;color:var(--muted2);margin-bottom:1.5rem;line-height:1.7;font-family:var(--mono);font-size:12px;letter-spacing:0.04em;"></div>
+        <div class="tl">
+          <div class="tl-item"><div class="tl-dot done"></div><div class="tl-name">Complaint received &amp; encrypted</div><div class="tl-date" id="tl-d1">Dec 14, 2024 · 09:41</div></div>
+          <div class="tl-item"><div class="tl-dot done"></div><div class="tl-name">Under initial review</div><div class="tl-date">Dec 15, 2024 · 11:00</div></div>
+          <div class="tl-item"><div class="tl-dot active"></div><div class="tl-name">Investigator assigned</div><div class="tl-date">Dec 16, 2024 · 14:15</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-name">Investigation ongoing</div><div class="tl-date">Pending</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-name">Resolution &amp; closure</div><div class="tl-date">Pending</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROTECTIONS -->
+<section class="protect-section">
+  <div class="section-label reveal">Legal</div>
+  <div class="section-title reveal">YOUR<br>PROTECTIONS</div>
+  <div class="protect-grid reveal">
+    <div class="protect-card">
+      <div class="protect-num">01</div>
+      <h3>Anti-retaliation law</h3>
+      <p>National and international laws protect you from dismissal, demotion, or any negative consequence for reporting in good faith. We help you understand your rights.</p>
+    </div>
+    <div class="protect-card">
+      <div class="protect-num">02</div>
+      <h3>EU Whistleblower Directive</h3>
+      <p>The 2019 EU Directive mandates confidential reporting channels and strict anti-retaliation measures across all member states. Organisations must respond within 3 months.</p>
+    </div>
+    <div class="protect-card">
+      <div class="protect-num">03</div>
+      <h3>Legal support access</h3>
+      <p>We connect you with pro-bono legal resources and support organisations if you face retaliation or need guidance on the investigation process.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     ADMIN LOGIN SCREEN
+══════════════════════════════════════ -->
+<div id="admin-login-screen">
+  <div style="position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:0.5;"></div>
+  <div class="login-box" style="position:relative;z-index:2">
+    <div class="login-header">
+      <span class="login-header-title">Restricted access · Admin only</span>
+      <div class="form-dots"><div class="form-dot"></div><div class="form-dot"></div><div class="form-dot"></div></div>
+    </div>
+    <div class="login-body">
+      <div class="login-logo">REPORTER</div>
+      <div class="login-sub">Admin portal · Authorised personnel only</div>
+      <div class="login-err" id="login-err">Invalid credentials. Try admin / admin123</div>
+      <div class="fld">
+        <label>Username</label>
+        <input type="text" id="login-user" placeholder="admin" autocomplete="off" />
+      </div>
+      <div class="fld">
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <button class="login-submit" onclick="doLogin()">Access secure dashboard →</button>
+      <div class="login-hint">Demo credentials: admin / admin123</div>
+      <div style="text-align:center;margin-top:1.25rem;">
+        <button onclick="closeAdminLogin()" style="background:none;border:none;font-family:var(--mono);font-size:11px;color:var(--muted);cursor:pointer;letter-spacing:0.06em;">← Back to site</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     ADMIN DASHBOARD
+══════════════════════════════════════ -->
+<div id="admin-dashboard">
+
+  <!-- ADMIN NAV -->
+  <div class="admin-nav">
+    <div class="admin-nav-left">
+      <div class="admin-logo">REPORTER</div>
+      <div class="admin-badge">Admin</div>
+    </div>
+    <div class="admin-nav-tabs">
+      <button class="admin-tab active" onclick="showAdminTab('overview',this)">Overview</button>
+      <button class="admin-tab" onclick="showAdminTab('complaints',this)">Complaints</button>
+      <button class="admin-tab" onclick="showAdminTab('investigators',this)">Investigators</button>
+      <button class="admin-tab" onclick="showAdminTab('analytics',this)">Analytics</button>
+      <button class="admin-tab" onclick="showAdminTab('audit',this)">Audit log</button>
+    </div>
+    <div class="admin-nav-right">
+      <div class="admin-user">
+        <div class="admin-avatar">A</div>
+        <span>admin</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Sign out</button>
     </div>
   </div>
 
-  <div class="fgroup">
-    <label class="flabel">Evidence (optional)</label>
-    <div class="file-zone" onclick="document.getElementById('fi').click()">
-      <svg width="22" height="22" style="margin-bottom:6px;" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      <div style="font-size:12px;color:var(--txt2);">Click to attach files — documents, screenshots, recordings</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px;" id="flist"></div>
+  <!-- OVERVIEW TAB -->
+  <div class="admin-panel active" id="tab-overview">
+    <!-- METRICS -->
+    <div class="metrics-row">
+      <div class="adm-metric">
+        <span class="adm-metric-val" style="color:var(--text)">24</span>
+        <span class="adm-metric-lbl">Total complaints</span>
+        <span class="adm-metric-trend" style="color:var(--accent)">↑ 3 this week</span>
+      </div>
+      <div class="adm-metric">
+        <span class="adm-metric-val" style="color:#60a5fa">7</span>
+        <span class="adm-metric-lbl">Awaiting review</span>
+        <span class="adm-metric-trend" style="color:#60a5fa">New submissions</span>
+      </div>
+      <div class="adm-metric">
+        <span class="adm-metric-val" style="color:#fbbf24">5</span>
+        <span class="adm-metric-lbl">In progress</span>
+        <span class="adm-metric-trend" style="color:var(--muted)">Active investigations</span>
+      </div>
+      <div class="adm-metric">
+        <span class="adm-metric-val" style="color:#ff6b6b">2</span>
+        <span class="adm-metric-lbl">Escalated</span>
+        <span class="adm-metric-trend" style="color:#ff6b6b">Needs urgent action</span>
+      </div>
+      <div class="adm-metric">
+        <span class="adm-metric-val" style="color:var(--accent)">10</span>
+        <span class="adm-metric-lbl">Resolved</span>
+        <span class="adm-metric-trend" style="color:var(--muted)">This month</span>
+      </div>
     </div>
-    <input type="file" id="fi" multiple onchange="handleFiles(this)" />
+
+    <!-- RECENT COMPLAINTS -->
+    <div class="adm-card">
+      <div class="adm-card-header">
+        <span class="adm-card-title">Recent complaints</span>
+        <div class="adm-card-actions">
+          <button class="adm-btn" onclick="showAdminTab('complaints',document.querySelectorAll('.admin-tab')[1])">View all →</button>
+        </div>
+      </div>
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Category</th>
+            <th>Department</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th>Risk</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr onclick="openDetail('SV-2025-7834')">
+            <td><span class="adm-id">SV-2025-7834</span></td>
+            <td><span class="adm-cat">Financial fraud</span></td>
+            <td><span class="adm-dept">Finance, HQ</span></td>
+            <td><span class="adm-date">Dec 14, 2024</span></td>
+            <td><span class="sp sp-progress">In progress</span></td>
+            <td><div class="risk-wrap"><div class="risk-dot risk-high"></div><span class="risk-label">High</span></div></td>
+            <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('SV-2025-7834')">View →</button></td>
+          </tr>
+          <tr onclick="openDetail('SV-2025-7791')">
+            <td><span class="adm-id">SV-2025-7791</span></td>
+            <td><span class="adm-cat">Safety violation</span></td>
+            <td><span class="adm-dept">Warehouse, Pune</span></td>
+            <td><span class="adm-date">Dec 11, 2024</span></td>
+            <td><span class="sp sp-new">New</span></td>
+            <td><div class="risk-wrap"><div class="risk-dot risk-med"></div><span class="risk-label">Medium</span></div></td>
+            <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('SV-2025-7791')">View →</button></td>
+          </tr>
+          <tr onclick="openDetail('SV-2025-7762')">
+            <td><span class="adm-id">SV-2025-7762</span></td>
+            <td><span class="adm-cat">Workplace harassment</span></td>
+            <td><span class="adm-dept">HR Department</span></td>
+            <td><span class="adm-date">Dec 8, 2024</span></td>
+            <td><span class="sp sp-escalated">Escalated</span></td>
+            <td><div class="risk-wrap"><div class="risk-dot risk-crit"></div><span class="risk-label">Critical</span></div></td>
+            <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('SV-2025-7762')">View →</button></td>
+          </tr>
+          <tr onclick="openDetail('SV-2025-7701')">
+            <td><span class="adm-id">SV-2025-7701</span></td>
+            <td><span class="adm-cat">Data privacy breach</span></td>
+            <td><span class="adm-dept">IT, Chennai</span></td>
+            <td><span class="adm-date">Dec 3, 2024</span></td>
+            <td><span class="sp sp-closed">Closed</span></td>
+            <td><div class="risk-wrap"><div class="risk-dot risk-low"></div><span class="risk-label">Low</span></div></td>
+            <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('SV-2025-7701')">View →</button></td>
+          </tr>
+          <tr onclick="openDetail('SV-2025-7688')">
+            <td><span class="adm-id">SV-2025-7688</span></td>
+            <td><span class="adm-cat">Bribery / corruption</span></td>
+            <td><span class="adm-dept">Procurement, Delhi</span></td>
+            <td><span class="adm-date">Nov 28, 2024</span></td>
+            <td><span class="sp sp-review">In review</span></td>
+            <td><div class="risk-wrap"><div class="risk-dot risk-high"></div><span class="risk-label">High</span></div></td>
+            <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('SV-2025-7688')">View →</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- QUICK STATS ROW -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+      <div class="adm-card">
+        <div class="adm-card-header"><span class="adm-card-title">Category breakdown</span></div>
+        <div style="padding:1.5rem;">
+          <div class="bar-chart">
+            <div class="bar-row"><span class="bar-label">Financial fraud</span><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="bar-val">8</span></div>
+            <div class="bar-row"><span class="bar-label">Harassment</span><div class="bar-track"><div class="bar-fill" style="width:55%;background:#fbbf24"></div></div><span class="bar-val">6</span></div>
+            <div class="bar-row"><span class="bar-label">Safety violation</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:#fb923c"></div></div><span class="bar-val">4</span></div>
+            <div class="bar-row"><span class="bar-label">Data breach</span><div class="bar-track"><div class="bar-fill" style="width:28%;background:#60a5fa"></div></div><span class="bar-val">3</span></div>
+            <div class="bar-row"><span class="bar-label">Bribery</span><div class="bar-track"><div class="bar-fill" style="width:18%;background:#a78bfa"></div></div><span class="bar-val">2</span></div>
+            <div class="bar-row"><span class="bar-label">Other</span><div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--muted)"></div></div><span class="bar-val">1</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="adm-card">
+        <div class="adm-card-header"><span class="adm-card-title">Resolution time</span></div>
+        <div style="padding:1.5rem;">
+          <div style="font-family:var(--display);font-size:56px;color:var(--accent);line-height:1;margin-bottom:4px;">4.2</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1.5rem;">Avg. days to resolution</div>
+          <div class="bar-chart">
+            <div class="bar-row"><span class="bar-label">Jan</span><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div><span class="bar-val">6d</span></div>
+            <div class="bar-row"><span class="bar-label">Feb</span><div class="bar-track"><div class="bar-fill" style="width:45%"></div></div><span class="bar-val">5d</span></div>
+            <div class="bar-row"><span class="bar-label">Mar</span><div class="bar-track"><div class="bar-fill" style="width:38%"></div></div><span class="bar-val">4d</span></div>
+            <div class="bar-row"><span class="bar-label">Dec</span><div class="bar-track"><div class="bar-fill" style="width:35%"></div></div><span class="bar-val">4d</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="fgroup">
-    <label class="flabel">Anonymous Submission</label>
-    <div class="anon-row" onclick="toggleAnon()">
-      <div class="ttrack" id="attrack"><div class="tthumb"></div></div>
+  <!-- COMPLAINTS TAB -->
+  <div class="admin-panel" id="tab-complaints">
+    <div class="adm-card">
+      <div class="adm-card-header">
+        <span class="adm-card-title">All complaints</span>
+        <div class="adm-card-actions">
+          <select class="adm-select" id="filter-status" onchange="filterComplaints()">
+            <option value="">All statuses</option>
+            <option value="New">New</option>
+            <option value="In review">In review</option>
+            <option value="In progress">In progress</option>
+            <option value="Escalated">Escalated</option>
+            <option value="Closed">Closed</option>
+          </select>
+          <select class="adm-select" id="filter-cat" onchange="filterComplaints()">
+            <option value="">All categories</option>
+            <option>Financial fraud</option>
+            <option>Safety violation</option>
+            <option>Workplace harassment</option>
+            <option>Data privacy breach</option>
+            <option>Bribery / corruption</option>
+          </select>
+          <button class="adm-btn adm-btn-accent">Export CSV</button>
+        </div>
+      </div>
+      <table class="adm-table" id="complaints-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>Category</th><th>Department</th><th>Submitted</th><th>Reporter</th><th>Status</th><th>Risk</th><th>Assigned</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="complaints-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INVESTIGATORS TAB -->
+  <div class="admin-panel" id="tab-investigators">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
       <div>
-        <div style="font-size:13px;font-weight:500;color:var(--txt);" id="anon-lbl">Anonymous — identity fully hidden</div>
-        <div style="font-size:11px;color:var(--txt2);margin-top:2px;">Your personal details will not be shared with investigators</div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">// team</div>
+        <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">INVESTIGATORS</div>
+      </div>
+      <button class="adm-btn adm-btn-accent">+ Add investigator</button>
+    </div>
+    <div class="inv-grid">
+      <div class="inv-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="inv-avatar">RS</div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
+        </div>
+        <div class="inv-name">Ravi Sharma</div>
+        <div class="inv-role">Senior Investigator · Fraud</div>
+        <div class="inv-stats">
+          <div><span class="inv-stat-val">8</span><span class="inv-stat-lbl">Active cases</span></div>
+          <div><span class="inv-stat-val">47</span><span class="inv-stat-lbl">Resolved</span></div>
+        </div>
+      </div>
+      <div class="inv-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="inv-avatar">PG</div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
+        </div>
+        <div class="inv-name">Priya Gupta</div>
+        <div class="inv-role">Investigator · HR &amp; Compliance</div>
+        <div class="inv-stats">
+          <div><span class="inv-stat-val">5</span><span class="inv-stat-lbl">Active cases</span></div>
+          <div><span class="inv-stat-val">31</span><span class="inv-stat-lbl">Resolved</span></div>
+        </div>
+      </div>
+      <div class="inv-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="inv-avatar">AK</div>
+          <span style="font-family:var(--mono);font-size:10px;color:#fbbf24;"><span class="inv-status-dot" style="background:#fbbf24"></span>On leave</span>
+        </div>
+        <div class="inv-name">Anita Krishnan</div>
+        <div class="inv-role">Lead Investigator · Safety</div>
+        <div class="inv-stats">
+          <div><span class="inv-stat-val">0</span><span class="inv-stat-lbl">Active cases</span></div>
+          <div><span class="inv-stat-val">62</span><span class="inv-stat-lbl">Resolved</span></div>
+        </div>
+      </div>
+      <div class="inv-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="inv-avatar">MR</div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
+        </div>
+        <div class="inv-name">Mohammed Rashid</div>
+        <div class="inv-role">Investigator · Data &amp; IT</div>
+        <div class="inv-stats">
+          <div><span class="inv-stat-val">3</span><span class="inv-stat-lbl">Active cases</span></div>
+          <div><span class="inv-stat-val">18</span><span class="inv-stat-lbl">Resolved</span></div>
+        </div>
+      </div>
+      <div class="inv-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="inv-avatar">SJ</div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
+        </div>
+        <div class="inv-name">Sunita Joshi</div>
+        <div class="inv-role">Investigator · Legal &amp; Ethics</div>
+        <div class="inv-stats">
+          <div><span class="inv-stat-val">4</span><span class="inv-stat-lbl">Active cases</span></div>
+          <div><span class="inv-stat-val">25</span><span class="inv-stat-lbl">Resolved</span></div>
+        </div>
+      </div>
+      <div class="inv-card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;cursor:pointer;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'">
+        <div style="font-size:28px;color:var(--muted);margin-bottom:8px;">+</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;">Add investigator</div>
       </div>
     </div>
   </div>
 
-  <div class="fgroup hidden" id="cg">
-    <label class="flabel">Contact Email (optional)</label>
-    <input class="finput" type="email" id="cemail" placeholder="you@example.com — only for follow-up notifications" />
-  </div>
-
-  <button class="submit-btn" id="sbtn" onclick="submitReport()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    Submit Securely
-  </button>
-
-  <div class="qr-section" id="report-qr">
-    <div class="qr-lbl">Your Report QR Code</div>
-    <div class="qr-wrap"><canvas id="qr-c1" width="160" height="160"></canvas></div>
-    <div class="qr-id" id="qr-id1"></div>
-    <div class="qr-note">Scan with any phone to track this report</div>
-    <button class="qr-dl" onclick="dlQR('qr-c1')">Download QR Code</button>
-  </div>
-</div>
-
-<!-- MY REPORTS TAB -->
-<div id="tab-reports" class="panel hidden">
-  <div class="ptitle">Reports Dashboard</div>
-  <div class="psub">Overview of all your submitted reports</div>
-  <div class="stats-grid">
-    <div class="stat-card"><div class="stat-num" id="s-tot">0</div><div class="stat-lbl">Total</div></div>
-    <div class="stat-card"><div class="stat-num" id="s-open">0</div><div class="stat-lbl">Open</div></div>
-    <div class="stat-card"><div class="stat-num" id="s-res2">0</div><div class="stat-lbl">Resolved</div></div>
-  </div>
-  <div id="rlist"><div class="empty">No reports yet. Submit your first report.</div></div>
-</div>
-
-<!-- TRACK TAB -->
-<div id="tab-track" class="panel hidden">
-  <div class="ptitle">Track Your Report</div>
-  <div class="psub">Enter your unique report ID to check status and receive investigation updates</div>
-  <div class="track-row">
-    <input class="finput" id="tid" placeholder="e.g. RPT-8F3K2X" style="text-transform:uppercase;flex:1;" />
-    <button class="track-btn" onclick="trackReport()">Track</button>
-  </div>
-  <div class="detail-box" id="tresult"></div>
-  <div class="qr-section" id="track-qr">
-    <div class="qr-lbl">Report QR Code</div>
-    <div class="qr-wrap"><canvas id="qr-c2" width="160" height="160"></canvas></div>
-    <div class="qr-id" id="qr-id2"></div>
-    <div class="qr-note">Share or save this QR to track anytime</div>
-    <button class="qr-dl" onclick="dlQR('qr-c2')">Download QR Code</button>
-  </div>
-</div>
-
-<!-- ADMIN TAB -->
-<div id="tab-admin" class="panel hidden">
-  <!-- LOCK SCREEN -->
-  <div id="admin-lock">
-    <div class="lock-wrap">
-      <div class="lock-circle">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#f5c518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+  <!-- ANALYTICS TAB -->
+  <div class="admin-panel" id="tab-analytics">
+    <div style="margin-bottom:1.5rem;">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">// insights</div>
+      <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">ANALYTICS</div>
+    </div>
+    <div class="analytics-grid">
+      <div class="chart-card">
+        <div class="chart-title">Complaints by category</div>
+        <div class="bar-chart">
+          <div class="bar-row"><span class="bar-label">Financial fraud</span><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="bar-val">8</span></div>
+          <div class="bar-row"><span class="bar-label">Harassment</span><div class="bar-track"><div class="bar-fill" style="width:55%;background:#fbbf24"></div></div><span class="bar-val">6</span></div>
+          <div class="bar-row"><span class="bar-label">Safety</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:#fb923c"></div></div><span class="bar-val">4</span></div>
+          <div class="bar-row"><span class="bar-label">Data breach</span><div class="bar-track"><div class="bar-fill" style="width:28%;background:#60a5fa"></div></div><span class="bar-val">3</span></div>
+          <div class="bar-row"><span class="bar-label">Bribery</span><div class="bar-track"><div class="bar-fill" style="width:18%;background:#a78bfa"></div></div><span class="bar-val">2</span></div>
+          <div class="bar-row"><span class="bar-label">Other</span><div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--muted)"></div></div><span class="bar-val">1</span></div>
+        </div>
       </div>
-      <div style="font-size:16px;font-weight:600;color:var(--y);margin-bottom:6px;">Admin Access</div>
-      <div style="font-size:13px;color:var(--txt2);margin-bottom:1.75rem;">Enter your 4-digit security PIN to continue</div>
-      <div class="pin-dots" id="pin-dots">
-        <div class="pin-dot" id="pd0"></div>
-        <div class="pin-dot" id="pd1"></div>
-        <div class="pin-dot" id="pd2"></div>
-        <div class="pin-dot" id="pd3"></div>
+      <div class="chart-card">
+        <div class="chart-title">Resolution status</div>
+        <div class="donut-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="var(--border)" stroke-width="18"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#00e87b" stroke-width="18" stroke-dasharray="113 188" stroke-dashoffset="47" stroke-linecap="butt"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#fbbf24" stroke-width="18" stroke-dasharray="62 239" stroke-dashoffset="-66" stroke-linecap="butt"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#60a5fa" stroke-width="18" stroke-dasharray="50 251" stroke-dashoffset="-128" stroke-linecap="butt"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#ff6b6b" stroke-width="18" stroke-dasharray="25 276" stroke-dashoffset="-178" stroke-linecap="butt"/>
+            <text x="60" y="55" text-anchor="middle" font-family="'Bebas Neue'" font-size="22" fill="#e8ede9">24</text>
+            <text x="60" y="70" text-anchor="middle" font-family="'DM Mono'" font-size="9" fill="#6b7a6e" letter-spacing="1">TOTAL</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#00e87b"></div>Resolved (10)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>In progress (5)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div>Under review (7)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ff6b6b"></div>Escalated (2)</div>
+          </div>
+        </div>
       </div>
-      <div class="pin-grid">
-        <button class="pin-key" onclick="pk('1')">1</button>
-        <button class="pin-key" onclick="pk('2')">2</button>
-        <button class="pin-key" onclick="pk('3')">3</button>
-        <button class="pin-key" onclick="pk('4')">4</button>
-        <button class="pin-key" onclick="pk('5')">5</button>
-        <button class="pin-key" onclick="pk('6')">6</button>
-        <button class="pin-key" onclick="pk('7')">7</button>
-        <button class="pin-key" onclick="pk('8')">8</button>
-        <button class="pin-key" onclick="pk('9')">9</button>
-        <button class="pin-key" style="opacity:.2;cursor:default;" onclick="return;"></button>
-        <button class="pin-key" onclick="pk('0')">0</button>
-        <button class="pin-key" style="font-size:13px;color:var(--txt2);" onclick="pdel()">⌫</button>
+      <div class="chart-card">
+        <div class="chart-title">Monthly submissions (2024)</div>
+        <div style="display:flex;align-items:flex-end;gap:8px;height:100px;margin-top:1rem;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="width:100%;background:var(--accent);border-radius:2px 2px 0 0;opacity:0.7;" data-h="40"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Jul</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="width:100%;background:var(--accent);border-radius:2px 2px 0 0;opacity:0.7;" data-h="55"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Aug</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="width:100%;background:var(--accent);border-radius:2px 2px 0 0;opacity:0.7;" data-h="35"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Sep</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="width:100%;background:var(--accent);border-radius:2px 2px 0 0;opacity:0.7;" data-h="70"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Oct</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="width:100%;background:var(--accent);border-radius:2px 2px 0 0;opacity:0.7;" data-h="85"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Nov</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="width:100%;background:var(--accent);border-radius:2px 2px 0 0;" data-h="100"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--accent)">Dec</span>
+          </div>
+        </div>
       </div>
-      <div class="pin-err" id="pin-err"></div>
-      <div style="font-size:11px;color:var(--txt3);margin-top:14px;">Default PIN: 1234</div>
+      <div class="chart-card">
+        <div class="chart-title">Risk level distribution</div>
+        <div class="bar-chart" style="margin-top:1rem;">
+          <div class="bar-row"><span class="bar-label">Critical</span><div class="bar-track"><div class="bar-fill" style="width:20%;background:#ff4444"></div></div><span class="bar-val" style="color:#ff6b6b">2</span></div>
+          <div class="bar-row"><span class="bar-label">High</span><div class="bar-track"><div class="bar-fill" style="width:45%;background:#fb923c"></div></div><span class="bar-val" style="color:#fb923c">7</span></div>
+          <div class="bar-row"><span class="bar-label">Medium</span><div class="bar-track"><div class="bar-fill" style="width:55%;background:#fbbf24"></div></div><span class="bar-val" style="color:#fbbf24">9</span></div>
+          <div class="bar-row"><span class="bar-label">Low</span><div class="bar-track"><div class="bar-fill" style="width:37%;background:var(--accent)"></div></div><span class="bar-val" style="color:var(--accent)">6</span></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- ADMIN DASHBOARD -->
-  <div id="admin-dash" class="hidden">
-    <div class="adm-topbar">
+  <!-- AUDIT LOG TAB -->
+  <div class="admin-panel" id="tab-audit">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
       <div>
-        <div style="font-size:16px;font-weight:600;color:var(--y);">Admin Panel</div>
-        <div style="font-size:12px;color:var(--txt2);margin-top:2px;">Full access — handle with care</div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">// compliance</div>
+        <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">AUDIT LOG</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="adm-badge">Authenticated</span>
-        <button class="logout-btn" onclick="adminOut()">Logout</button>
+      <button class="adm-btn adm-btn-accent">Export log</button>
+    </div>
+    <div class="adm-card">
+      <div class="adm-card-header"><span class="adm-card-title">All system actions</span></div>
+      <div style="padding:1rem 1.5rem;" id="audit-list">
+        <div class="audit-row"><span class="audit-ts">Dec 16 · 14:15</span><span class="audit-action">SV-2025-7834 assigned to R. Sharma</span><span class="audit-by">admin</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 16 · 11:02</span><span class="audit-action">SV-2025-7762 status changed → Escalated</span><span class="audit-by">admin</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 15 · 16:45</span><span class="audit-action">SV-2025-7791 status changed → In review</span><span class="audit-by">P. Gupta</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 15 · 11:00</span><span class="audit-action">SV-2025-7834 status changed → In progress</span><span class="audit-by">R. Sharma</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 14 · 09:41</span><span class="audit-action">SV-2025-7834 received and encrypted by system</span><span class="audit-by">System</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 11 · 08:20</span><span class="audit-action">SV-2025-7791 received and encrypted by system</span><span class="audit-by">System</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 10 · 17:33</span><span class="audit-action">SV-2025-7701 status changed → Closed · resolved</span><span class="audit-by">R. Sharma</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 8 · 14:05</span><span class="audit-action">SV-2025-7762 received and encrypted by system</span><span class="audit-by">System</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 3 · 10:12</span><span class="audit-action">SV-2025-7701 received and encrypted by system</span><span class="audit-by">System</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /admin-dashboard -->
+
+<!-- DETAIL SIDE PANEL -->
+<div class="admin-overlay" id="admin-overlay" onclick="closeDetail()"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="dp-header">
+    <div class="dp-header-top">
+      <span class="dp-id" id="dp-id">SV-2025-7834</span>
+      <button class="dp-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <span class="sp sp-progress" id="dp-status-badge">In progress</span>
+      <div class="risk-wrap" id="dp-risk-wrap"><div class="risk-dot risk-high"></div><span class="risk-label">High risk</span></div>
+    </div>
+  </div>
+  <div class="dp-body">
+
+    <div class="dp-section">
+      <div class="dp-section-title">Complaint details</div>
+      <div id="dp-rows"></div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-title">Description</div>
+      <div class="dp-desc" id="dp-desc"></div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-title">AI investigative analysis</div>
+      <div class="ai-box">
+        <div class="ai-box-header">
+          <div class="ai-dot"></div>
+          <span class="ai-label">AI analysis engine</span>
+          <button onclick="runAIAnalysis()" style="margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border:1px solid rgba(0,232,123,0.3);border-radius:2px;background:none;color:var(--accent);cursor:pointer;">Run →</button>
+        </div>
+        <div class="ai-body" id="ai-output">
+          <p style="color:var(--muted);font-style:italic;">Click "Run" to generate an AI-powered investigative analysis for this complaint.</p>
+        </div>
       </div>
     </div>
 
-    <div class="adm-stats">
-      <div class="stat-card"><div class="stat-num" id="a-tot">0</div><div class="stat-lbl">Total</div></div>
-      <div class="stat-card"><div class="stat-num" id="a-new">0</div><div class="stat-lbl">New</div></div>
-      <div class="stat-card"><div class="stat-num" id="a-rev">0</div><div class="stat-lbl">In Review</div></div>
-      <div class="stat-card"><div class="stat-num" id="a-crit" style="color:#F7C1C1;">0</div><div class="stat-lbl" style="color:#F09595;">Critical</div></div>
+    <div class="dp-section">
+      <div class="dp-section-title">Update status</div>
+      <div class="status-btns" id="status-btns">
+        <button class="st-btn" onclick="updateStatus(this,'New')">New</button>
+        <button class="st-btn" onclick="updateStatus(this,'In review')">In review</button>
+        <button class="st-btn active" onclick="updateStatus(this,'In progress')">In progress</button>
+        <button class="st-btn" onclick="updateStatus(this,'Escalated')">Escalated</button>
+        <button class="st-btn" onclick="updateStatus(this,'Closed')">Closed</button>
+      </div>
     </div>
 
-    <div class="search-bar">
-      <input class="finput" id="asearch" placeholder="Search by title, ID, category..." oninput="renderAdm()" style="flex:1;" />
-      <select class="filter-sel" id="afilter" onchange="renderAdm()" style="background:var(--blk3);color:var(--txt2);">
-        <option value="">All status</option>
-        <option>New</option>
-        <option>Under Review</option>
-        <option>Resolved</option>
+    <div class="dp-section">
+      <div class="dp-section-title">Assign investigator</div>
+      <select class="dp-assign" id="dp-assign" onchange="logAssign()">
+        <option value="">Unassigned</option>
+        <option value="R. Sharma">Ravi Sharma · Senior Investigator</option>
+        <option value="P. Gupta">Priya Gupta · HR &amp; Compliance</option>
+        <option value="M. Rashid">Mohammed Rashid · IT &amp; Data</option>
+        <option value="S. Joshi">Sunita Joshi · Legal &amp; Ethics</option>
       </select>
     </div>
 
-    <div id="adm-list"><div class="empty">No reports found.</div></div>
+    <div class="dp-section">
+      <div class="dp-section-title">Audit trail</div>
+      <div id="dp-audit"></div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-title">Add note</div>
+      <textarea id="dp-note" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;resize:vertical;min-height:80px;outline:none;line-height:1.6;" placeholder="Add investigation note..."></textarea>
+      <button onclick="addNote()" style="margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;padding:7px 16px;border:1px solid rgba(0,232,123,0.3);border-radius:2px;background:none;color:var(--accent);cursor:pointer;">Save note →</button>
+    </div>
+
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">REPORTER</div>
+    <div class="footer-text">Reporter is a secure, anonymous whistleblowing platform.<br>We do not track, log, or store any identifying information about our users.</div>
+  </div>
+  <div class="footer-copy">
+    © 2025 Reporter. All communications are encrypted end-to-end.<br>
+    <span style="color:var(--accent)">// speak truth. stay safe.</span>
+  </div>
+</footer>
 
 <script>
-var sev='', anon=true, db, authed=false, pin='', allR=[];
-var ADMIN_PIN='1234';
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const DB = {
+  'SV-2025-7834': { cat: 'Financial fraud', dept: 'Finance dept, HQ', date: 'Dec 14, 2024', status: 'In progress', risk: 'High', anon: true, assigned: 'R. Sharma', desc: 'Repeated irregularities noticed in vendor payment approvals. Invoices appear to be duplicated across Q2 and Q3 with inflated amounts. Three vendors share the same bank account routing details.', audit: ['Dec 14 · 09:41 — Complaint received · System', 'Dec 15 · 11:00 — Status → In progress · admin', 'Dec 16 · 14:15 — Assigned to R. Sharma · admin'] },
+  'SV-2025-7791': { cat: 'Safety violation', dept: 'Warehouse, Pune', date: 'Dec 11, 2024', status: 'New', risk: 'Medium', anon: false, reporter: 'J. Mehta', assigned: '', desc: 'Fire exits on Floor 3 have been blocked by inventory for over 2 months. Multiple requests to the facilities manager have been ignored.', audit: ['Dec 11 · 08:20 — Complaint received · System'] },
+  'SV-2025-7762': { cat: 'Workplace harassment', dept: 'HR Department', date: 'Dec 8, 2024', status: 'Escalated', risk: 'Critical', anon: true, assigned: 'P. Gupta', desc: 'Sustained pattern of intimidation from a senior manager. Multiple employees affected but afraid to report formally due to fear of retaliation.', audit: ['Dec 8 · 14:05 — Complaint received · System', 'Dec 10 · 09:30 — Assigned to P. Gupta · admin', 'Dec 16 · 11:02 — Status → Escalated · admin'] },
+  'SV-2025-7701': { cat: 'Data privacy breach', dept: 'IT, Chennai', date: 'Dec 3, 2024', status: 'Closed', risk: 'Low', anon: true, assigned: 'R. Sharma', desc: 'Customer PII data was found in an unencrypted shared drive accessible to all employees. Data has since been secured.', audit: ['Dec 3 · 10:12 — Complaint received · System', 'Dec 5 · 12:00 — Assigned to R. Sharma · admin', 'Dec 10 · 17:33 — Status → Closed · R. Sharma'] },
+  'SV-2025-7688': { cat: 'Bribery / corruption', dept: 'Procurement, Delhi', date: 'Nov 28, 2024', status: 'In review', risk: 'High', anon: true, assigned: 'S. Joshi', desc: 'Evidence of kickbacks from suppliers during contract negotiation. Cash transfers reportedly linked to procurement head.', audit: ['Nov 28 · 10:00 — Complaint received · System', 'Nov 29 · 15:00 — Assigned to S. Joshi · admin'] },
+};
 
-try{
-  var cfg={
-    apiKey:"AIzaSyBa1aMiK05bW5c2-1-x_mOMuHdT3Rrq55Y",
-    authDomain:"asd123-cbc36.firebaseapp.com",
-    projectId:"asd123-cbc36",
-    storageBucket:"asd123-cbc36.firebasestorage.app",
-    messagingSenderId:"479790670785",
-    appId:"1:479790670785:web:b14796c643dd5ceca38540",
-    measurementId:"G-D15HL4112N"
-  };
-  if(!firebase.apps.length) firebase.initializeApp(cfg);
-  db=firebase.firestore();
-  console.log('Firebase connected');
-}catch(e){console.error('Firebase error:',e);}
+let currentDetailId = null;
 
-function gid(){
-  var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return 'RPT-'+Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('');
-}
-
-function toast(m,d){
-  var t=document.getElementById('toast');
-  t.textContent=m; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),d||3200);
-}
-
-function switchTab(t,btn){
-  ['report','reports','track','admin'].forEach(function(x){
-    var el=document.getElementById('tab-'+x);
-    if(!el) return;
-    if(x===t){ el.classList.remove('hidden'); } else { el.classList.add('hidden'); }
-  });
-  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-  if(t==='reports') loadReports();
-  if(t==='admin'&&authed) loadAdm();
-}
-
-function setSev(l,el){
-  sev=l;
-  document.querySelectorAll('.sev-btn').forEach(function(b){b.className='sev-btn';});
-  el.classList.add('sel-'+l);
-}
-
-function toggleAnon(){
-  anon=!anon;
-  document.getElementById('attrack').className='ttrack'+(anon?'':' off');
-  document.getElementById('anon-lbl').textContent=anon?'Anonymous — identity fully hidden':'Identified — name may be shared with investigators';
-  var cg=document.getElementById('cg');
-  cg.className=anon?'fgroup hidden':'fgroup';
-}
-
-function handleFiles(inp){
-  document.getElementById('flist').innerHTML=Array.from(inp.files).map(function(f){return '<span class="fchip">'+f.name+'</span>';}).join('');
-}
-
-function makeQR(cid,rid,lid){
-  var url=window.location.href.split('?')[0]+'?track='+rid;
-  if(typeof QRCode!=='undefined'){
-    QRCode.toCanvas(document.getElementById(cid),url,{width:160,margin:1,color:{dark:'#000000',light:'#ffffff'}},function(e){if(e)console.error(e);});
-  }
-  if(lid) document.getElementById(lid).textContent=rid;
-}
-
-function dlQR(cid){
-  var a=document.createElement('a');
-  a.download='safevoice-'+cid+'.png';
-  a.href=document.getElementById(cid).toDataURL();
-  a.click();
-}
-
-async function submitReport(){
-  var cat=document.getElementById('category').value;
-  var title=document.getElementById('rtitle').value.trim();
-  var desc=document.getElementById('rdesc').value.trim();
-  if(!cat||!title||!desc){toast('Please fill in category, title, and description.');return;}
-  var btn=document.getElementById('sbtn');
-  btn.disabled=true;
-  btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Submitting...';
-  var rid=gid();
-  var rep={
-    reportId:rid, category:cat, title:title, description:desc,
-    department:document.getElementById('dept').value,
-    incidentDate:document.getElementById('idate').value,
-    severity:sev||'medium', anonymous:anon,
-    contact:anon?null:document.getElementById('cemail').value,
-    status:'New', createdAt:new Date().toISOString(),
-    timeline:[{event:'Report submitted',date:new Date().toISOString()}]
-  };
-  /* Always save locally first — never block on Firebase */
-  try{
-    var stored=JSON.parse(localStorage.getItem('sv_r')||'[]');
-    stored.push(rep);
-    localStorage.setItem('sv_r',JSON.stringify(stored));
-  }catch(e){console.error('localStorage error:',e);}
-  /* Attempt Firebase in background — don't await, don't block UI */
-  if(db){
-    db.collection('reports').doc(rid).set(rep).catch(function(e){console.warn('Firebase sync failed:',e);});
-  }
-  /* Immediately show success */
-  toast('Submitted successfully! Your ID: '+rid,5000);
-  document.getElementById('report-qr').style.display='block';
-  setTimeout(function(){makeQR('qr-c1',rid,'qr-id1');},300);
-  ['category','rtitle','rdesc','dept','idate','cemail'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  document.getElementById('flist').innerHTML='';
-  document.querySelectorAll('.sev-btn').forEach(function(b){b.className='sev-btn';});
-  sev='';
-  btn.disabled=false;
-  btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Submit Securely';
-}
-
-async function loadReports(){
-  var el=document.getElementById('rlist');
-  var rpts=JSON.parse(localStorage.getItem('sv_r')||'[]').reverse();
-  renderReports(rpts);
-  /* Try Firebase in background */
-  if(db){
-    try{
-      var s=await Promise.race([
-        db.collection('reports').orderBy('createdAt','desc').limit(100).get(),
-        new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},5000);})
-      ]);
-      var fbR=[];
-      s.forEach(function(d){fbR.push(d.data());});
-      if(fbR.length) renderReports(fbR);
-    }catch(e){console.warn('Firebase load failed:',e);}
-  }
-}
-
-function renderReports(rpts){
-  document.getElementById('s-tot').textContent=rpts.length;
-  document.getElementById('s-open').textContent=rpts.filter(function(r){return r.status!=='Resolved';}).length;
-  document.getElementById('s-res2').textContent=rpts.filter(function(r){return r.status==='Resolved';}).length;
-  var el=document.getElementById('rlist');
-  if(!rpts.length){el.innerHTML='<div class="empty">No reports yet. Submit your first report.</div>';return;}
-  var sc={New:'s-New','Under Review':'s-Under-Review',Resolved:'s-Resolved'};
-  el.innerHTML=rpts.map(function(r){
-    return '<div class="rcard" onclick="goTrack(\''+r.reportId+'\')">'
-      +'<div class="rc-head"><span class="rc-id">'+r.reportId+'</span>'
-      +'<span class="rc-cat cat-'+(r.category||'Other')+'">'+r.category+'</span></div>'
-      +'<div class="rc-title">'+r.title+'</div>'
-      +'<div class="rc-meta">'
-      +'<span><span class="sdot '+(sc[r.status]||'s-New')+'"></span>'+(r.status||'New')+'</span>'
-      +'<span>'+(r.severity||'medium')+'</span>'
-      +'<span>'+(r.anonymous?'Anonymous':'Named')+'</span>'
-      +'<span>'+(r.createdAt?new Date(r.createdAt).toLocaleDateString():'')+'</span>'
-      +'</div></div>';
-  }).join('');
-}
-
-function goTrack(id){
-  document.getElementById('tid').value=id;
-  document.querySelectorAll('.nav-btn')[2].click();
-  setTimeout(trackReport,120);
-}
-
-async function trackReport(){
-  var id=document.getElementById('tid').value.trim().toUpperCase();
-  var box=document.getElementById('tresult');
-  if(!id){toast('Please enter a report ID');return;}
-  /* Check localStorage first — instant */
-  var all=JSON.parse(localStorage.getItem('sv_r')||'[]');
-  var rep=all.find(function(r){return r.reportId===id;})||null;
-  /* Try Firebase with timeout */
-  if(!rep&&db){
-    try{
-      var result=await Promise.race([
-        db.collection('reports').doc(id).get(),
-        new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},5000);})
-      ]);
-      if(result.exists) rep=result.data();
-    }catch(e){console.warn('Firebase track failed:',e);}
-  }
-  if(!rep){
-    box.style.display='block';
-    box.innerHTML='<div style="color:#F09595;font-size:13px;padding:4px 0;">Report not found. Please check the ID and try again.</div>';
-    return;
-  }
-  var pct={New:20,'Under Review':60,Resolved:100}[rep.status]||20;
-  var tl=rep.timeline||[{event:'Report submitted',date:rep.createdAt}];
-  box.style.display='block';
-  box.innerHTML=
-    '<div class="drow"><span class="dk">Report ID</span><span class="dv" style="font-family:monospace;">'+rep.reportId+'</span></div>'
-   +'<div class="drow"><span class="dk">Category</span><span class="dv">'+rep.category+'</span></div>'
-   +'<div class="drow"><span class="dk">Title</span><span class="dv">'+rep.title+'</span></div>'
-   +'<div class="drow"><span class="dk">Severity</span><span class="dv">'+rep.severity+'</span></div>'
-   +'<div class="drow"><span class="dk">Status</span><span class="dv" style="color:var(--y);">'+(rep.status||'New')+'</span></div>'
-   +'<div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div>'
-   +'<div style="margin-top:1.25rem;">'+tl.map(function(t){
-     return '<div class="tl-item"><div class="tl-dot"></div>'
-       +'<div class="tl-txt">'+t.event+'</div>'
-       +'<div class="tl-dt">'+new Date(t.date).toLocaleString()+'</div></div>';
-   }).join('')+'</div>';
-  document.getElementById('track-qr').style.display='block';
-  setTimeout(function(){makeQR('qr-c2',rep.reportId,'qr-id2');},300);
-}
-
-/* PIN LOGIC */
-function pk(k){
-  if(!k||pin.length>=4) return;
-  pin+=k;
-  for(var i=0;i<4;i++) document.getElementById('pd'+i).classList.toggle('filled',i<pin.length);
-  document.getElementById('pin-err').textContent='';
-  if(pin.length===4) setTimeout(checkPin,220);
-}
-function pdel(){
-  if(!pin.length) return;
-  pin=pin.slice(0,-1);
-  for(var i=0;i<4;i++) document.getElementById('pd'+i).classList.toggle('filled',i<pin.length);
-}
-function checkPin(){
-  if(pin===ADMIN_PIN){
-    authed=true;
-    document.getElementById('admin-lock').style.display='none';
-    document.getElementById('admin-dash').className='';
-    loadAdm();
-  }else{
-    document.getElementById('pin-err').textContent='Incorrect PIN. Please try again.';
-    pin='';
-    for(var i=0;i<4;i++) document.getElementById('pd'+i).classList.remove('filled');
-    /* shake animation */
-    var grid=document.querySelector('.pin-grid');
-    grid.style.transform='translateX(8px)';
-    setTimeout(function(){grid.style.transform='translateX(-8px)';},80);
-    setTimeout(function(){grid.style.transform='translateX(0)';},160);
-  }
-}
-function adminOut(){
-  authed=false; pin='';
-  document.getElementById('admin-lock').style.display='block';
-  document.getElementById('admin-dash').className='hidden';
-  for(var i=0;i<4;i++) document.getElementById('pd'+i).classList.remove('filled');
-}
-
-/* ADMIN DATA */
-async function loadAdm(){
-  allR=JSON.parse(localStorage.getItem('sv_r')||'[]').reverse();
-  document.getElementById('a-tot').textContent=allR.length;
-  document.getElementById('a-new').textContent=allR.filter(function(r){return !r.status||r.status==='New';}).length;
-  document.getElementById('a-rev').textContent=allR.filter(function(r){return r.status==='Under Review';}).length;
-  document.getElementById('a-crit').textContent=allR.filter(function(r){return r.severity==='critical';}).length;
-  renderAdm();
-  /* Try to sync from Firebase in background */
-  if(db){
-    try{
-      var s=await Promise.race([
-        db.collection('reports').orderBy('createdAt','desc').get(),
-        new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},5000);})
-      ]);
-      var fbR=[];
-      s.forEach(function(d){fbR.push(d.data());});
-      if(fbR.length){
-        allR=fbR;
-        document.getElementById('a-tot').textContent=allR.length;
-        document.getElementById('a-new').textContent=allR.filter(function(r){return !r.status||r.status==='New';}).length;
-        document.getElementById('a-rev').textContent=allR.filter(function(r){return r.status==='Under Review';}).length;
-        document.getElementById('a-crit').textContent=allR.filter(function(r){return r.severity==='critical';}).length;
-        renderAdm();
-      }
-    }catch(e){console.warn('Firebase load failed, using local data:',e);}
-  }
-}
-
-function renderAdm(){
-  var q=(document.getElementById('asearch').value||'').toLowerCase();
-  var f=document.getElementById('afilter').value;
-  var rpts=allR.filter(function(r){
-    var m=!q||(r.title+r.reportId+r.category+(r.description||'')).toLowerCase().includes(q);
-    var sf=!f||r.status===f||(f==='New'&&!r.status);
-    return m&&sf;
-  });
-  var el=document.getElementById('adm-list');
-  if(!rpts.length){el.innerHTML='<div class="empty">No reports match the search/filter.</div>';return;}
-  el.innerHTML=rpts.map(function(r){
-    var sevColor=r.severity==='critical'?'var(--y)':r.severity==='high'?'#F09595':'var(--txt3)';
-    return '<div class="adm-rrow">'
-      +'<div class="adm-rrow-head">'
-      +'<div style="display:flex;align-items:center;gap:8px;">'
-      +'<span class="rc-cat cat-'+(r.category||'Other')+'">'+r.category+'</span>'
-      +'<span style="font-size:11px;font-family:monospace;color:var(--txt3);">'+r.reportId+'</span>'
-      +'</div>'
-      +'<div class="adm-acts">'
-      +'<select class="status-sel" onchange="updSt(\''+r.reportId+'\',this.value)">'
-      +'<option'+((!r.status||r.status==='New')?' selected':'')+'>New</option>'
-      +'<option'+(r.status==='Under Review'?' selected':'')+'>Under Review</option>'
-      +'<option'+(r.status==='Resolved'?' selected':'')+'>Resolved</option>'
-      +'</select>'
-      +'<button class="adm-btn" onclick="admQR(\''+r.reportId+'\')">QR</button>'
-      +'<button class="adm-btn del" onclick="delR(\''+r.reportId+'\')">Delete</button>'
-      +'</div></div>'
-      +'<div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:5px;">'+r.title+'</div>'
-      +'<div style="font-size:12px;color:var(--txt2);line-height:1.5;">'+(r.description||'').substring(0,130)+((r.description||'').length>130?'...':'')+'</div>'
-      +'<div style="display:flex;gap:12px;margin-top:8px;font-size:11px;">'
-      +'<span style="color:'+sevColor+';">Severity: '+r.severity+'</span>'
-      +'<span style="color:var(--txt3);">'+(r.anonymous?'Anonymous':'Named')+'</span>'
-      +'<span style="color:var(--txt3);">'+(r.createdAt?new Date(r.createdAt).toLocaleDateString():'')+'</span>'
-      +(r.department?'<span style="color:var(--txt3);">'+r.department+'</span>':'')
-      +'</div></div>';
-  }).join('');
-}
-
-function admQR(rid){
-  document.querySelectorAll('.nav-btn')[2].click();
-  document.getElementById('tid').value=rid;
-  setTimeout(trackReport,150);
-  toast('Showing QR for '+rid);
-}
-
-async function updSt(rid,status){
-  var stored=JSON.parse(localStorage.getItem('sv_r')||'[]');
-  var idx=stored.findIndex(function(r){return r.reportId===rid;});
-  if(idx>=0){
-    stored[idx].status=status;
-    stored[idx].timeline=stored[idx].timeline||[];
-    stored[idx].timeline.push({event:'Status updated to: '+status,date:new Date().toISOString()});
-    localStorage.setItem('sv_r',JSON.stringify(stored));
-  }
-  try{if(db) await db.collection('reports').doc(rid).update({status:status});}catch(e){}
-  var r=allR.find(function(x){return x.reportId===rid;});
-  if(r) r.status=status;
-  document.getElementById('a-new').textContent=allR.filter(function(r){return !r.status||r.status==='New';}).length;
-  document.getElementById('a-rev').textContent=allR.filter(function(r){return r.status==='Under Review';}).length;
-  toast('Status updated to '+status);
-}
-
-async function delR(rid){
-  if(!confirm('Permanently delete report '+rid+'? This cannot be undone.')) return;
-  var stored=JSON.parse(localStorage.getItem('sv_r')||'[]').filter(function(r){return r.reportId!==rid;});
-  localStorage.setItem('sv_r',JSON.stringify(stored));
-  try{if(db) await db.collection('reports').doc(rid).delete();}catch(e){}
-  allR=allR.filter(function(r){return r.reportId!==rid;});
-  document.getElementById('a-tot').textContent=allR.length;
-  document.getElementById('a-crit').textContent=allR.filter(function(r){return r.severity==='critical';}).length;
-  renderAdm();
-  toast('Report deleted permanently');
-}
-
-/* auto-track from URL param */
-window.addEventListener('DOMContentLoaded',function(){
-  var p=new URLSearchParams(window.location.search);
-  var t=p.get('track');
-  if(t){
-    document.getElementById('tid').value=t;
-    document.querySelectorAll('.nav-btn')[2].click();
-    setTimeout(trackReport,300);
-  }
+// ═══════════════════════════════════════
+// PUBLIC SITE FUNCTIONS
+// ═══════════════════════════════════════
+document.getElementById('anon').addEventListener('change', function() {
+  document.getElementById('id-fields').style.display = this.checked ? 'none' : 'block';
 });
+
+function genId() {
+  return 'SV-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 8999);
+}
+
+function submitReport() {
+  const cat = document.getElementById('cat').value;
+  const desc = document.getElementById('desc').value;
+  if (!cat || !desc.trim()) { alert('Please select a category and provide a description.'); return; }
+  const tid = genId();
+  document.getElementById('tid-display').textContent = tid;
+  DB[tid] = { cat, dept: document.getElementById('dept').value || 'Not specified', date: new Date().toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}), status: 'New', risk: 'Pending', anon: document.getElementById('anon').checked, assigned: '', desc, audit: [new Date().toLocaleString('en-GB') + ' — Complaint received · System'] };
+  document.getElementById('complaint-form').style.display = 'none';
+  document.getElementById('success-view').style.display = 'block';
+}
+
+function resetForm() {
+  document.getElementById('complaint-form').style.display = 'block';
+  document.getElementById('success-view').style.display = 'none';
+  document.getElementById('cat').value = '';
+  document.getElementById('desc').value = '';
+}
+
+function trackReport() {
+  const id = document.getElementById('track-id').value.trim().toUpperCase();
+  const c = DB[id];
+  const res = document.getElementById('track-result');
+  if (!c) { alert('Tracking ID not found. Try: SV-2025-7834'); return; }
+  res.classList.add('show');
+  document.getElementById('tr-id-label').textContent = id;
+  const pill = document.getElementById('tr-status');
+  pill.textContent = c.status;
+  const cls = {New:'sp-new','In review':'sp-review','In progress':'sp-progress','Escalated':'sp-escalated','Closed':'sp-closed'};
+  pill.className = 'status-pill ' + (cls[c.status] || 'sp-progress');
+  document.getElementById('tr-info').textContent = `Category: ${c.cat}  ·  Department: ${c.dept}  ·  Submitted: ${c.date}  ·  Reporter: ${c.anon ? 'Anonymous' : (c.reporter || 'Identified')}`;
+}
+
+// ═══════════════════════════════════════
+// ADMIN AUTH
+// ═══════════════════════════════════════
+function openAdminLogin() {
+  document.getElementById('admin-login-screen').classList.add('show');
+}
+
+function closeAdminLogin() {
+  document.getElementById('admin-login-screen').classList.remove('show');
+  document.getElementById('login-err').classList.remove('show');
+}
+
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value.trim();
+  if (u === 'admin' && p === 'admin123') {
+    document.getElementById('admin-login-screen').classList.remove('show');
+    document.getElementById('admin-dashboard').classList.add('show');
+    buildComplaintsTable();
+    initBars();
+  } else {
+    document.getElementById('login-err').classList.add('show');
+  }
+}
+
+function doLogout() {
+  document.getElementById('admin-dashboard').classList.remove('show');
+  closeDetail();
+}
+
+// ═══════════════════════════════════════
+// ADMIN TABS
+// ═══════════════════════════════════════
+function showAdminTab(name, btn) {
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════
+// COMPLAINTS TABLE
+// ═══════════════════════════════════════
+const riskClass = { Low: 'risk-low', Medium: 'risk-med', High: 'risk-high', Critical: 'risk-crit', Pending: 'risk-low' };
+const statusClass = { New: 'sp-new', 'In review': 'sp-review', 'In progress': 'sp-progress', Escalated: 'sp-escalated', Closed: 'sp-closed' };
+
+function buildComplaintsTable(filterStatus = '', filterCat = '') {
+  const tbody = document.getElementById('complaints-tbody');
+  tbody.innerHTML = '';
+  Object.entries(DB).forEach(([id, c]) => {
+    if (filterStatus && c.status !== filterStatus) return;
+    if (filterCat && c.cat !== filterCat) return;
+    const tr = document.createElement('tr');
+    tr.onclick = () => openDetail(id);
+    tr.innerHTML = `
+      <td><span class="adm-id">${id}</span></td>
+      <td><span class="adm-cat">${c.cat}</span></td>
+      <td><span class="adm-dept">${c.dept}</span></td>
+      <td><span class="adm-date">${c.date}</span></td>
+      <td><span style="font-family:var(--mono);font-size:12px;color:var(--muted2)">${c.anon ? 'Anonymous' : (c.reporter || 'Identified')}</span></td>
+      <td><span class="sp ${statusClass[c.status] || 'sp-new'}">${c.status}</span></td>
+      <td><div class="risk-wrap"><div class="risk-dot ${riskClass[c.risk] || 'risk-low'}"></div><span class="risk-label">${c.risk}</span></div></td>
+      <td><span style="font-family:var(--mono);font-size:12px;color:var(--muted2)">${c.assigned || '—'}</span></td>
+      <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('${id}')">View →</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterComplaints() {
+  buildComplaintsTable(
+    document.getElementById('filter-status').value,
+    document.getElementById('filter-cat').value
+  );
+}
+
+// ═══════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════
+function openDetail(id) {
+  const c = DB[id];
+  if (!c) return;
+  currentDetailId = id;
+  document.getElementById('dp-id').textContent = id;
+  const sb = document.getElementById('dp-status-badge');
+  sb.textContent = c.status;
+  sb.className = 'sp ' + (statusClass[c.status] || 'sp-new');
+  const rw = document.getElementById('dp-risk-wrap');
+  rw.innerHTML = `<div class="risk-dot ${riskClass[c.risk] || 'risk-low'}"></div><span class="risk-label">${c.risk} risk</span>`;
+  document.getElementById('dp-rows').innerHTML = `
+    <div class="dp-row"><span class="dp-lbl">Category</span><span class="dp-val">${c.cat}</span></div>
+    <div class="dp-row"><span class="dp-lbl">Submitted</span><span class="dp-val">${c.date}</span></div>
+    <div class="dp-row"><span class="dp-lbl">Department</span><span class="dp-val">${c.dept}</span></div>
+    <div class="dp-row"><span class="dp-lbl">Reporter</span><span class="dp-val">${c.anon ? 'Anonymous' : (c.reporter || 'Identified')}</span></div>
+    <div class="dp-row"><span class="dp-lbl">Risk level</span><span class="dp-val">${c.risk}</span></div>
+  `;
+  document.getElementById('dp-desc').textContent = c.desc;
+  document.getElementById('dp-assign').value = c.assigned || '';
+  document.getElementById('ai-output').innerHTML = '<p style="color:var(--muted);font-style:italic;">Click "Run" to generate an AI-powered investigative analysis for this complaint.</p>';
+  buildDpAudit(id);
+  const stBtns = document.querySelectorAll('.st-btn');
+  stBtns.forEach(b => { b.classList.toggle('active', b.textContent === c.status); });
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('admin-overlay').classList.add('show');
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('admin-overlay').classList.remove('show');
+  currentDetailId = null;
+}
+
+function buildDpAudit(id) {
+  const c = DB[id];
+  document.getElementById('dp-audit').innerHTML = (c.audit || []).slice().reverse().map(a => {
+    const parts = a.split(' — ');
+    return `<div class="audit-row"><span class="audit-ts">${parts[0]}</span><span class="audit-action">${parts[1] || ''}</span></div>`;
+  }).join('');
+}
+
+function updateStatus(btn, status) {
+  if (!currentDetailId) return;
+  DB[currentDetailId].status = status;
+  document.querySelectorAll('.st-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const sb = document.getElementById('dp-status-badge');
+  sb.textContent = status;
+  sb.className = 'sp ' + (statusClass[status] || 'sp-new');
+  const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  DB[currentDetailId].audit.push(`${ts} — Status → ${status} · admin`);
+  buildDpAudit(currentDetailId);
+  addAuditEntry(`${currentDetailId} status changed → ${status}`);
+  buildComplaintsTable();
+}
+
+function logAssign() {
+  if (!currentDetailId) return;
+  const val = document.getElementById('dp-assign').value;
+  DB[currentDetailId].assigned = val;
+  if (val) {
+    const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+    DB[currentDetailId].audit.push(`${ts} — Assigned to ${val} · admin`);
+    buildDpAudit(currentDetailId);
+    addAuditEntry(`${currentDetailId} assigned to ${val}`);
+  }
+  buildComplaintsTable();
+}
+
+function addNote() {
+  if (!currentDetailId) return;
+  const note = document.getElementById('dp-note').value.trim();
+  if (!note) return;
+  const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  DB[currentDetailId].audit.push(`${ts} — Note: "${note}" · admin`);
+  buildDpAudit(currentDetailId);
+  addAuditEntry(`Note added to ${currentDetailId}`);
+  document.getElementById('dp-note').value = '';
+}
+
+function addAuditEntry(action) {
+  const list = document.getElementById('audit-list');
+  const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  const row = document.createElement('div');
+  row.className = 'audit-row';
+  row.innerHTML = `<span class="audit-ts">${ts}</span><span class="audit-action">${action}</span><span class="audit-by">admin</span>`;
+  list.prepend(row);
+}
+
+// ═══════════════════════════════════════
+// AI ANALYSIS
+// ═══════════════════════════════════════
+async function runAIAnalysis() {
+  if (!currentDetailId) return;
+  const c = DB[currentDetailId];
+  const out = document.getElementById('ai-output');
+  out.innerHTML = '<div class="ai-loading"><div class="spinner"></div> Analysing complaint data...</div>';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: 'You are a compliance investigation AI for a secure whistleblower platform. Given complaint details, provide a concise 4-6 sentence investigative briefing covering: (1) Severity and risk rationale, (2) Key investigation steps recommended, (3) Potential legal or regulatory implications, (4) Suggested next actions and timeline. Be professional and factual. No markdown headers or bullet points — plain paragraph only.',
+        messages: [{ role: 'user', content: `Complaint ID: ${currentDetailId}\nCategory: ${c.cat}\nDepartment: ${c.dept}\nDate: ${c.date}\nRisk: ${c.risk}\nStatus: ${c.status}\nDescription: ${c.desc}` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(i => i.text || '').join('');
+    out.innerHTML = `<p>${text}</p>`;
+    const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+    DB[currentDetailId].audit.push(`${ts} — AI analysis run · admin`);
+    buildDpAudit(currentDetailId);
+    addAuditEntry(`AI analysis run on ${currentDetailId}`);
+  } catch(e) {
+    out.innerHTML = '<p style="color:var(--muted)">AI analysis unavailable. Please review manually.</p>';
+  }
+}
+
+// ═══════════════════════════════════════
+// SCROLL REVEAL & BAR CHARTS
+// ═══════════════════════════════════════
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+function initBars() {
+  document.querySelectorAll('[data-h]').forEach(el => {
+    el.style.height = el.getAttribute('data-h') + 'px';
+  });
+}
+
+// Cursor glow
+const glow = document.createElement('div');
+glow.style.cssText = 'position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(0,232,123,0.04) 0%,transparent 70%);pointer-events:none;z-index:9997;transform:translate(-50%,-50%);transition:all 0.15s ease;';
+document.body.appendChild(glow);
+document.addEventListener('mousemove', e => { glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px'; });
 </script>
 </body>
 </html>
