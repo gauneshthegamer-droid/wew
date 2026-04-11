@@ -1295,6 +1295,7 @@
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 </head>
 <body>
 
@@ -2654,43 +2655,24 @@ async function recheckFirebase() {
 }
 
 // Run Firebase check when admin logs in
+// Patch doLogin to also trigger QR init and Firebase status check
 const _origDoLogin = doLogin;
-// Wrap buildComplaintsTable call to also init QR and Firebase check
-const _origBuildComplaintsTable = buildComplaintsTable;
-function buildComplaintsTable(filterStatus, filterCat) {
-  _origBuildComplaintsTable(filterStatus, filterCat);
-}
+window.doLogin = function() {
+  _origDoLogin();
+  setTimeout(() => {
+    initQRCodes();
+    recheckFirebase();
+  }, 200);
+};
 
-// Override doLogin to also trigger QR init and Firebase status check
-window.addEventListener('load', () => {
-  // Patch doLogin
-  const loginBtn = document.querySelector('.login-submit');
-  // We patch via the existing doLogin definition
-});
-
-// Monkey-patch doLogin after definition
-(function patchDoLogin() {
-  const orig = window.doLogin;
-  window.doLogin = function() {
-    orig();
-    // After login, init QRs and check Firebase
-    setTimeout(() => {
-      initQRCodes();
-      recheckFirebase();
-    }, 100);
-  };
-})();
-
-// Also init when QR tab is opened
-(function patchShowAdminTab() {
-  const orig = window.showAdminTab;
-  window.showAdminTab = function(name, btn) {
-    orig(name, btn);
-    if (name === 'qr') {
-      setTimeout(() => { initQRCodes(); }, 50);
-    }
-  };
-})();
+// Patch showAdminTab to init QR whenever QR tab is opened
+const _origShowAdminTab = showAdminTab;
+window.showAdminTab = function(name, btn) {
+  _origShowAdminTab(name, btn);
+  if (name === 'qr') {
+    setTimeout(() => { initQRCodes(); }, 100);
+  }
+};
 
 
 const glow = document.createElement('div');
