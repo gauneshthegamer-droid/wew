@@ -1293,6 +1293,8 @@
     .footer-copy { text-align: center; }
   }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -2103,6 +2105,25 @@
 </footer>
 
 <script>
+// ═══════════════════════════════════════
+// FIREBASE CONFIG
+// ═══════════════════════════════════════
+var db;
+try {
+  var firebaseConfig = {
+    apiKey: "AIzaSyBs8xQtoHuVV-Zp-3jImydfvfJWuVsX4zI",
+    authDomain: "new-671e9.firebaseapp.com",
+    projectId: "new-671e9",
+    storageBucket: "new-671e9.firebasestorage.app",
+    messagingSenderId: "869887358649",
+    appId: "1:869887358649:web:cee023cbedd4335a264d68",
+    measurementId: "G-35EW9VTC15"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  console.log('Firebase connected: new-671e9');
+} catch(e) { console.error('Firebase init error:', e); }
+
 // ═══════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════
