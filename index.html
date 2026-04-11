@@ -1723,52 +1723,8 @@
             <th>Action</th>
           </tr>
         </thead>
-        <tbody>
-          <tr onclick="openDetail('SV-2025-7834')">
-            <td><span class="adm-id">SV-2025-7834</span></td>
-            <td><span class="adm-cat">Financial fraud</span></td>
-            <td><span class="adm-dept">Finance, HQ</span></td>
-            <td><span class="adm-date">Dec 14, 2024</span></td>
-            <td><span class="sp sp-progress">In progress</span></td>
-            <td><div class="risk-wrap"><div class="risk-dot risk-high"></div><span class="risk-label">High</span></div></td>
-            <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('SV-2025-7834')">View →</button></td>
-          </tr>
-          <tr onclick="openDetail('SV-2025-7791')">
-            <td><span class="adm-id">SV-2025-7791</span></td>
-            <td><span class="adm-cat">Safety violation</span></td>
-            <td><span class="adm-dept">Warehouse, Pune</span></td>
-            <td><span class="adm-date">Dec 11, 2024</span></td>
-            <td><span class="sp sp-new">New</span></td>
-            <td><div class="risk-wrap"><div class="risk-dot risk-med"></div><span class="risk-label">Medium</span></div></td>
-            <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('SV-2025-7791')">View →</button></td>
-          </tr>
-          <tr onclick="openDetail('SV-2025-7762')">
-            <td><span class="adm-id">SV-2025-7762</span></td>
-            <td><span class="adm-cat">Workplace harassment</span></td>
-            <td><span class="adm-dept">HR Department</span></td>
-            <td><span class="adm-date">Dec 8, 2024</span></td>
-            <td><span class="sp sp-escalated">Escalated</span></td>
-            <td><div class="risk-wrap"><div class="risk-dot risk-crit"></div><span class="risk-label">Critical</span></div></td>
-            <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('SV-2025-7762')">View →</button></td>
-          </tr>
-          <tr onclick="openDetail('SV-2025-7701')">
-            <td><span class="adm-id">SV-2025-7701</span></td>
-            <td><span class="adm-cat">Data privacy breach</span></td>
-            <td><span class="adm-dept">IT, Chennai</span></td>
-            <td><span class="adm-date">Dec 3, 2024</span></td>
-            <td><span class="sp sp-closed">Closed</span></td>
-            <td><div class="risk-wrap"><div class="risk-dot risk-low"></div><span class="risk-label">Low</span></div></td>
-            <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('SV-2025-7701')">View →</button></td>
-          </tr>
-          <tr onclick="openDetail('SV-2025-7688')">
-            <td><span class="adm-id">SV-2025-7688</span></td>
-            <td><span class="adm-cat">Bribery / corruption</span></td>
-            <td><span class="adm-dept">Procurement, Delhi</span></td>
-            <td><span class="adm-date">Nov 28, 2024</span></td>
-            <td><span class="sp sp-review">In review</span></td>
-            <td><div class="risk-wrap"><div class="risk-dot risk-high"></div><span class="risk-label">High</span></div></td>
-            <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('SV-2025-7688')">View →</button></td>
-          </tr>
+        <tbody id="overview-recent-tbody">
+          <tr><td colspan="7" style="text-align:center;padding:1.5rem;font-family:var(--mono);font-size:12px;color:var(--muted);">Loading…</td></tr>
         </tbody>
       </table>
     </div>
@@ -1953,7 +1909,7 @@
         <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">// team</div>
         <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">INVESTIGATORS</div>
       </div>
-      <button class="adm-btn adm-btn-accent">+ Add investigator</button>
+      <button class="adm-btn adm-btn-accent" onclick="openAddInv()">+ Add investigator</button>
     </div>
     <div class="inv-grid">
       <div class="inv-card">
@@ -2016,7 +1972,7 @@
           <div><span class="inv-stat-val">25</span><span class="inv-stat-lbl">Resolved</span></div>
         </div>
       </div>
-      <div class="inv-card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;cursor:pointer;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'">
+      <div class="inv-card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;cursor:pointer;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'" onclick="openAddInv()">
         <div style="font-size:28px;color:var(--muted);margin-bottom:8px;">+</div>
         <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;">Add investigator</div>
       </div>
@@ -2180,6 +2136,16 @@
     </div>
 
     <div class="dp-section">
+      <div class="dp-section-title">Set risk level</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="st-btn" onclick="updateRisk(this,'Low')" style="border-color:rgba(0,232,123,0.3);color:#00e87b;">Low</button>
+        <button class="st-btn" onclick="updateRisk(this,'Medium')" style="border-color:rgba(251,191,36,0.3);color:#fbbf24;">Medium</button>
+        <button class="st-btn" onclick="updateRisk(this,'High')" style="border-color:rgba(251,146,60,0.3);color:#fb923c;">High</button>
+        <button class="st-btn" onclick="updateRisk(this,'Critical')" style="border-color:rgba(255,68,68,0.3);color:#ff6b6b;">Critical</button>
+      </div>
+    </div>
+
+    <div class="dp-section">
       <div class="dp-section-title">Assign investigator</div>
       <select class="dp-assign" id="dp-assign" onchange="logAssign()">
         <option value="">Unassigned</option>
@@ -2201,6 +2167,33 @@
       <button onclick="addNote()" style="margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;padding:7px 16px;border:1px solid rgba(0,232,123,0.3);border-radius:2px;background:none;color:var(--accent);cursor:pointer;">Save note →</button>
     </div>
 
+  </div>
+</div>
+
+<!-- ADD INVESTIGATOR MODAL -->
+<div id="add-inv-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;align-items:center;justify-content:center;" onclick="if(event.target===this)closeAddInv()">
+  <div style="background:var(--bg3);border:1px solid var(--border-hi);border-radius:4px;width:100%;max-width:440px;overflow:hidden;">
+    <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);">// Add Investigator</span>
+      <button onclick="closeAddInv()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;">✕</button>
+    </div>
+    <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
+      <div id="add-inv-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
+      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Full Name</label>
+        <input id="inv-name" type="text" placeholder="e.g. Arjun Mehta" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+      </div>
+      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Role / Specialisation</label>
+        <input id="inv-role" type="text" placeholder="e.g. Investigator · Finance" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+      </div>
+      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Status</label>
+        <select id="inv-status" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;cursor:pointer;">
+          <option value="Active">Active</option>
+          <option value="On leave">On leave</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+      <button onclick="saveInvestigator()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(0,232,123,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);cursor:pointer;transition:all 0.2s;margin-top:4px;" onmouseover="this.style.background='rgba(0,232,123,0.1)'" onmouseout="this.style.background='transparent'">Add Investigator →</button>
+    </div>
   </div>
 </div>
 
@@ -2339,7 +2332,105 @@ async function trackReport() {
 }
 
 // ═══════════════════════════════════════
-// ADMIN AUTH
+// OVERVIEW RECENT COMPLAINTS
+// ═══════════════════════════════════════
+function renderOverviewRecent() {
+  const tbody = document.getElementById('overview-recent-tbody');
+  if (!tbody) return;
+  const entries = Object.entries(DB).sort((a,b) => (b[1].createdAt||0) - (a[1].createdAt||0)).slice(0, 5);
+  if (entries.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:1.5rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No complaints yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = entries.map(([id, c]) => `
+    <tr onclick="openDetail('${id}')" style="cursor:pointer;">
+      <td><span class="adm-id">${id}</span></td>
+      <td><span class="adm-cat">${c.cat}</span></td>
+      <td><span class="adm-dept">${c.dept}</span></td>
+      <td><span class="adm-date">${c.date}</span></td>
+      <td><span class="sp ${statusClass[c.status]||'sp-new'}">${c.status}</span></td>
+      <td><div class="risk-wrap"><div class="risk-dot ${riskClass[c.risk]||'risk-low'}"></div><span class="risk-label">${c.risk}</span></div></td>
+      <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('${id}')">View →</button></td>
+    </tr>`).join('');
+}
+
+// ═══════════════════════════════════════
+// ADD INVESTIGATOR MODAL
+// ═══════════════════════════════════════
+const investigators = [
+  { initials:'RS', name:'Ravi Sharma', role:'Senior Investigator · Fraud', status:'Active', active:8, resolved:47 },
+  { initials:'PG', name:'Priya Gupta', role:'Investigator · HR & Compliance', status:'Active', active:5, resolved:31 },
+  { initials:'AK', name:'Anita Krishnan', role:'Lead Investigator · Safety', status:'On leave', active:0, resolved:62 },
+  { initials:'MR', name:'Mohammed Rashid', role:'Investigator · Data & IT', status:'Active', active:3, resolved:18 },
+  { initials:'SJ', name:'Sunita Joshi', role:'Investigator · Legal & Ethics', status:'Active', active:4, resolved:25 },
+];
+
+function openAddInv() {
+  const overlay = document.getElementById('add-inv-overlay');
+  overlay.style.display = 'flex';
+  document.getElementById('inv-name').value = '';
+  document.getElementById('inv-role').value = '';
+  document.getElementById('inv-status').value = 'Active';
+  document.getElementById('add-inv-err').style.display = 'none';
+}
+
+function closeAddInv() {
+  document.getElementById('add-inv-overlay').style.display = 'none';
+}
+
+function saveInvestigator() {
+  const name = document.getElementById('inv-name').value.trim();
+  const role = document.getElementById('inv-role').value.trim();
+  const status = document.getElementById('inv-status').value;
+  const errEl = document.getElementById('add-inv-err');
+  if (!name || !role) {
+    errEl.textContent = 'Please fill in name and role.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+  investigators.push({ initials, name, role, status, active:0, resolved:0 });
+  renderInvestigatorsGrid();
+  rebuildAssignDropdown();
+  addAuditEntry(`Investigator added: ${name}`);
+  closeAddInv();
+}
+
+function renderInvestigatorsGrid() {
+  const grid = document.querySelector('.inv-grid');
+  if (!grid) return;
+  const statusColor = { Active: 'var(--accent)', 'On leave': '#fbbf24', Inactive: 'var(--muted)' };
+  grid.innerHTML = investigators.map(inv => `
+    <div class="inv-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="inv-avatar">${inv.initials}</div>
+        <span style="font-family:var(--mono);font-size:10px;color:${statusColor[inv.status]||'var(--muted)'};"><span class="inv-status-dot" style="background:${statusColor[inv.status]||'var(--muted)'};"></span>${inv.status}</span>
+      </div>
+      <div class="inv-name">${inv.name}</div>
+      <div class="inv-role">${inv.role}</div>
+      <div class="inv-stats">
+        <div><span class="inv-stat-val">${inv.active}</span><span class="inv-stat-lbl">Active cases</span></div>
+        <div><span class="inv-stat-val">${inv.resolved}</span><span class="inv-stat-lbl">Resolved</span></div>
+      </div>
+    </div>`).join('') + `
+    <div class="inv-card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;cursor:pointer;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'" onclick="openAddInv()">
+      <div style="font-size:28px;color:var(--muted);margin-bottom:8px;">+</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;">Add investigator</div>
+    </div>`;
+}
+
+function rebuildAssignDropdown() {
+  const sel = document.getElementById('dp-assign');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Unassigned</option>' +
+    investigators.map(inv => {
+      const shortName = inv.name.split(' ').map((w,i) => i===0 ? w[0]+'.' : w).join(' ');
+      return `<option value="${shortName}">${inv.name} · ${inv.role.split('·')[0].trim()}</option>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════
 // ═══════════════════════════════════════
 function openAdminLogin() {
   document.getElementById('admin-login-screen').classList.add('show');
@@ -2358,7 +2449,10 @@ function doLogin() {
     document.getElementById('admin-dashboard').classList.add('show');
     buildComplaintsTable();
     initBars();
-    startRealtimeListener(); // ← live updates from Firestore
+    startRealtimeListener();
+    renderInvestigatorsGrid();
+    rebuildAssignDropdown();
+    renderOverviewRecent();
   } else {
     document.getElementById('login-err').classList.add('show');
   }
@@ -2441,12 +2535,14 @@ function startRealtimeListener() {
       document.getElementById('filter-status')?.value || '',
       document.getElementById('filter-cat')?.value || ''
     );
+    renderOverviewRecent();
     // Update metrics
-    const total = Object.keys(DB).length;
-    const newCount = Object.values(DB).filter(c => c.status === 'New').length;
-    const inProgress = Object.values(DB).filter(c => c.status === 'In progress').length;
-    const escalated = Object.values(DB).filter(c => c.status === 'Escalated').length;
-    const closed = Object.values(DB).filter(c => c.status === 'Closed').length;
+    const vals = Object.values(DB);
+    const total = vals.length;
+    const newCount = vals.filter(c => c.status === 'New').length;
+    const inProgress = vals.filter(c => c.status === 'In progress').length;
+    const escalated = vals.filter(c => c.status === 'Escalated').length;
+    const closed = vals.filter(c => c.status === 'Closed').length;
     const metricEls = document.querySelectorAll('.adm-metric-val');
     if (metricEls[0]) metricEls[0].textContent = total;
     if (metricEls[1]) metricEls[1].textContent = newCount;
@@ -2468,7 +2564,7 @@ function filterComplaints() {
 // ═══════════════════════════════════════
 function openDetail(id) {
   const c = DB[id];
-  if (!c) return;
+  if (!c) { console.warn('openDetail: id not found in DB:', id); return; }
   currentDetailId = id;
   document.getElementById('dp-id').textContent = id;
   const sb = document.getElementById('dp-status-badge');
@@ -2484,11 +2580,16 @@ function openDetail(id) {
     <div class="dp-row"><span class="dp-lbl">Risk level</span><span class="dp-val">${c.risk}</span></div>
   `;
   document.getElementById('dp-desc').textContent = c.desc;
+  rebuildAssignDropdown();
   document.getElementById('dp-assign').value = c.assigned || '';
   document.getElementById('ai-output').innerHTML = '<p style="color:var(--muted);font-style:italic;">Click "Run" to generate an AI-powered investigative analysis for this complaint.</p>';
   buildDpAudit(id);
   const stBtns = document.querySelectorAll('.st-btn');
   stBtns.forEach(b => { b.classList.toggle('active', b.textContent === c.status); });
+  // Highlight current risk button
+  document.querySelectorAll('.dp-section .st-btn[onclick*="updateRisk"]').forEach(b => {
+    b.classList.toggle('active', b.textContent === c.risk);
+  });
   document.getElementById('detail-panel').classList.add('open');
   document.getElementById('admin-overlay').classList.add('show');
 }
@@ -2509,24 +2610,80 @@ function buildDpAudit(id) {
 
 async function updateStatus(btn, status) {
   if (!currentDetailId) return;
+
+  // Determine risk based on status
+  const autoRisk = {
+    'New': DB[currentDetailId].risk || 'Pending',
+    'In review': DB[currentDetailId].risk === 'Pending' ? 'Low' : DB[currentDetailId].risk,
+    'In progress': DB[currentDetailId].risk === 'Pending' ? 'Medium' : DB[currentDetailId].risk,
+    'Escalated': 'High',
+    'Closed': DB[currentDetailId].risk
+  };
+  const newRisk = autoRisk[status] || DB[currentDetailId].risk;
+
+  // Update local DB
   DB[currentDetailId].status = status;
+  DB[currentDetailId].risk = newRisk;
+
+  // Update status buttons
   document.querySelectorAll('.st-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+
+  // Update badge in detail panel
   const sb = document.getElementById('dp-status-badge');
   sb.textContent = status;
   sb.className = 'sp ' + (statusClass[status] || 'sp-new');
+
+  // Update risk display in detail panel
+  const rw = document.getElementById('dp-risk-wrap');
+  rw.innerHTML = `<div class="risk-dot ${riskClass[newRisk]||'risk-low'}"></div><span class="risk-label">${newRisk} risk</span>`;
+
+  // Add audit entry
   const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
   DB[currentDetailId].audit.push(`${ts} — Status → ${status} · admin`);
   buildDpAudit(currentDetailId);
   addAuditEntry(`${currentDetailId} status changed → ${status}`);
-  buildComplaintsTable();
+
+  // Refresh both tables
+  renderComplaintsTable();
+  renderOverviewRecent();
+
+  // Show toast
+  showToast(`Status updated → ${status}`, 'success');
+
+  // Save to Firestore
   if (db) {
     try {
       await db.collection('complaints').doc(currentDetailId).update({
         status,
+        risk: newRisk,
         audit: DB[currentDetailId].audit
       });
-    } catch(e) { console.error('Firestore update error:', e); }
+    } catch(e) {
+      console.error('Firestore update error:', e);
+      showToast('Saved locally — Firestore sync failed', 'error');
+    }
+  }
+}
+
+async function updateRisk(btn, risk) {
+  if (!currentDetailId) return;
+  DB[currentDetailId].risk = risk;
+  btn.closest('div').querySelectorAll('.st-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const rw = document.getElementById('dp-risk-wrap');
+  rw.innerHTML = `<div class="risk-dot ${riskClass[risk]||'risk-low'}"></div><span class="risk-label">${risk} risk</span>`;
+  const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  DB[currentDetailId].audit.push(`${ts} — Risk → ${risk} · admin`);
+  buildDpAudit(currentDetailId);
+  addAuditEntry(`${currentDetailId} risk set → ${risk}`);
+  renderComplaintsTable();
+  renderOverviewRecent();
+  showToast(`Risk set → ${risk}`, 'success');
+  if (db) {
+    try {
+      await db.collection('complaints').doc(currentDetailId).update({ risk, audit: DB[currentDetailId].audit });
+    } catch(e) { showToast('Saved locally — sync failed', 'error'); }
   }
 }
 
@@ -2539,14 +2696,13 @@ async function logAssign() {
     DB[currentDetailId].audit.push(`${ts} — Assigned to ${val} · admin`);
     buildDpAudit(currentDetailId);
     addAuditEntry(`${currentDetailId} assigned to ${val}`);
+    showToast(`Assigned to ${val}`, 'success');
   }
-  buildComplaintsTable();
+  renderComplaintsTable();
+  renderOverviewRecent();
   if (db) {
     try {
-      await db.collection('complaints').doc(currentDetailId).update({
-        assigned: val,
-        audit: DB[currentDetailId].audit
-      });
+      await db.collection('complaints').doc(currentDetailId).update({ assigned: val, audit: DB[currentDetailId].audit });
     } catch(e) { console.error('Firestore assign error:', e); }
   }
 }
@@ -2560,11 +2716,10 @@ async function addNote() {
   buildDpAudit(currentDetailId);
   addAuditEntry(`Note added to ${currentDetailId}`);
   document.getElementById('dp-note').value = '';
+  showToast('Note saved ✓', 'success');
   if (db) {
     try {
-      await db.collection('complaints').doc(currentDetailId).update({
-        audit: DB[currentDetailId].audit
-      });
+      await db.collection('complaints').doc(currentDetailId).update({ audit: DB[currentDetailId].audit });
     } catch(e) { console.error('Firestore note error:', e); }
   }
 }
@@ -2576,6 +2731,24 @@ function addAuditEntry(action) {
   row.className = 'audit-row';
   row.innerHTML = `<span class="audit-ts">${ts}</span><span class="audit-action">${action}</span><span class="audit-by">admin</span>`;
   list.prepend(row);
+}
+
+function showToast(msg, type = 'success') {
+  let toast = document.getElementById('admin-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'admin-toast';
+    toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;z-index:9999;padding:12px 20px;border-radius:4px;font-family:var(--mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;pointer-events:none;transition:all 0.3s;opacity:0;transform:translateY(10px);';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.background = type === 'success' ? 'rgba(0,232,123,0.15)' : 'rgba(255,68,68,0.15)';
+  toast.style.border = type === 'success' ? '1px solid rgba(0,232,123,0.4)' : '1px solid rgba(255,68,68,0.4)';
+  toast.style.color = type === 'success' ? 'var(--accent)' : '#ff6b6b';
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateY(0)';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; }, 2500);
 }
 
 // ═══════════════════════════════════════
