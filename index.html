@@ -2358,6 +2358,7 @@ function doLogin() {
     document.getElementById('admin-dashboard').classList.add('show');
     buildComplaintsTable();
     initBars();
+    startRealtimeListener(); // ← live updates from Firestore
   } else {
     document.getElementById('login-err').classList.add('show');
   }
@@ -2366,6 +2367,7 @@ function doLogin() {
 function doLogout() {
   document.getElementById('admin-dashboard').classList.remove('show');
   closeDetail();
+  if (firestoreListener) { firestoreListener(); firestoreListener = null; }
 }
 
 // ═══════════════════════════════════════
@@ -2388,20 +2390,27 @@ async function buildComplaintsTable(filterStatus = '', filterCat = '') {
   const tbody = document.getElementById('complaints-tbody');
   tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">Loading from Firestore…</td></tr>';
 
-  // Load from Firestore
+  // Load from Firestore (no orderBy to avoid index requirement)
   if (db) {
     try {
-      const snapshot = await db.collection('complaints').orderBy('createdAt', 'desc').get();
+      const snapshot = await db.collection('complaints').get();
       snapshot.forEach(doc => { DB[doc.id] = doc.data(); });
     } catch(e) { console.error('Firestore load error:', e); }
   }
 
+  renderComplaintsTable(filterStatus, filterCat);
+}
+
+function renderComplaintsTable(filterStatus = '', filterCat = '') {
+  const tbody = document.getElementById('complaints-tbody');
   tbody.innerHTML = '';
   const entries = Object.entries(DB);
   if (entries.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No complaints yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No complaints yet. Submitted complaints will appear here.</td></tr>';
     return;
   }
+  // Sort by createdAt descending (newest first)
+  entries.sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
   entries.forEach(([id, c]) => {
     if (filterStatus && c.status !== filterStatus) return;
     if (filterCat && c.cat !== filterCat) return;
@@ -2422,8 +2431,33 @@ async function buildComplaintsTable(filterStatus = '', filterCat = '') {
   });
 }
 
+let firestoreListener = null;
+
+function startRealtimeListener() {
+  if (!db || firestoreListener) return;
+  firestoreListener = db.collection('complaints').onSnapshot(snapshot => {
+    snapshot.forEach(doc => { DB[doc.id] = doc.data(); });
+    renderComplaintsTable(
+      document.getElementById('filter-status')?.value || '',
+      document.getElementById('filter-cat')?.value || ''
+    );
+    // Update metrics
+    const total = Object.keys(DB).length;
+    const newCount = Object.values(DB).filter(c => c.status === 'New').length;
+    const inProgress = Object.values(DB).filter(c => c.status === 'In progress').length;
+    const escalated = Object.values(DB).filter(c => c.status === 'Escalated').length;
+    const closed = Object.values(DB).filter(c => c.status === 'Closed').length;
+    const metricEls = document.querySelectorAll('.adm-metric-val');
+    if (metricEls[0]) metricEls[0].textContent = total;
+    if (metricEls[1]) metricEls[1].textContent = newCount;
+    if (metricEls[2]) metricEls[2].textContent = inProgress;
+    if (metricEls[3]) metricEls[3].textContent = escalated;
+    if (metricEls[4]) metricEls[4].textContent = closed;
+  }, err => { console.error('Realtime listener error:', err); });
+}
+
 function filterComplaints() {
-  buildComplaintsTable(
+  renderComplaintsTable(
     document.getElementById('filter-status').value,
     document.getElementById('filter-cat').value
   );
