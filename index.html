@@ -648,6 +648,26 @@
   }
   .login-role-tab.active { background: var(--bg3); color: var(--accent); border: 1px solid rgba(245,196,0,0.25); }
   .login-role-tab.sio-role.active { color: var(--blue); border-color: rgba(42,143,255,0.25); background: rgba(42,143,255,0.08); }
+  .login-role-tab.tm-role.active { color: #a78bfa; border-color: rgba(167,139,250,0.25); background: rgba(167,139,250,0.08); }
+
+  /* TOP MANAGEMENT DASHBOARD */
+  #tm-dashboard {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: var(--bg); overflow-y: auto;
+  }
+  #tm-dashboard.show { display: block; }
+  .tm-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(8,8,14,0.97); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(167,139,250,0.22);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 56px;
+  }
+  .tm-badge {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 4px 10px; border: 1px solid rgba(167,139,250,0.4); border-radius: 2px; color: #a78bfa;
+  }
+  .admin-tab.tm-tab.active { color: #a78bfa; border-color: rgba(167,139,250,0.25); background: rgba(167,139,250,0.08); }
 
   /* SIO FORCE-CHANGE PASSWORD SCREEN */
   #sio-change-pass-screen {
@@ -2504,6 +2524,7 @@
       <div class="login-sub" id="login-sub">Admin portal · Authorised personnel only</div>
       <div class="login-role-tabs">
         <button class="login-role-tab active" id="tab-admin-role" onclick="switchLoginRole('admin')">Admin</button>
+        <button class="login-role-tab tm-role" id="tab-tm-role" onclick="switchLoginRole('tm')">Top Mgmt</button>
         <button class="login-role-tab sio-role" id="tab-sio-role" onclick="switchLoginRole('sio')">SIO Login</button>
       </div>
       <div class="login-err" id="login-err">Invalid credentials. Try admin / admin123</div>
@@ -2978,6 +2999,24 @@
       </div>
       <button class="adm-btn" onclick="openAddSio()" style="border-color:rgba(42,143,255,0.35);color:var(--blue);">+ Add SIO</button>
     </div>
+    <!-- TOP MANAGEMENT ACCOUNTS CARD -->
+    <div class="adm-card" style="margin-bottom:1.5rem;">
+      <div class="adm-card-header">
+        <span class="adm-card-title" style="color:#a78bfa;">Top Management Accounts</span>
+        <button class="adm-btn adm-btn-accent" onclick="openAddTm()" style="border-color:rgba(167,139,250,0.4);color:#a78bfa;">+ Add TM Account</button>
+      </div>
+      <div style="padding:0;">
+        <table class="sio-table">
+          <thead>
+            <tr><th>Username</th><th>Full name</th><th>Password status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="tm-management-tbody">
+            <tr><td colspan="4" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="adm-card">
       <div class="adm-card-header">
         <span class="adm-card-title" style="color:var(--blue);">Senior Investigating Officers</span>
@@ -3049,6 +3088,103 @@
   </div>
 
 </div><!-- /admin-dashboard -->
+
+
+<!-- ══════════════════════════════════════
+     TOP MANAGEMENT DASHBOARD
+══════════════════════════════════════ -->
+<div id="tm-dashboard">
+  <div class="tm-nav">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <div class="admin-logo" style="color:#a78bfa;">REPORTER</div>
+      <div class="tm-badge">Top Management</div>
+    </div>
+    <div style="display:flex;gap:4px;">
+      <button class="admin-tab tm-tab active" id="tm-tab-overview-btn" onclick="showTmTab('tm-overview',this)">Overview</button>
+      <button class="admin-tab tm-tab" id="tm-tab-complaints-btn" onclick="showTmTab('tm-complaints',this)">All Complaints</button>
+      <button class="admin-tab tm-tab" id="tm-tab-tasks-btn" onclick="showTmTab('tm-tasks',this)">Assign Tasks</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <div class="admin-user">
+        <div class="admin-avatar" id="tm-avatar" style="background:rgba(167,139,250,0.13);border-color:rgba(167,139,250,0.3);color:#a78bfa;">T</div>
+        <span id="tm-username-display">TM</span>
+      </div>
+      <button class="btn-logout" onclick="doTmLogout()">Log out</button>
+    </div>
+  </div>
+
+  <!-- TM: OVERVIEW TAB -->
+  <div class="admin-panel active" id="tab-tm-overview" style="padding:2rem;">
+    <div style="margin-bottom:1.5rem;">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:4px;">// executive view</div>
+      <div style="font-family:var(--display);font-size:32px;letter-spacing:0.06em;">OVERVIEW</div>
+    </div>
+    <div class="metrics-row">
+      <div class="adm-metric"><span class="adm-metric-val" id="tm-metric-total" style="color:var(--text)">—</span><span class="adm-metric-lbl">Total complaints</span></div>
+      <div class="adm-metric"><span class="adm-metric-val" id="tm-metric-new" style="color:#60a5fa">—</span><span class="adm-metric-lbl">Awaiting review</span></div>
+      <div class="adm-metric"><span class="adm-metric-val" id="tm-metric-progress" style="color:#fbbf24">—</span><span class="adm-metric-lbl">In progress</span></div>
+      <div class="adm-metric"><span class="adm-metric-val" id="tm-metric-escalated" style="color:#ff6b6b">—</span><span class="adm-metric-lbl">Escalated</span></div>
+      <div class="adm-metric"><span class="adm-metric-val" id="tm-metric-resolved" style="color:var(--accent)">—</span><span class="adm-metric-lbl">Resolved</span></div>
+    </div>
+    <div class="adm-card">
+      <div class="adm-card-header">
+        <span class="adm-card-title" style="color:#a78bfa;">Recent Complaints</span>
+      </div>
+      <table class="adm-table">
+        <thead><tr><th>ID</th><th>Category</th><th>Department</th><th>Date</th><th>Status</th><th>Risk</th><th>Assigned SIO</th><th></th></tr></thead>
+        <tbody id="tm-overview-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TM: ALL COMPLAINTS TAB -->
+  <div class="admin-panel" id="tab-tm-complaints" style="padding:2rem;">
+    <div style="margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:4px;">// all cases</div>
+        <div style="font-family:var(--display);font-size:32px;letter-spacing:0.06em;">ALL COMPLAINTS</div>
+      </div>
+    </div>
+    <div class="adm-card">
+      <table class="adm-table">
+        <thead><tr><th>ID</th><th>Category</th><th>Department</th><th>Date</th><th>Status</th><th>Risk</th><th>Assigned SIO</th><th></th></tr></thead>
+        <tbody id="tm-complaints-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TM: ASSIGN TASKS TAB -->
+  <div class="admin-panel" id="tab-tm-tasks" style="padding:2rem;">
+    <div style="margin-bottom:1.5rem;">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:4px;">// task assignment</div>
+      <div style="font-family:var(--display);font-size:32px;letter-spacing:0.06em;">ASSIGN TASKS</div>
+    </div>
+    <div class="adm-card" style="max-width:600px;">
+      <div class="adm-card-header"><span class="adm-card-title" style="color:#a78bfa;">Create & Assign Task to SIO</span></div>
+      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
+        <div id="tm-task-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
+        <div id="tm-task-ok" style="display:none;padding:8px 12px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#a78bfa;"></div>
+        <div class="fld">
+          <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Select Complaint</label>
+          <select id="tm-task-complaint" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;">
+            <option value="">— Select a complaint —</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Assign to SIO</label>
+          <select id="tm-task-sio" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;">
+            <option value="">— Select an SIO —</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Task Instructions</label>
+          <textarea id="tm-task-note" rows="4" placeholder="Describe the task or special instructions for the SIO…" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;resize:vertical;outline:none;line-height:1.6;"></textarea>
+        </div>
+        <button onclick="tmAssignTask()" style="padding:12px;background:transparent;border:1px solid rgba(167,139,250,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#a78bfa;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(167,139,250,0.1)'" onmouseout="this.style.background='transparent'">Assign Task →</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /tm-dashboard -->
 
 <!-- ══════════════════════════════════════
      SIO FORCE CHANGE PASSWORD SCREEN
@@ -3273,6 +3409,27 @@
         <input id="sio-add-defpass" type="text" placeholder="e.g. Welcome@123" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
       </div>
       <button onclick="saveSio()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(42,143,255,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);cursor:pointer;transition:all 0.2s;margin-top:4px;" onmouseover="this.style.background='rgba(42,143,255,0.1)'" onmouseout="this.style.background='transparent'">Create SIO Account →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TOP MANAGEMENT MODAL -->
+<div id="add-tm-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:400;align-items:center;justify-content:center;">
+  <div style="background:var(--bg3);border:1px solid rgba(167,139,250,0.25);border-radius:4px;width:100%;max-width:420px;overflow:hidden;">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#a78bfa;">// Add Top Management Account</span>
+      <button onclick="closeAddTm()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;">✕</button>
+    </div>
+    <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
+      <div id="add-tm-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
+      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Full Name</label>
+        <input id="tm-add-name" type="text" placeholder="e.g. Rajesh Kapoor" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" /></div>
+      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Username</label>
+        <input id="tm-add-username" type="text" placeholder="e.g. rajesh.kapoor" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" /></div>
+      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Default Password</label>
+        <input id="tm-add-defpass" type="text" placeholder="e.g. Mgmt@123" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" /></div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.04em;">TM user must change password on first login.</div>
+      <button onclick="saveTm()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(167,139,250,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#a78bfa;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(167,139,250,0.1)'" onmouseout="this.style.background='transparent'">Create TM Account →</button>
     </div>
   </div>
 </div>
@@ -3670,7 +3827,15 @@ function openSendTask(idx) {
     sel.value = currentDetailId;
     const c = DB[currentDetailId];
     document.getElementById('task-subject').value = `Case Assignment: ${currentDetailId} – ${c.cat}`;
-    const sioLink = `${location.origin}${location.pathname}?sio=${encodeURIComponent(inv.username || inv.name.split(' ')[0].toLowerCase())}`;
+    const matchedSio = sioRegistry.find(s =>
+      s.name.toLowerCase() === inv.name.toLowerCase() ||
+      (inv.email && s.username && inv.email.toLowerCase().startsWith(s.username.toLowerCase()))
+    );
+    const sioUsername = matchedSio ? matchedSio.username : (inv.username || inv.name.split(' ')[0].toLowerCase());
+    const sioLink = `${location.origin}${location.pathname}?sio=${encodeURIComponent(sioUsername)}`;
+    const credBlock = matchedSio
+      ? `\nYour login credentials:\n  Username : ${matchedSio.username}\n  Password : ${matchedSio.password}${matchedSio.mustChange ? '\n  (You will be prompted to set a new password on first login.)' : ''}\n`
+      : '';
     document.getElementById('task-body').value =
 `Dear ${inv.name},
 
@@ -3689,7 +3854,7 @@ Please review this case at your earliest convenience and update the status accor
 ─────────────────────────────────
 Access your SIO portal directly:
 ${sioLink}
-─────────────────────────────────
+${credBlock}─────────────────────────────────
 
 Regards,
 Admin — Reporter Platform`;
@@ -3724,9 +3889,16 @@ function buildGmailUrl() {
 
   const priorityTag = currentTaskPriority !== 'Normal' ? `[${currentTaskPriority.toUpperCase()}] ` : '';
   const fullSubject = priorityTag + subject;
-  const sioUsername = inv.username || inv.name.split(' ')[0].toLowerCase();
+  const matchedSio2 = sioRegistry.find(s =>
+    s.name.toLowerCase() === inv.name.toLowerCase() ||
+    (inv.email && s.username && inv.email.toLowerCase().startsWith(s.username.toLowerCase()))
+  );
+  const sioUsername = matchedSio2 ? matchedSio2.username : (inv.username || inv.name.split(' ')[0].toLowerCase());
   const sioLink = `${location.origin}${location.pathname}?sio=${encodeURIComponent(sioUsername)}`;
-  const fullBody = body + `\n\n─────────────────────────────────\nAccess your SIO portal directly:\n${sioLink}\n─────────────────────────────────\nSent from Reporter Whistleblower Platform`;
+  const credLine = matchedSio2
+    ? `\nUsername : ${matchedSio2.username}\nPassword : ${matchedSio2.password}${matchedSio2.mustChange ? '\n(Change password on first login)' : ''}\n`
+    : '';
+  const fullBody = body + `\n\n─────────────────────────────────\nAccess your SIO portal directly:\n${sioLink}\n${credLine}─────────────────────────────────\nSent from Reporter Whistleblower Platform`;
 
   return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(fullBody)}`;
 }
@@ -4461,18 +4633,234 @@ async function recheckFirebase() {
 // SIO registry: { username, name, role, password, mustChange, assignedCases[] }
 let sioRegistry = [];
 let currentSio = null; // logged-in SIO object
-let loginRole = 'admin'; // 'admin' | 'sio'
+// Top Management registry: { username, name, password, mustChange }
+let tmRegistry = [
+  { username: 'topmgmt', name: 'Top Management', password: 'Mgmt@123', mustChange: true }
+];
+let currentTm = null; // logged-in TM object
+let loginRole = 'admin'; // 'admin' | 'tm' | 'sio'
+
+
+// ═══════════════════════════════════════
+// TOP MANAGEMENT SYSTEM
+// ═══════════════════════════════════════
+
+function launchTmDashboard() {
+  const tm = currentTm;
+  document.getElementById('tm-dashboard').classList.add('show');
+  document.getElementById('tm-username-display').textContent = tm.name;
+  document.getElementById('tm-avatar').textContent = tm.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  showTmTab('tm-overview', document.getElementById('tm-tab-overview-btn'));
+  renderTmOverview();
+  populateTmTaskDropdowns();
+}
+
+function doTmLogout() {
+  document.getElementById('tm-dashboard').classList.remove('show');
+  currentTm = null;
+}
+
+function showTmTab(name, btn) {
+  document.querySelectorAll('#tm-dashboard .admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#tm-dashboard .admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'tm-complaints') renderTmComplaintsTable();
+  if (name === 'tm-tasks') populateTmTaskDropdowns();
+}
+
+function renderTmComplaintsRow(id, c) {
+  const sioLabel = c.sioAssigned
+    ? (sioRegistry.find(s=>s.username===c.sioAssigned)?.name || c.sioAssigned)
+    : '<span style="color:var(--muted);font-style:italic;">Unassigned</span>';
+  return `<tr>
+    <td><span class="adm-id">${id}</span></td>
+    <td><span class="adm-cat">${c.cat}</span></td>
+    <td><span class="adm-dept">${c.dept}</span></td>
+    <td><span class="adm-date">${c.date}</span></td>
+    <td><span class="sp ${statusClass[c.status]||'sp-new'}">${c.status}</span></td>
+    <td><div class="risk-wrap"><div class="risk-dot ${riskClass[c.risk]||'risk-low'}"></div><span class="risk-label">${c.risk}</span></div></td>
+    <td style="font-family:var(--mono);font-size:12px;">${sioLabel}</td>
+    <td><button class="adm-btn" onclick="openTmCaseDetail('${id}')">View →</button></td>
+  </tr>`;
+}
+
+function renderTmComplaintsTable() {
+  const tbody = document.getElementById('tm-complaints-tbody');
+  const entries = Object.entries(DB);
+  if (entries.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No complaints yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = entries.map(([id,c]) => renderTmComplaintsRow(id,c)).join('');
+}
+
+function renderTmOverview() {
+  const entries = Object.entries(DB);
+  const total = entries.length;
+  document.getElementById('tm-metric-total').textContent = total;
+  document.getElementById('tm-metric-new').textContent = entries.filter(([,c])=>c.status==='New').length;
+  document.getElementById('tm-metric-progress').textContent = entries.filter(([,c])=>c.status==='In progress').length;
+  document.getElementById('tm-metric-escalated').textContent = entries.filter(([,c])=>c.status==='Escalated').length;
+  document.getElementById('tm-metric-resolved').textContent = entries.filter(([,c])=>c.status==='Resolved').length;
+  const tbody = document.getElementById('tm-overview-tbody');
+  const recent = entries.slice(-8).reverse();
+  tbody.innerHTML = recent.map(([id,c]) => renderTmComplaintsRow(id,c)).join('') ||
+    '<tr><td colspan="8" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No complaints yet.</td></tr>';
+}
+
+function openTmCaseDetail(id) {
+  openDetail(id);
+  // TM: read-only — disable write actions
+  document.getElementById('status-btns').querySelectorAll('.st-btn').forEach(b => b.disabled = true);
+  document.querySelectorAll('.risk-btns .st-btn').forEach(b => b.disabled = true);
+  document.getElementById('dp-assign').disabled = true;
+  document.getElementById('dp-sio-assign').disabled = true;
+}
+
+function populateTmTaskDropdowns() {
+  // Complaints dropdown
+  const cSel = document.getElementById('tm-task-complaint');
+  cSel.innerHTML = '<option value="">— Select a complaint —</option>' +
+    Object.entries(DB).map(([id,c]) => `<option value="${id}">${id} · ${c.cat} · ${c.status}</option>`).join('');
+
+  // SIO dropdown
+  const sSel = document.getElementById('tm-task-sio');
+  sSel.innerHTML = '<option value="">— Select an SIO —</option>' +
+    sioRegistry.map(s => `<option value="${s.username}">${s.name} · ${s.role}</option>`).join('');
+}
+
+function tmAssignTask() {
+  const cid = document.getElementById('tm-task-complaint').value;
+  const sioUser = document.getElementById('tm-task-sio').value;
+  const note = document.getElementById('tm-task-note').value.trim();
+  const errEl = document.getElementById('tm-task-err');
+  const okEl = document.getElementById('tm-task-ok');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+
+  if (!cid) { errEl.textContent = 'Please select a complaint.'; errEl.style.display = 'block'; return; }
+  if (!sioUser) { errEl.textContent = 'Please select an SIO to assign.'; errEl.style.display = 'block'; return; }
+
+  // Assign SIO to complaint
+  DB[cid].sioAssigned = sioUser;
+  const sio = sioRegistry.find(s => s.username === sioUser);
+  if (sio) {
+    sio.assignedCases = (sio.assignedCases || []).filter(id => id !== cid);
+    sio.assignedCases.push(cid);
+  }
+
+  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  const auditNote = note
+    ? `${ts} — Task assigned to SIO ${sioUser} by Top Management · Note: ${note}`
+    : `${ts} — Task assigned to SIO ${sioUser} by Top Management`;
+  DB[cid].audit.push(auditNote);
+
+  addAuditEntry(`TM assigned complaint ${cid} to SIO ${sioUser}`);
+  showToast(`Complaint ${cid} assigned to ${sio?.name || sioUser} ✓`, 'success');
+
+  okEl.textContent = `✓ Complaint ${cid} successfully assigned to ${sio?.name || sioUser}.`;
+  okEl.style.display = 'block';
+  document.getElementById('tm-task-complaint').value = '';
+  document.getElementById('tm-task-sio').value = '';
+  document.getElementById('tm-task-note').value = '';
+
+  // Refresh overview counts
+  renderTmOverview();
+}
+
+// ── TM Management table (shown in Admin's Manage SIOs tab) ──
+function renderTmManagementTable() {
+  const tbody = document.getElementById('tm-management-tbody');
+  if (!tbody) return;
+  if (tmRegistry.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No TM accounts added yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = tmRegistry.map(tm => `
+    <tr>
+      <td><span class="adm-id">${tm.username}</span></td>
+      <td style="color:var(--text);">${tm.name}</td>
+      <td>${tm.mustChange ? '<span class="sio-must-change">Must change</span>' : '<span class="sio-pass-ok">Set</span>'}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="adm-btn" onclick="resetTmPassword('${tm.username}')" style="font-size:10px;padding:5px 10px;">Reset pwd</button>
+          <button class="adm-btn" onclick="deleteTm('${tm.username}')" style="font-size:10px;padding:5px 10px;color:#ff6b6b;border-color:rgba(255,68,68,0.3);">Delete</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function resetTmPassword(username) {
+  const newPass = prompt('Enter new password for Top Management account "' + username + '":');
+  if (!newPass || newPass.length < 4) { showToast('Password too short — minimum 4 characters', 'error'); return; }
+  const tm = tmRegistry.find(t => t.username === username);
+  if (!tm) return;
+  tm.password = newPass;
+  tm.mustChange = true;
+  renderTmManagementTable();
+  addAuditEntry(`TM ${username} password reset by admin`);
+  showToast(`Password reset for ${username} ✓`, 'success');
+}
+
+function deleteTm(username) {
+  if (!confirm('Delete Top Management account "' + username + '"?')) return;
+  tmRegistry = tmRegistry.filter(t => t.username !== username);
+  renderTmManagementTable();
+  addAuditEntry(`TM account deleted: ${username}`);
+  showToast('TM account deleted', 'success');
+}
+
+function openAddTm() {
+  document.getElementById('add-tm-overlay').style.display = 'flex';
+  document.getElementById('tm-add-name').value = '';
+  document.getElementById('tm-add-username').value = '';
+  document.getElementById('tm-add-defpass').value = 'Mgmt@123';
+  document.getElementById('add-tm-err').style.display = 'none';
+}
+function closeAddTm() {
+  document.getElementById('add-tm-overlay').style.display = 'none';
+}
+function saveTm() {
+  const name = document.getElementById('tm-add-name').value.trim();
+  const username = document.getElementById('tm-add-username').value.trim().toLowerCase();
+  const defpass = document.getElementById('tm-add-defpass').value.trim();
+  const errEl = document.getElementById('add-tm-err');
+  if (!name || !username) { errEl.textContent = 'Name and username are required.'; errEl.style.display = 'block'; return; }
+  if (!defpass || defpass.length < 4) { errEl.textContent = 'Password must be at least 4 characters.'; errEl.style.display = 'block'; return; }
+  if (tmRegistry.find(t => t.username === username)) { errEl.textContent = 'Username already exists.'; errEl.style.display = 'block'; return; }
+  tmRegistry.push({ username, name, password: defpass, mustChange: true });
+  renderTmManagementTable();
+  addAuditEntry(`TM account created: ${username} (${name})`);
+  showToast(`Top Management account ${name} created ✓`, 'success');
+  closeAddTm();
+}
+
+// ── Deep-link ?tm= handler ──
+(function() {
+  const params = new URLSearchParams(location.search);
+  const tmParam = params.get('tm');
+  if (tmParam) {
+    document.getElementById('admin-login-screen').classList.add('show');
+    switchLoginRole('tm');
+    document.getElementById('login-user').value = tmParam;
+    setTimeout(() => { document.getElementById('login-pass').focus(); }, 100);
+  }
+})();
 
 // ── Login role tab toggle ──────────────
 function switchLoginRole(role) {
   loginRole = role;
   document.getElementById('tab-admin-role').classList.toggle('active', role === 'admin');
+  document.getElementById('tab-tm-role').classList.toggle('active', role === 'tm');
   document.getElementById('tab-sio-role').classList.toggle('active', role === 'sio');
-  const isAdmin = role === 'admin';
-  document.getElementById('login-header-title').textContent = isAdmin ? 'Restricted access · Admin only' : 'SIO Portal · Secure login';
-  document.getElementById('login-sub').textContent = isAdmin ? 'Admin portal · Authorised personnel only' : 'Senior Investigating Officer access';
-  document.getElementById('login-hint').textContent = isAdmin ? 'Demo credentials: admin / admin123' : 'Use credentials provided by admin';
-  document.getElementById('login-submit-btn').textContent = isAdmin ? 'Access secure dashboard →' : 'Access SIO portal →';
+  const titles = { admin: 'Restricted access · Admin only', tm: 'Top Management Portal · Secure login', sio: 'SIO Portal · Secure login' };
+  const subs   = { admin: 'Admin portal · Authorised personnel only', tm: 'Top Management · Executive access', sio: 'Senior Investigating Officer access' };
+  const hints  = { admin: 'Demo credentials: admin / admin123', tm: 'Use credentials assigned by admin', sio: 'Use credentials provided by admin' };
+  const btns   = { admin: 'Access secure dashboard →', tm: 'Access management portal →', sio: 'Access SIO portal →' };
+  document.getElementById('login-header-title').textContent = titles[role];
+  document.getElementById('login-sub').textContent = subs[role];
+  document.getElementById('login-hint').textContent = hints[role];
+  document.getElementById('login-submit-btn').textContent = btns[role];
   document.getElementById('login-err').classList.remove('show');
   document.getElementById('login-user').value = '';
   document.getElementById('login-pass').value = '';
@@ -4483,21 +4871,37 @@ function switchLoginRole(role) {
 const __origDoLogin = window.doLogin || function(){};
 
 window.doLogin = function() {
-  if (loginRole === 'sio') {
-    const u = document.getElementById('login-user').value.trim();
-    const p = document.getElementById('login-pass').value;
-    const sio = sioRegistry.find(s => s.username === u && s.password === p);
-    const err = document.getElementById('login-err');
-    if (!sio) {
-      err.textContent = 'Invalid SIO credentials.';
-      err.classList.add('show');
-      return;
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-err');
+
+  if (loginRole === 'tm') {
+    const tm = tmRegistry.find(t => t.username === u && t.password === p);
+    if (!tm) { err.textContent = 'Invalid Top Management credentials.'; err.classList.add('show'); return; }
+    document.getElementById('admin-login-screen').classList.remove('show');
+    err.classList.remove('show');
+    currentTm = tm;
+    if (tm.mustChange) {
+      // Reuse SIO change-pass screen with TM context
+      window._changePassContext = 'tm';
+      document.getElementById('sio-change-pass-screen').classList.add('show');
+      document.getElementById('sio-cp-err').style.display = 'none';
+      document.getElementById('sio-new-pass').value = '';
+      document.getElementById('sio-confirm-pass').value = '';
+    } else {
+      launchTmDashboard();
     }
+    return;
+  }
+
+  if (loginRole === 'sio') {
+    const sio = sioRegistry.find(s => s.username === u && s.password === p);
+    if (!sio) { err.textContent = 'Invalid SIO credentials.'; err.classList.add('show'); return; }
     document.getElementById('admin-login-screen').classList.remove('show');
     err.classList.remove('show');
     currentSio = sio;
-
     if (sio.mustChange) {
+      window._changePassContext = 'sio';
       document.getElementById('sio-change-pass-screen').classList.add('show');
       document.getElementById('sio-cp-err').style.display = 'none';
       document.getElementById('sio-new-pass').value = '';
@@ -4507,6 +4911,7 @@ window.doLogin = function() {
     }
     return;
   }
+
   // Admin login — call original, then trigger QR + Firebase
   __origDoLogin();
   setTimeout(() => {
@@ -4523,12 +4928,21 @@ function sioSetFirstPassword() {
   if (!np) { err.textContent = 'Password cannot be empty.'; err.style.display = 'block'; return; }
   if (np.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.style.display = 'block'; return; }
   if (np !== cp) { err.textContent = 'Passwords do not match.'; err.style.display = 'block'; return; }
-  currentSio.password = np;
-  currentSio.mustChange = false;
   document.getElementById('sio-change-pass-screen').classList.remove('show');
-  addAuditEntry(`SIO ${currentSio.username} changed their default password`);
-  renderSioManagementTable();
-  launchSioDashboard();
+  if (window._changePassContext === 'tm' && currentTm) {
+    currentTm.password = np;
+    currentTm.mustChange = false;
+    addAuditEntry(`Top Management ${currentTm.username} changed their default password`);
+    renderTmManagementTable();
+    launchTmDashboard();
+  } else {
+    currentSio.password = np;
+    currentSio.mustChange = false;
+    addAuditEntry(`SIO ${currentSio.username} changed their default password`);
+    renderSioManagementTable();
+    launchSioDashboard();
+  }
+  window._changePassContext = null;
 }
 
 function launchSioDashboard() {
