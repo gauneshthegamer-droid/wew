@@ -635,6 +635,56 @@
   .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 450; }
   .admin-overlay.show { display: block; }
 
+  /* SIO BADGE & ROLE TABS */
+  .sio-badge {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 4px 10px; border: 1px solid rgba(42,143,255,0.35); border-radius: 2px; color: var(--blue);
+  }
+  .login-role-tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; background: var(--bg); border-radius: 2px; padding: 4px; }
+  .login-role-tab {
+    flex: 1; padding: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; border: none; background: none; color: var(--muted2); cursor: pointer;
+    border-radius: 1px; transition: all 0.15s;
+  }
+  .login-role-tab.active { background: var(--bg3); color: var(--accent); border: 1px solid rgba(245,196,0,0.25); }
+  .login-role-tab.sio-role.active { color: var(--blue); border-color: rgba(42,143,255,0.25); background: rgba(42,143,255,0.08); }
+
+  /* SIO FORCE-CHANGE PASSWORD SCREEN */
+  #sio-change-pass-screen {
+    display: none; position: fixed; inset: 0; z-index: 220;
+    background: var(--bg); align-items: center; justify-content: center; flex-direction: column;
+  }
+  #sio-change-pass-screen.show { display: flex; }
+
+  /* SIO DASHBOARD */
+  #sio-dashboard {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: var(--bg); overflow-y: auto;
+  }
+  #sio-dashboard.show { display: block; }
+
+  .sio-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(8,8,14,0.97); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(42,143,255,0.18);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 56px;
+  }
+
+  /* MANAGE SIO MODAL */
+  #manage-sio-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    z-index: 350; align-items: center; justify-content: center;
+  }
+  #manage-sio-overlay.show { display: flex; }
+
+  .sio-table { width: 100%; border-collapse: collapse; }
+  .sio-table th { text-align:left; padding:8px 12px; font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); }
+  .sio-table td { padding:10px 12px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:middle; }
+  .sio-table tr:last-child td { border-bottom:none; }
+  .sio-must-change { font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:2px;background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.2); }
+  .sio-pass-ok { font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:2px;background:rgba(245,196,0,0.08);color:var(--accent);border:1px solid rgba(245,196,0,0.2); }
+
   /* HERO */
   .hero {
     min-height: 100vh;
@@ -2446,12 +2496,16 @@
   <div style="position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:0.5;"></div>
   <div class="login-box" style="position:relative;z-index:2">
     <div class="login-header">
-      <span class="login-header-title">Restricted access · Admin only</span>
+      <span class="login-header-title" id="login-header-title">Restricted access · Admin only</span>
       <div class="form-dots"><div class="form-dot"></div><div class="form-dot"></div><div class="form-dot"></div></div>
     </div>
     <div class="login-body">
       <div class="login-logo">REPORTER</div>
-      <div class="login-sub">Admin portal · Authorised personnel only</div>
+      <div class="login-sub" id="login-sub">Admin portal · Authorised personnel only</div>
+      <div class="login-role-tabs">
+        <button class="login-role-tab active" id="tab-admin-role" onclick="switchLoginRole('admin')">Admin</button>
+        <button class="login-role-tab sio-role" id="tab-sio-role" onclick="switchLoginRole('sio')">SIO Login</button>
+      </div>
       <div class="login-err" id="login-err">Invalid credentials. Try admin / admin123</div>
       <div class="fld">
         <label>Username</label>
@@ -2461,8 +2515,8 @@
         <label>Password</label>
         <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
       </div>
-      <button class="login-submit" onclick="doLogin()">Access secure dashboard →</button>
-      <div class="login-hint">Demo credentials: admin / admin123</div>
+      <button class="login-submit" id="login-submit-btn" onclick="doLogin()">Access secure dashboard →</button>
+      <div class="login-hint" id="login-hint">Demo credentials: admin / admin123</div>
       <div style="text-align:center;margin-top:1.25rem;">
         <button onclick="closeAdminLogin()" style="background:none;border:none;font-family:var(--mono);font-size:11px;color:var(--muted);cursor:pointer;letter-spacing:0.06em;">← Back to site</button>
       </div>
@@ -2479,12 +2533,13 @@
   <div class="admin-nav">
     <div class="admin-nav-left">
       <div class="admin-logo">REPORTER</div>
-      <div class="admin-badge">Admin</div>
+      <div class="admin-badge" id="admin-role-badge">Admin</div>
     </div>
     <div class="admin-nav-tabs">
       <button class="admin-tab active" onclick="showAdminTab('overview',this)">Overview</button>
       <button class="admin-tab" onclick="showAdminTab('complaints',this)">Complaints</button>
       <button class="admin-tab" onclick="showAdminTab('investigators',this)">Investigators</button>
+      <button class="admin-tab admin-only-tab" onclick="showAdminTab('sio-manage',this)">Manage SIOs</button>
       <button class="admin-tab" onclick="showAdminTab('analytics',this)">Analytics</button>
       <button class="admin-tab" onclick="showAdminTab('audit',this)">Audit log</button>
       <button class="admin-tab" onclick="showAdminTab('qr',this)">QR Code</button>
@@ -2914,6 +2969,33 @@
     </div>
   </div>
 
+  <!-- MANAGE SIOs TAB (admin only) -->
+  <div class="admin-panel" id="tab-sio-manage">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue);margin-bottom:4px;">// access control</div>
+        <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">MANAGE SIOs</div>
+      </div>
+      <button class="adm-btn" onclick="openAddSio()" style="border-color:rgba(42,143,255,0.35);color:var(--blue);">+ Add SIO</button>
+    </div>
+    <div class="adm-card">
+      <div class="adm-card-header">
+        <span class="adm-card-title" style="color:var(--blue);">Senior Investigating Officers</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">SIOs can only view cases assigned to them</span>
+      </div>
+      <div style="padding:0;">
+        <table class="sio-table">
+          <thead>
+            <tr><th>Username</th><th>Full name</th><th>Role</th><th>Password</th><th>Assigned cases</th><th></th></tr>
+          </thead>
+          <tbody id="sio-management-tbody">
+            <tr><td colspan="6" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No SIOs added yet. Click "+ Add SIO" to create one.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- ACCOUNT SETTINGS TAB -->
   <div class="admin-panel" id="tab-account">
     <div style="max-width:520px;">
@@ -2967,6 +3049,111 @@
   </div>
 
 </div><!-- /admin-dashboard -->
+
+<!-- ══════════════════════════════════════
+     SIO FORCE CHANGE PASSWORD SCREEN
+══════════════════════════════════════ -->
+<div id="sio-change-pass-screen">
+  <div style="position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:0.5;"></div>
+  <div class="login-box" style="position:relative;z-index:2;max-width:460px;">
+    <div class="login-header" style="border-color:rgba(42,143,255,0.25);">
+      <span class="login-header-title" style="color:var(--blue);">🔐 Set New Password · Required</span>
+      <div class="form-dots"><div class="form-dot"></div><div class="form-dot"></div><div class="form-dot"></div></div>
+    </div>
+    <div class="login-body">
+      <div class="login-logo" style="color:var(--blue);">SIO PORTAL</div>
+      <div class="login-sub">You must change your default password before continuing.</div>
+      <div class="login-err" id="sio-cp-err"></div>
+      <div class="fld">
+        <label>New Password</label>
+        <input type="password" id="sio-new-pass" placeholder="Min 6 characters" />
+      </div>
+      <div class="fld">
+        <label>Confirm New Password</label>
+        <input type="password" id="sio-confirm-pass" placeholder="Repeat password" onkeydown="if(event.key==='Enter')sioSetFirstPassword()" />
+      </div>
+      <button class="login-submit" style="border-color:rgba(42,143,255,0.5);color:var(--blue);" onclick="sioSetFirstPassword()">Set password &amp; continue →</button>
+      <div class="login-hint">Your new password will be required on all future logins.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SIO DASHBOARD
+══════════════════════════════════════ -->
+<div id="sio-dashboard">
+  <div class="sio-nav">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <div class="admin-logo" style="color:var(--blue);">REPORTER</div>
+      <div class="sio-badge">SIO Portal</div>
+    </div>
+    <div style="display:flex;gap:4px;">
+      <button class="admin-tab active" id="sio-tab-mycases-btn" onclick="showSioTab('mycases',this)">My Cases</button>
+      <button class="admin-tab" id="sio-tab-account-btn" onclick="showSioTab('sio-account',this)" style="border-color:rgba(42,143,255,0.2);color:var(--blue);">⚙ Account</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <div class="admin-user">
+        <div class="admin-avatar" id="sio-avatar" style="background:rgba(42,143,255,0.13);border-color:rgba(42,143,255,0.25);color:var(--blue);">S</div>
+        <span id="sio-username-display">SIO</span>
+      </div>
+      <button class="btn-logout" onclick="doSioLogout()">Log out</button>
+    </div>
+  </div>
+
+  <!-- SIO: MY CASES TAB -->
+  <div class="admin-panel active" id="tab-mycases" style="padding:2rem;">
+    <div style="margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue);margin-bottom:4px;">// your assigned cases</div>
+        <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">MY CASES</div>
+      </div>
+      <div id="sio-case-count" style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;"></div>
+    </div>
+    <div class="adm-card">
+      <div class="adm-card-header">
+        <span class="adm-card-title" style="color:var(--blue);">Assigned to me</span>
+      </div>
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>Category</th><th>Department</th><th>Date</th><th>Status</th><th>Risk</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="sio-cases-tbody">
+          <tr><td colspan="7" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No cases assigned yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SIO: ACCOUNT TAB -->
+  <div class="admin-panel" id="tab-sio-account" style="padding:2rem;">
+    <div style="max-width:520px;">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue);margin-bottom:4px;">// settings</div>
+      <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;margin-bottom:2rem;">SIO ACCOUNT</div>
+      <div class="adm-card">
+        <div class="adm-card-header"><span class="adm-card-title" style="color:var(--blue);">Change password</span></div>
+        <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
+          <div id="sio-acc-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
+          <div id="sio-acc-ok" style="display:none;padding:8px 12px;background:rgba(42,143,255,0.08);border:1px solid rgba(42,143,255,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:var(--blue);"></div>
+          <div class="fld">
+            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Current password</label>
+            <input type="password" id="sio-cur-pass" placeholder="Current password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+          </div>
+          <div class="fld">
+            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">New password</label>
+            <input type="password" id="sio-new-pass2" placeholder="New password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+          </div>
+          <div class="fld">
+            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Confirm new password</label>
+            <input type="password" id="sio-confirm-pass2" placeholder="Confirm new password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+          </div>
+          <button onclick="sioChangePassword()" style="padding:12px;background:transparent;border:1px solid rgba(42,143,255,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(42,143,255,0.1)'" onmouseout="this.style.background='transparent'">Update password →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /sio-dashboard -->
 
 <!-- DETAIL SIDE PANEL -->
 <div class="admin-overlay" id="admin-overlay" onclick="closeDetail()"></div>
@@ -3039,6 +3226,14 @@
       </select>
     </div>
 
+    <div class="dp-section" id="dp-sio-section">
+      <div class="dp-section-title" style="color:var(--blue);">Assign SIO (Senior Investigating Officer)</div>
+      <select class="dp-assign" id="dp-sio-assign" onchange="logSioAssign()" style="border-color:rgba(42,143,255,0.25);">
+        <option value="">— No SIO assigned —</option>
+      </select>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:0.04em;">SIO will see this case in their restricted portal.</div>
+    </div>
+
     <div class="dp-section">
       <div class="dp-section-title">Audit trail</div>
       <div id="dp-audit"></div>
@@ -3050,6 +3245,35 @@
       <button onclick="addNote()" style="margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;padding:7px 16px;border:1px solid rgba(245,196,0,0.3);border-radius:2px;background:none;color:var(--accent);cursor:pointer;">Save note →</button>
     </div>
 
+  </div>
+</div>
+
+<!-- ADD SIO MODAL -->
+<div id="add-sio-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:350;align-items:center;justify-content:center;" onclick="if(event.target===this)closeAddSio()">
+  <div style="background:var(--bg3);border:1px solid rgba(42,143,255,0.25);border-radius:4px;width:100%;max-width:440px;overflow:hidden;">
+    <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">// Add SIO Account</span>
+      <button onclick="closeAddSio()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;">✕</button>
+    </div>
+    <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
+      <div id="add-sio-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
+      <div style="padding:10px 14px;background:rgba(42,143,255,0.06);border:1px solid rgba(42,143,255,0.18);border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--blue);">
+        A default password will be set. The SIO must change it on first login.
+      </div>
+      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Full Name</label>
+        <input id="sio-add-name" type="text" placeholder="e.g. Kiran Mehta" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+      </div>
+      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Username (login ID)</label>
+        <input id="sio-add-username" type="text" placeholder="e.g. kiran.mehta" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+      </div>
+      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Role / Specialisation</label>
+        <input id="sio-add-role" type="text" placeholder="e.g. Senior IO · Financial Crimes" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+      </div>
+      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Default Password</label>
+        <input id="sio-add-defpass" type="text" placeholder="e.g. Welcome@123" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+      </div>
+      <button onclick="saveSio()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(42,143,255,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);cursor:pointer;transition:all 0.2s;margin-top:4px;" onmouseover="this.style.background='rgba(42,143,255,0.1)'" onmouseout="this.style.background='transparent'">Create SIO Account →</button>
+    </div>
   </div>
 </div>
 
@@ -3351,6 +3575,11 @@ function saveInvestigator() {
     errEl.style.display = 'block';
     return;
   }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errEl.textContent = 'Please enter a valid email address.';
+    errEl.style.display = 'block';
+    return;
+  }
   errEl.style.display = 'none';
   const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
   investigators.push({ initials, name, role, email: email || '', status, active:0, resolved:0 });
@@ -3441,6 +3670,7 @@ function openSendTask(idx) {
     sel.value = currentDetailId;
     const c = DB[currentDetailId];
     document.getElementById('task-subject').value = `Case Assignment: ${currentDetailId} – ${c.cat}`;
+    const sioLink = `${location.origin}${location.pathname}?sio=${encodeURIComponent(inv.username || inv.name.split(' ')[0].toLowerCase())}`;
     document.getElementById('task-body').value =
 `Dear ${inv.name},
 
@@ -3455,6 +3685,11 @@ Summary:
 ${c.desc}
 
 Please review this case at your earliest convenience and update the status accordingly.
+
+─────────────────────────────────
+Access your SIO portal directly:
+${sioLink}
+─────────────────────────────────
 
 Regards,
 Admin — Reporter Platform`;
@@ -3489,7 +3724,9 @@ function buildGmailUrl() {
 
   const priorityTag = currentTaskPriority !== 'Normal' ? `[${currentTaskPriority.toUpperCase()}] ` : '';
   const fullSubject = priorityTag + subject;
-  const fullBody = body + '\n\n---\nSent from Reporter Whistleblower Platform';
+  const sioUsername = inv.username || inv.name.split(' ')[0].toLowerCase();
+  const sioLink = `${location.origin}${location.pathname}?sio=${encodeURIComponent(sioUsername)}`;
+  const fullBody = body + `\n\n─────────────────────────────────\nAccess your SIO portal directly:\n${sioLink}\n─────────────────────────────────\nSent from Reporter Whistleblower Platform`;
 
   return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(fullBody)}`;
 }
@@ -4214,31 +4451,322 @@ async function recheckFirebase() {
   }
 }
 
-// Run Firebase check when admin logs in
-// Patch doLogin to also trigger QR init and Firebase status check
-const _origDoLogin = doLogin;
+// Firebase check is triggered from within the SIO-aware doLogin patch below
+
+
+// ═══════════════════════════════════════
+// SIO SYSTEM
+// ═══════════════════════════════════════
+
+// SIO registry: { username, name, role, password, mustChange, assignedCases[] }
+let sioRegistry = [];
+let currentSio = null; // logged-in SIO object
+let loginRole = 'admin'; // 'admin' | 'sio'
+
+// ── Login role tab toggle ──────────────
+function switchLoginRole(role) {
+  loginRole = role;
+  document.getElementById('tab-admin-role').classList.toggle('active', role === 'admin');
+  document.getElementById('tab-sio-role').classList.toggle('active', role === 'sio');
+  const isAdmin = role === 'admin';
+  document.getElementById('login-header-title').textContent = isAdmin ? 'Restricted access · Admin only' : 'SIO Portal · Secure login';
+  document.getElementById('login-sub').textContent = isAdmin ? 'Admin portal · Authorised personnel only' : 'Senior Investigating Officer access';
+  document.getElementById('login-hint').textContent = isAdmin ? 'Demo credentials: admin / admin123' : 'Use credentials provided by admin';
+  document.getElementById('login-submit-btn').textContent = isAdmin ? 'Access secure dashboard →' : 'Access SIO portal →';
+  document.getElementById('login-err').classList.remove('show');
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+}
+
+// ── Patch doLogin to handle SIO ────────
+// Preserve original admin login
+const __origDoLogin = window.doLogin || function(){};
+
 window.doLogin = function() {
-  _origDoLogin();
+  if (loginRole === 'sio') {
+    const u = document.getElementById('login-user').value.trim();
+    const p = document.getElementById('login-pass').value;
+    const sio = sioRegistry.find(s => s.username === u && s.password === p);
+    const err = document.getElementById('login-err');
+    if (!sio) {
+      err.textContent = 'Invalid SIO credentials.';
+      err.classList.add('show');
+      return;
+    }
+    document.getElementById('admin-login-screen').classList.remove('show');
+    err.classList.remove('show');
+    currentSio = sio;
+
+    if (sio.mustChange) {
+      document.getElementById('sio-change-pass-screen').classList.add('show');
+      document.getElementById('sio-cp-err').style.display = 'none';
+      document.getElementById('sio-new-pass').value = '';
+      document.getElementById('sio-confirm-pass').value = '';
+    } else {
+      launchSioDashboard();
+    }
+    return;
+  }
+  // Admin login — call original, then trigger QR + Firebase
+  __origDoLogin();
   setTimeout(() => {
     initQRCodes();
     recheckFirebase();
   }, 200);
 };
 
-// Patch showAdminTab to init QR whenever QR tab is opened
-const _origShowAdminTab = showAdminTab;
-window.showAdminTab = function(name, btn) {
-  _origShowAdminTab(name, btn);
-  if (name === 'qr') {
-    setTimeout(() => { initQRCodes(); }, 100);
+function sioSetFirstPassword() {
+  const np = document.getElementById('sio-new-pass').value;
+  const cp = document.getElementById('sio-confirm-pass').value;
+  const err = document.getElementById('sio-cp-err');
+  err.style.display = 'none';
+  if (!np) { err.textContent = 'Password cannot be empty.'; err.style.display = 'block'; return; }
+  if (np.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.style.display = 'block'; return; }
+  if (np !== cp) { err.textContent = 'Passwords do not match.'; err.style.display = 'block'; return; }
+  currentSio.password = np;
+  currentSio.mustChange = false;
+  document.getElementById('sio-change-pass-screen').classList.remove('show');
+  addAuditEntry(`SIO ${currentSio.username} changed their default password`);
+  renderSioManagementTable();
+  launchSioDashboard();
+}
+
+function launchSioDashboard() {
+  const sio = currentSio;
+  document.getElementById('sio-dashboard').classList.add('show');
+  document.getElementById('sio-username-display').textContent = sio.username;
+  document.getElementById('sio-avatar').textContent = sio.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  showSioTab('mycases', document.getElementById('sio-tab-mycases-btn'));
+  renderSioCasesTable();
+}
+
+function doSioLogout() {
+  document.getElementById('sio-dashboard').classList.remove('show');
+  currentSio = null;
+}
+
+function showSioTab(name, btn) {
+  document.querySelectorAll('#sio-dashboard .admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#sio-dashboard .admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function renderSioCasesTable() {
+  if (!currentSio) return;
+  const tbody = document.getElementById('sio-cases-tbody');
+  const assignedIds = currentSio.assignedCases || [];
+  const count = document.getElementById('sio-case-count');
+  if (assignedIds.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No cases assigned to you yet.</td></tr>';
+    count.textContent = '0 cases';
+    return;
   }
+  count.textContent = assignedIds.length + ' case' + (assignedIds.length !== 1 ? 's' : '');
+  const rows = assignedIds.map(id => {
+    const c = DB[id];
+    if (!c) return '';
+    return `<tr>
+      <td><span class="adm-id">${id}</span></td>
+      <td><span class="adm-cat">${c.cat}</span></td>
+      <td><span class="adm-dept">${c.dept}</span></td>
+      <td><span class="adm-date">${c.date}</span></td>
+      <td><span class="sp ${statusClass[c.status]||'sp-new'}">${c.status}</span></td>
+      <td><div class="risk-wrap"><div class="risk-dot ${riskClass[c.risk]||'risk-low'}"></div><span class="risk-label">${c.risk}</span></div></td>
+      <td><button class="adm-btn" onclick="openSioCaseDetail('${id}')">View →</button></td>
+    </tr>`;
+  }).join('');
+  tbody.innerHTML = rows || '<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No matching cases found.</td></tr>';
+}
+
+function openSioCaseDetail(id) {
+  // Use existing detail panel in read-only mode for SIO
+  openDetail(id);
+  // Hide write actions for SIO — they can read only
+  const actionsToHide = ['status-btns', 'dp-sio-section'];
+  document.getElementById('status-btns').querySelectorAll('.st-btn').forEach(b => b.disabled = true);
+  document.querySelectorAll('.risk-btns .st-btn').forEach(b => b.disabled = true);
+  document.getElementById('dp-assign').disabled = true;
+  document.getElementById('dp-sio-assign').disabled = true;
+}
+
+function sioChangePassword() {
+  const sio = currentSio;
+  const cur = document.getElementById('sio-cur-pass').value;
+  const np = document.getElementById('sio-new-pass2').value;
+  const cp = document.getElementById('sio-confirm-pass2').value;
+  const errEl = document.getElementById('sio-acc-err');
+  const okEl = document.getElementById('sio-acc-ok');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+  if (cur !== sio.password) { errEl.textContent = 'Current password is incorrect.'; errEl.style.display = 'block'; return; }
+  if (!np) { errEl.textContent = 'New password cannot be empty.'; errEl.style.display = 'block'; return; }
+  if (np.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
+  if (np !== cp) { errEl.textContent = 'Passwords do not match.'; errEl.style.display = 'block'; return; }
+  sio.password = np;
+  sio.mustChange = false;
+  document.getElementById('sio-cur-pass').value = '';
+  document.getElementById('sio-new-pass2').value = '';
+  document.getElementById('sio-confirm-pass2').value = '';
+  okEl.textContent = 'Password updated successfully.';
+  okEl.style.display = 'block';
+  addAuditEntry('SIO ' + sio.username + ' changed password');
+  renderSioManagementTable();
+  showToast('SIO password updated ✓', 'success');
+}
+
+// ── Admin: Add / Remove SIOs ──────────
+function openAddSio() {
+  document.getElementById('add-sio-overlay').style.display = 'flex';
+  document.getElementById('sio-add-name').value = '';
+  document.getElementById('sio-add-username').value = '';
+  document.getElementById('sio-add-role').value = '';
+  document.getElementById('sio-add-defpass').value = 'Welcome@123';
+  document.getElementById('add-sio-err').style.display = 'none';
+}
+
+function closeAddSio() {
+  document.getElementById('add-sio-overlay').style.display = 'none';
+}
+
+function saveSio() {
+  const name = document.getElementById('sio-add-name').value.trim();
+  const username = document.getElementById('sio-add-username').value.trim().toLowerCase();
+  const role = document.getElementById('sio-add-role').value.trim();
+  const defpass = document.getElementById('sio-add-defpass').value.trim();
+  const errEl = document.getElementById('add-sio-err');
+  if (!name || !username) { errEl.textContent = 'Name and username are required.'; errEl.style.display = 'block'; return; }
+  if (!defpass || defpass.length < 4) { errEl.textContent = 'Default password must be at least 4 characters.'; errEl.style.display = 'block'; return; }
+  if (sioRegistry.find(s => s.username === username)) { errEl.textContent = 'Username already exists.'; errEl.style.display = 'block'; return; }
+  const newSio = { name, username, role: role || 'Senior Investigating Officer', password: defpass, mustChange: true, assignedCases: [] };
+  sioRegistry.push(newSio);
+  renderSioManagementTable();
+  rebuildSioAssignDropdown();
+  addAuditEntry(`SIO account created: ${username} (${name})`);
+  showToast(`SIO ${name} created ✓`, 'success');
+  closeAddSio();
+}
+
+function deleteSio(username) {
+  if (!confirm('Delete SIO account "' + username + '"? This cannot be undone.')) return;
+  sioRegistry = sioRegistry.filter(s => s.username !== username);
+  // Remove SIO assignment from all cases
+  Object.values(DB).forEach(c => { if (c.sioAssigned === username) delete c.sioAssigned; });
+  renderSioManagementTable();
+  rebuildSioAssignDropdown();
+  addAuditEntry(`SIO account deleted: ${username}`);
+  showToast('SIO account deleted', 'success');
+}
+
+function resetSioPassword(username) {
+  const newPass = prompt('Enter new default password for ' + username + ':');
+  if (!newPass || newPass.length < 4) { showToast('Password too short — minimum 4 characters', 'error'); return; }
+  const sio = sioRegistry.find(s => s.username === username);
+  if (!sio) return;
+  sio.password = newPass;
+  sio.mustChange = true;
+  renderSioManagementTable();
+  addAuditEntry(`SIO ${username} password reset by admin`);
+  showToast(`Password reset for ${username} ✓`, 'success');
+}
+
+function renderSioManagementTable() {
+  const tbody = document.getElementById('sio-management-tbody');
+  if (!tbody) return;
+  if (sioRegistry.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No SIOs added yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = sioRegistry.map(sio => `
+    <tr>
+      <td><span class="adm-id">${sio.username}</span></td>
+      <td style="color:var(--text);">${sio.name}</td>
+      <td><span class="adm-dept">${sio.role}</span></td>
+      <td>${sio.mustChange ? '<span class="sio-must-change">Must change</span>' : '<span class="sio-pass-ok">Set</span>'}</td>
+      <td><span style="font-family:var(--mono);font-size:12px;color:var(--blue);">${(sio.assignedCases||[]).length} case${(sio.assignedCases||[]).length !== 1 ? 's' : ''}</span></td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="adm-btn" onclick="resetSioPassword('${sio.username}')" style="font-size:10px;padding:5px 10px;">Reset pwd</button>
+          <button class="adm-btn" onclick="deleteSio('${sio.username}')" style="font-size:10px;padding:5px 10px;color:#ff6b6b;border-color:rgba(255,68,68,0.3);">Delete</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+// ── SIO dropdown in detail panel ──────
+function rebuildSioAssignDropdown() {
+  const sel = document.getElementById('dp-sio-assign');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— No SIO assigned —</option>' +
+    sioRegistry.map(sio => `<option value="${sio.username}">${sio.name} · ${sio.role}</option>`).join('');
+}
+
+function logSioAssign() {
+  const sel = document.getElementById('dp-sio-assign');
+  const chosen = sel.value;
+  const id = currentDetailId;
+  if (!id) return;
+  DB[id].sioAssigned = chosen || null;
+
+  // Update SIO's case list
+  sioRegistry.forEach(sio => {
+    sio.assignedCases = (sio.assignedCases || []).filter(cid => cid !== id);
+  });
+  if (chosen) {
+    const sio = sioRegistry.find(s => s.username === chosen);
+    if (sio) {
+      if (!sio.assignedCases) sio.assignedCases = [];
+      sio.assignedCases.push(id);
+    }
+  }
+
+  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  const note = chosen ? `${ts} — SIO assigned: ${chosen} · admin` : `${ts} — SIO assignment removed · admin`;
+  DB[id].audit.push(note);
+  buildDpAudit(id);
+  renderSioManagementTable();
+  addAuditEntry(chosen ? `SIO ${chosen} assigned to ${id}` : `SIO removed from ${id}`);
+  showToast(chosen ? `SIO ${chosen} assigned ✓` : 'SIO assignment removed', 'success');
+}
+
+// Patch openDetail to populate SIO dropdown
+const __origOpenDetail = window.openDetail;
+window.openDetail = function(id) {
+  __origOpenDetail(id);
+  rebuildSioAssignDropdown();
+  const sel = document.getElementById('dp-sio-assign');
+  if (sel) sel.value = DB[id]?.sioAssigned || '';
+  // Re-enable controls (in case disabled by SIO view)
+  document.getElementById('status-btns').querySelectorAll('.st-btn').forEach(b => b.disabled = false);
+  document.querySelectorAll('.risk-btns .st-btn').forEach(b => b.disabled = false);
+  document.getElementById('dp-assign').disabled = false;
+  document.getElementById('dp-sio-assign').disabled = false;
 };
 
+// Patch showAdminTab: init QR when QR tab is opened
+const __origShowAdminTab2 = window.showAdminTab;
+window.showAdminTab = function(name, btn) {
+  __origShowAdminTab2(name, btn);
+  if (name === 'qr') setTimeout(() => { initQRCodes(); }, 100);
+};
 
+// ── SIO deep-link handler (?sio=username) ──
+(function() {
+  const params = new URLSearchParams(location.search);
+  const sioParam = params.get('sio');
+  if (sioParam) {
+    document.getElementById('admin-login-screen').classList.add('show');
+    switchLoginRole('sio');
+    document.getElementById('login-user').value = sioParam;
+    setTimeout(() => { document.getElementById('login-pass').focus(); }, 100);
+  }
+})();
+
+// Restore cursor glow
 const glow = document.createElement('div');
 glow.style.cssText = 'position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(245,196,0,0.05) 0%,rgba(42,143,255,0.04) 55%,transparent 72%);pointer-events:none;z-index:9997;transform:translate(-50%,-50%);transition:all 0.15s ease;';
 document.body.appendChild(glow);
 document.addEventListener('mousemove', e => { glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px'; });
+
 </script>
 </body>
 </html>
