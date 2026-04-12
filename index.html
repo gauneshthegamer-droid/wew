@@ -507,18 +507,18 @@
 
   /* DETAIL PANEL */
   .detail-panel {
-    display: none;
     position: fixed;
     top: 56px; right: 0; bottom: 0;
-    width: 480px;
+    width: 500px;
     background: var(--bg2);
     border-left: 1px solid var(--border-hi);
-    z-index: 40;
+    z-index: 500;
     overflow-y: auto;
-    transform: translateX(100%);
+    transform: translateX(110%);
     transition: transform 0.3s ease;
+    display: block;
   }
-  .detail-panel.open { display: block; transform: translateX(0); }
+  .detail-panel.open { transform: translateX(0); }
 
   .dp-header {
     padding: 1.25rem 1.5rem;
@@ -632,7 +632,7 @@
   .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
   /* OVERLAY */
-  .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 35; }
+  .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 450; }
   .admin-overlay.show { display: block; }
 
   /* HERO */
@@ -2449,62 +2449,22 @@
       <span class="login-header-title">Restricted access · Admin only</span>
       <div class="form-dots"><div class="form-dot"></div><div class="form-dot"></div><div class="form-dot"></div></div>
     </div>
-    <!-- LOGIN VIEW -->
-    <div class="login-body" id="login-view">
+    <div class="login-body">
       <div class="login-logo">REPORTER</div>
       <div class="login-sub">Admin portal · Authorised personnel only</div>
-      <div class="login-err" id="login-err">Invalid credentials. Check your email and password.</div>
+      <div class="login-err" id="login-err">Invalid credentials. Try admin / admin123</div>
       <div class="fld">
-        <label>Gmail address</label>
-        <input type="email" id="login-email" placeholder="admin@gmail.com" autocomplete="off" />
+        <label>Username</label>
+        <input type="text" id="login-user" placeholder="admin" autocomplete="off" />
       </div>
       <div class="fld">
         <label>Password</label>
         <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
       </div>
       <button class="login-submit" onclick="doLogin()">Access secure dashboard →</button>
-      <div style="text-align:center;margin-top:0.75rem;">
-        <button onclick="showForgotPassword()" style="background:none;border:none;font-family:var(--mono);font-size:11px;color:var(--blue);cursor:pointer;letter-spacing:0.06em;text-decoration:underline;">Forgot password?</button>
-      </div>
-      <div class="login-hint">Login: gauneshthegamer@gmail.com / 9896302510</div>
-      <div style="text-align:center;margin-top:1rem;">
+      <div class="login-hint">Demo credentials: admin / admin123</div>
+      <div style="text-align:center;margin-top:1.25rem;">
         <button onclick="closeAdminLogin()" style="background:none;border:none;font-family:var(--mono);font-size:11px;color:var(--muted);cursor:pointer;letter-spacing:0.06em;">← Back to site</button>
-      </div>
-    </div>
-
-    <!-- FORGOT PASSWORD VIEW -->
-    <div class="login-body" id="forgot-view" style="display:none;">
-      <div class="login-logo" style="font-size:24px;">RESET ACCESS</div>
-      <div class="login-sub">Enter your registered Gmail to receive an OTP</div>
-      <div class="login-err" id="forgot-err">Email not found in admin records.</div>
-      <div class="login-err" id="forgot-success" style="background:rgba(42,143,255,0.08);border-color:rgba(42,143,255,0.2);color:#60a5fa;">OTP sent! Check your email (demo OTP: <strong id="demo-otp-display"></strong>)</div>
-      <!-- Step 1: Enter email -->
-      <div id="forgot-step1">
-        <div class="fld">
-          <label>Registered Gmail</label>
-          <input type="email" id="forgot-email-input" placeholder="admin@gmail.com" autocomplete="off" onkeydown="if(event.key==='Enter')sendOTP()" />
-        </div>
-        <button class="login-submit" onclick="sendOTP()">Send OTP →</button>
-      </div>
-      <!-- Step 2: Enter OTP + new password -->
-      <div id="forgot-step2" style="display:none;">
-        <div class="fld">
-          <label>Enter OTP</label>
-          <input type="text" id="forgot-otp-input" placeholder="6-digit OTP" maxlength="6" autocomplete="off" style="letter-spacing:0.2em;font-family:var(--mono);" />
-        </div>
-        <div class="fld">
-          <label>New Password</label>
-          <input type="password" id="forgot-new-pass" placeholder="New password" />
-        </div>
-        <div class="fld">
-          <label>Confirm Password</label>
-          <input type="password" id="forgot-confirm-pass" placeholder="Confirm new password" onkeydown="if(event.key==='Enter')resetPassword()" />
-        </div>
-        <div class="login-err" id="reset-err">Passwords do not match.</div>
-        <button class="login-submit" onclick="resetPassword()">Reset password →</button>
-      </div>
-      <div style="text-align:center;margin-top:1rem;">
-        <button onclick="showLoginView()" style="background:none;border:none;font-family:var(--mono);font-size:11px;color:var(--muted);cursor:pointer;letter-spacing:0.06em;">← Back to login</button>
       </div>
     </div>
   </div>
@@ -2524,12 +2484,11 @@
     <div class="admin-nav-tabs">
       <button class="admin-tab active" onclick="showAdminTab('overview',this)">Overview</button>
       <button class="admin-tab" onclick="showAdminTab('complaints',this)">Complaints</button>
-      <button class="admin-tab" id="tab-btn-view" onclick="showAdminTab('view',this)" style="display:none;">View Report</button>
       <button class="admin-tab" onclick="showAdminTab('investigators',this)">Investigators</button>
       <button class="admin-tab" onclick="showAdminTab('analytics',this)">Analytics</button>
       <button class="admin-tab" onclick="showAdminTab('audit',this)">Audit log</button>
       <button class="admin-tab" onclick="showAdminTab('qr',this)">QR Code</button>
-      <button class="admin-tab" onclick="showAdminTab('account',this)">⚙ Account</button>
+      <button class="admin-tab" onclick="showAdminTab('account',this)" style="border-color:rgba(245,196,0,0.2);color:var(--accent);">⚙ Account</button>
     </div>
     <div class="admin-nav-right">
       <div id="firebase-status" style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:5px 10px;border-radius:2px;border:1px solid rgba(255,255,255,0.08);color:var(--muted);">
@@ -2955,121 +2914,53 @@
     </div>
   </div>
 
-  <!-- VIEW REPORT TAB -->
-  <div class="admin-panel" id="tab-view">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
-      <div>
-        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">// report detail</div>
-        <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">VIEW REPORT &nbsp;<span id="view-tab-id" style="color:var(--accent);font-size:22px;"></span></div>
-      </div>
-      <button class="adm-btn" onclick="showAdminTab('complaints',document.querySelectorAll('.admin-tab')[1])">← Back to complaints</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;" id="view-tab-grid">
-      <div style="display:flex;flex-direction:column;gap:1.5rem;">
-        <div class="adm-card">
-          <div class="adm-card-header"><span class="adm-card-title">Complaint details</span>
-            <span class="sp sp-new" id="vt-status-badge" style="font-size:10px;">New</span>
-          </div>
-          <div style="padding:1.25rem;" id="vt-rows"></div>
-        </div>
-        <div class="adm-card">
-          <div class="adm-card-header"><span class="adm-card-title">Description</span></div>
-          <div style="padding:1.25rem;font-size:14px;line-height:1.7;color:var(--muted2);" id="vt-desc"></div>
-        </div>
-        <div class="adm-card">
-          <div class="adm-card-header">
-            <span class="adm-card-title">AI investigative analysis</span>
-            <button onclick="runVTAIAnalysis()" class="adm-btn adm-btn-accent">Run AI →</button>
-          </div>
-          <div style="padding:1.25rem;" id="vt-ai-output">
-            <p style="font-family:var(--mono);font-size:12px;color:var(--muted);font-style:italic;">Click "Run AI" to generate an investigative briefing.</p>
-          </div>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:1.5rem;">
-        <div class="adm-card">
-          <div class="adm-card-header"><span class="adm-card-title">Update status</span></div>
-          <div style="padding:1.25rem;">
-            <div style="display:flex;gap:6px;flex-wrap:wrap;" id="vt-status-btns">
-              <button class="st-btn" onclick="vtUpdateStatus(this,'New')">New</button>
-              <button class="st-btn" onclick="vtUpdateStatus(this,'In review')">In review</button>
-              <button class="st-btn" onclick="vtUpdateStatus(this,'In progress')">In progress</button>
-              <button class="st-btn" onclick="vtUpdateStatus(this,'Escalated')">Escalated</button>
-              <button class="st-btn" onclick="vtUpdateStatus(this,'Closed')">Closed</button>
-            </div>
-          </div>
-        </div>
-        <div class="adm-card">
-          <div class="adm-card-header"><span class="adm-card-title">Set risk level</span></div>
-          <div style="padding:1.25rem;">
-            <div style="display:flex;gap:6px;flex-wrap:wrap;" id="vt-risk-btns">
-              <button class="st-btn" onclick="vtUpdateRisk(this,'Low')" style="border-color:rgba(245,196,0,0.3);color:#f5c400;">Low</button>
-              <button class="st-btn" onclick="vtUpdateRisk(this,'Medium')" style="border-color:rgba(251,191,36,0.3);color:#fbbf24;">Medium</button>
-              <button class="st-btn" onclick="vtUpdateRisk(this,'High')" style="border-color:rgba(251,146,60,0.3);color:#fb923c;">High</button>
-              <button class="st-btn" onclick="vtUpdateRisk(this,'Critical')" style="border-color:rgba(255,68,68,0.3);color:#ff6b6b;">Critical</button>
-            </div>
-          </div>
-        </div>
-        <div class="adm-card">
-          <div class="adm-card-header"><span class="adm-card-title">Assign investigator</span></div>
-          <div style="padding:1.25rem;">
-            <select class="adm-select" id="vt-assign" onchange="vtLogAssign()" style="width:100%;padding:9px 12px;">
-              <option value="">Unassigned</option>
-            </select>
-          </div>
-        </div>
-        <div class="adm-card">
-          <div class="adm-card-header"><span class="adm-card-title">Add note</span></div>
-          <div style="padding:1.25rem;">
-            <textarea id="vt-note" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;resize:vertical;min-height:80px;outline:none;line-height:1.6;" placeholder="Add investigation note..."></textarea>
-            <button onclick="vtAddNote()" style="margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;padding:7px 16px;border:1px solid rgba(245,196,0,0.3);border-radius:2px;background:none;color:var(--accent);cursor:pointer;">Save note →</button>
-          </div>
-        </div>
-        <div class="adm-card">
-          <div class="adm-card-header"><span class="adm-card-title">Audit trail</span></div>
-          <div style="padding:1rem 1.5rem;" id="vt-audit"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- ACCOUNT SETTINGS TAB -->
   <div class="admin-panel" id="tab-account">
-    <div style="margin-bottom:1.5rem;">
-      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">// admin preferences</div>
-      <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">ACCOUNT SETTINGS</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:900px;">
+    <div style="max-width:520px;">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">// settings</div>
+      <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;margin-bottom:2rem;">ACCOUNT SETTINGS</div>
+
+      <!-- Change Username -->
+      <div class="adm-card" style="margin-bottom:1.5rem;">
+        <div class="adm-card-header"><span class="adm-card-title">Change username</span></div>
+        <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
+          <div id="acc-user-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
+          <div id="acc-user-ok" style="display:none;padding:8px 12px;background:rgba(245,196,0,0.08);border:1px solid rgba(245,196,0,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:var(--accent);"></div>
+          <div class="fld">
+            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Current username</label>
+            <div id="acc-current-user-display" style="padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--muted2);font-family:var(--mono);font-size:13px;">admin</div>
+          </div>
+          <div class="fld">
+            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">New username</label>
+            <input type="text" id="acc-new-user" placeholder="Enter new username" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+          </div>
+          <div class="fld">
+            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Confirm with password</label>
+            <input type="password" id="acc-user-pass" placeholder="Current password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+          </div>
+          <button onclick="changeUsername()" style="padding:12px;background:transparent;border:1px solid rgba(245,196,0,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(245,196,0,0.1)'" onmouseout="this.style.background='transparent'">Update username →</button>
+        </div>
+      </div>
+
+      <!-- Change Password -->
       <div class="adm-card">
         <div class="adm-card-header"><span class="adm-card-title">Change password</span></div>
         <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
-          <div class="login-err" id="chpw-err"></div>
-          <div class="login-err" id="chpw-ok" style="background:rgba(42,143,255,0.08);border-color:rgba(42,143,255,0.2);color:#60a5fa;">Password updated successfully.</div>
-          <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Current password</label><input type="password" id="chpw-current" placeholder="Current password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" /></div>
-          <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">New password</label><input type="password" id="chpw-new" placeholder="New password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" /></div>
-          <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Confirm new password</label><input type="password" id="chpw-confirm" placeholder="Confirm new password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" /></div>
-          <button onclick="changeAdminPassword()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(245,196,0,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);cursor:pointer;" onmouseover="this.style.background='rgba(245,196,0,0.1)'" onmouseout="this.style.background='transparent'">Update password →</button>
-        </div>
-      </div>
-      <div class="adm-card">
-        <div class="adm-card-header"><span class="adm-card-title">Change registered Gmail</span></div>
-        <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
-          <div class="login-err" id="chemail-err"></div>
-          <div class="login-err" id="chemail-ok" style="background:rgba(42,143,255,0.08);border-color:rgba(42,143,255,0.2);color:#60a5fa;"></div>
-          <div style="padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:2px;font-family:var(--mono);font-size:12px;color:var(--muted2);">Current: <span id="current-email-display" style="color:var(--accent);"></span></div>
-          <div id="email-step1">
-            <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">New Gmail address</label><input type="email" id="chemail-new" placeholder="new@gmail.com" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" /></div>
-            <div class="fld" style="margin-top:0.75rem;"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Confirm with password</label><input type="password" id="chemail-pass" placeholder="Current password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" /></div>
-            <button onclick="sendEmailChangeOTP()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(42,143,255,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);cursor:pointer;margin-top:0.75rem;" onmouseover="this.style.background='rgba(42,143,255,0.1)'" onmouseout="this.style.background='transparent'">Send verification OTP →</button>
+          <div id="acc-pass-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
+          <div id="acc-pass-ok" style="display:none;padding:8px 12px;background:rgba(245,196,0,0.08);border:1px solid rgba(245,196,0,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:var(--accent);"></div>
+          <div class="fld">
+            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Current password</label>
+            <input type="password" id="acc-cur-pass" placeholder="Current password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
           </div>
-          <div id="email-step2" style="display:none;">
-            <div style="padding:8px 12px;background:rgba(42,143,255,0.08);border:1px solid rgba(42,143,255,0.2);border-radius:2px;font-family:var(--mono);font-size:11px;color:#60a5fa;margin-bottom:0.75rem;">OTP sent to new email (demo: <strong id="email-otp-display"></strong>)</div>
-            <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Enter OTP</label><input type="text" id="chemail-otp" placeholder="6-digit OTP" maxlength="6" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--mono);font-size:15px;letter-spacing:0.2em;outline:none;" /></div>
-            <div style="display:flex;gap:8px;margin-top:0.75rem;">
-              <button onclick="confirmEmailChange()" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(245,196,0,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);cursor:pointer;" onmouseover="this.style.background='rgba(245,196,0,0.1)'" onmouseout="this.style.background='transparent'">Confirm →</button>
-              <button onclick="cancelEmailChange()" style="padding:12px 16px;background:transparent;border:1px solid var(--border-hi);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;">Cancel</button>
-            </div>
+          <div class="fld">
+            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">New password</label>
+            <input type="password" id="acc-new-pass" placeholder="New password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
           </div>
+          <div class="fld">
+            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Confirm new password</label>
+            <input type="password" id="acc-confirm-pass" placeholder="Confirm new password" onkeydown="if(event.key==='Enter')changePassword()" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+          </div>
+          <button onclick="changePassword()" style="padding:12px;background:transparent;border:1px solid rgba(255,68,68,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#ff6b6b;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,68,68,0.08)'" onmouseout="this.style.background='transparent'">Update password →</button>
         </div>
       </div>
     </div>
@@ -3129,7 +3020,7 @@
 
     <div class="dp-section">
       <div class="dp-section-title">Set risk level</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <div class="risk-btns" style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="st-btn" onclick="updateRisk(this,'Low')" style="border-color:rgba(245,196,0,0.3);color:#f5c400;">Low</button>
         <button class="st-btn" onclick="updateRisk(this,'Medium')" style="border-color:rgba(251,191,36,0.3);color:#fbbf24;">Medium</button>
         <button class="st-btn" onclick="updateRisk(this,'High')" style="border-color:rgba(251,146,60,0.3);color:#fb923c;">High</button>
@@ -3174,6 +3065,9 @@
       <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Full Name</label>
         <input id="inv-name" type="text" placeholder="e.g. Arjun Mehta" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
       </div>
+      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Gmail address</label>
+        <input id="inv-email" type="email" placeholder="e.g. arjun@reporter.com" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+      </div>
       <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Role / Specialisation</label>
         <input id="inv-role" type="text" placeholder="e.g. Investigator · Finance" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
       </div>
@@ -3185,6 +3079,72 @@
         </select>
       </div>
       <button onclick="saveInvestigator()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(245,196,0,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);cursor:pointer;transition:all 0.2s;margin-top:4px;" onmouseover="this.style.background='rgba(245,196,0,0.1)'" onmouseout="this.style.background='transparent'">Add Investigator →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SEND TASK / GMAIL MODAL -->
+<div id="send-task-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;align-items:center;justify-content:center;" onclick="if(event.target===this)closeSendTask()">
+  <div style="background:var(--bg3);border:1px solid var(--border-hi);border-radius:6px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.7);">
+    <!-- Header -->
+    <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;">📧</span>
+        <div>
+          <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);">Send via Gmail</div>
+          <div id="task-inv-name" style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:1px;"></div>
+        </div>
+      </div>
+      <button onclick="closeSendTask()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;padding:4px;">✕</button>
+    </div>
+    <!-- Body -->
+    <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
+      <div id="send-task-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
+
+      <!-- To (read-only display) -->
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">To</label>
+        <div id="task-to-display" style="padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--blue);font-family:var(--mono);font-size:13px;"></div>
+      </div>
+
+      <!-- Complaint link (optional) -->
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Link complaint (optional)</label>
+        <select id="task-complaint-select" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;cursor:pointer;">
+          <option value="">— No specific complaint —</option>
+        </select>
+      </div>
+
+      <!-- Subject -->
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Subject</label>
+        <input id="task-subject" type="text" placeholder="e.g. New case assignment – SV-2025-7834" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+      </div>
+
+      <!-- Task / Message -->
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Task / Message</label>
+        <textarea id="task-body" rows="5" placeholder="Describe the task or instructions for the investigator…" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;resize:vertical;outline:none;line-height:1.6;"></textarea>
+      </div>
+
+      <!-- Priority -->
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px;">Priority</label>
+        <div style="display:flex;gap:8px;">
+          <button class="task-pri-btn active" data-pri="Normal" onclick="selectPriority(this)" style="flex:1;padding:7px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(245,196,0,0.3);border-radius:2px;background:rgba(245,196,0,0.08);color:var(--accent);cursor:pointer;">Normal</button>
+          <button class="task-pri-btn" data-pri="High" onclick="selectPriority(this)" style="flex:1;padding:7px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(251,146,60,0.3);border-radius:2px;background:none;color:#fb923c;cursor:pointer;">High</button>
+          <button class="task-pri-btn" data-pri="Urgent" onclick="selectPriority(this)" style="flex:1;padding:7px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(255,68,68,0.3);border-radius:2px;background:none;color:#ff6b6b;cursor:pointer;">Urgent</button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button onclick="sendTaskViaGmail()" style="flex:1;padding:12px;background:rgba(245,196,0,0.1);border:1px solid rgba(245,196,0,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.background='rgba(245,196,0,0.18)'" onmouseout="this.style.background='rgba(245,196,0,0.1)'">
+          <span>📧</span> Open in Gmail →
+        </button>
+        <button onclick="copyTaskEmail()" style="padding:12px 16px;background:none;border:1px solid var(--border-hi);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted2);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.2)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.13)'">Copy</button>
+      </div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;letter-spacing:0.04em;">Opens Gmail compose in a new tab · pre-filled with the task details</div>
     </div>
   </div>
 </div>
@@ -3210,7 +3170,7 @@
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 // ═══════════════════════════════════════
 var db;
@@ -3351,7 +3311,7 @@ function renderOverviewRecent() {
       <td><span class="adm-date">${c.date}</span></td>
       <td><span class="sp ${statusClass[c.status]||'sp-new'}">${c.status}</span></td>
       <td><div class="risk-wrap"><div class="risk-dot ${riskClass[c.risk]||'risk-low'}"></div><span class="risk-label">${c.risk}</span></div></td>
-      <td><button class="adm-btn adm-btn-accent" onclick="event.stopPropagation();openViewTab('${id}')">View →</button></td>
+      <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('${id}')">View →</button></td>
     </tr>`).join('');
 }
 
@@ -3359,17 +3319,18 @@ function renderOverviewRecent() {
 // ADD INVESTIGATOR MODAL
 // ═══════════════════════════════════════
 const investigators = [
-  { initials:'RS', name:'Ravi Sharma', role:'Senior Investigator · Fraud', status:'Active', active:8, resolved:47 },
-  { initials:'PG', name:'Priya Gupta', role:'Investigator · HR & Compliance', status:'Active', active:5, resolved:31 },
-  { initials:'AK', name:'Anita Krishnan', role:'Lead Investigator · Safety', status:'On leave', active:0, resolved:62 },
-  { initials:'MR', name:'Mohammed Rashid', role:'Investigator · Data & IT', status:'Active', active:3, resolved:18 },
-  { initials:'SJ', name:'Sunita Joshi', role:'Investigator · Legal & Ethics', status:'Active', active:4, resolved:25 },
+  { initials:'RS', name:'Ravi Sharma', role:'Senior Investigator · Fraud', email:'ravi.sharma@reporter.com', status:'Active', active:8, resolved:47 },
+  { initials:'PG', name:'Priya Gupta', role:'Investigator · HR & Compliance', email:'priya.gupta@reporter.com', status:'Active', active:5, resolved:31 },
+  { initials:'AK', name:'Anita Krishnan', role:'Lead Investigator · Safety', email:'anita.krishnan@reporter.com', status:'On leave', active:0, resolved:62 },
+  { initials:'MR', name:'Mohammed Rashid', role:'Investigator · Data & IT', email:'m.rashid@reporter.com', status:'Active', active:3, resolved:18 },
+  { initials:'SJ', name:'Sunita Joshi', role:'Investigator · Legal & Ethics', email:'sunita.joshi@reporter.com', status:'Active', active:4, resolved:25 },
 ];
 
 function openAddInv() {
   const overlay = document.getElementById('add-inv-overlay');
   overlay.style.display = 'flex';
   document.getElementById('inv-name').value = '';
+  document.getElementById('inv-email').value = '';
   document.getElementById('inv-role').value = '';
   document.getElementById('inv-status').value = 'Active';
   document.getElementById('add-inv-err').style.display = 'none';
@@ -3381,6 +3342,7 @@ function closeAddInv() {
 
 function saveInvestigator() {
   const name = document.getElementById('inv-name').value.trim();
+  const email = document.getElementById('inv-email').value.trim();
   const role = document.getElementById('inv-role').value.trim();
   const status = document.getElementById('inv-status').value;
   const errEl = document.getElementById('add-inv-err');
@@ -3391,10 +3353,11 @@ function saveInvestigator() {
   }
   errEl.style.display = 'none';
   const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
-  investigators.push({ initials, name, role, status, active:0, resolved:0 });
+  investigators.push({ initials, name, role, email: email || '', status, active:0, resolved:0 });
   renderInvestigatorsGrid();
   rebuildAssignDropdown();
-  addAuditEntry(`Investigator added: ${name}`);
+  addAuditEntry(`Investigator added: ${name}${email ? ' (' + email + ')' : ''}`);
+  showToast(`${name} added ✓`, 'success');
   closeAddInv();
 }
 
@@ -3402,20 +3365,32 @@ function renderInvestigatorsGrid() {
   const grid = document.querySelector('.inv-grid');
   if (!grid) return;
   const statusColor = { Active: 'var(--accent)', 'On leave': '#fbbf24', Inactive: 'var(--muted)' };
-  grid.innerHTML = investigators.map(inv => `
-    <div class="inv-card">
+  grid.innerHTML = investigators.map((inv, idx) => `
+    <div class="inv-card" style="display:flex;flex-direction:column;gap:0;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div class="inv-avatar">${inv.initials}</div>
         <span style="font-family:var(--mono);font-size:10px;color:${statusColor[inv.status]||'var(--muted)'};"><span class="inv-status-dot" style="background:${statusColor[inv.status]||'var(--muted)'};"></span>${inv.status}</span>
       </div>
       <div class="inv-name">${inv.name}</div>
       <div class="inv-role">${inv.role}</div>
-      <div class="inv-stats">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--blue);margin-top:4px;display:flex;align-items:center;gap:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+        <span style="opacity:0.6;">✉</span>
+        <span style="overflow:hidden;text-overflow:ellipsis;">${inv.email || '—'}</span>
+      </div>
+      <div class="inv-stats" style="margin-top:10px;margin-bottom:12px;">
         <div><span class="inv-stat-val">${inv.active}</span><span class="inv-stat-lbl">Active cases</span></div>
         <div><span class="inv-stat-val">${inv.resolved}</span><span class="inv-stat-lbl">Resolved</span></div>
       </div>
+      <div style="display:flex;gap:6px;margin-top:auto;padding-top:10px;border-top:1px solid var(--border);">
+        <button onclick="openSendTask(${idx})" style="flex:1;padding:7px 10px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(245,196,0,0.35);border-radius:2px;background:rgba(245,196,0,0.06);color:var(--accent);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:5px;" onmouseover="this.style.background='rgba(245,196,0,0.14)'" onmouseout="this.style.background='rgba(245,196,0,0.06)'">
+          <span>📋</span> Send Task
+        </button>
+        <button onclick="quickGmail(${idx})" title="Send quick Gmail" style="padding:7px 10px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(42,143,255,0.35);border-radius:2px;background:rgba(42,143,255,0.06);color:var(--blue);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:5px;" onmouseover="this.style.background='rgba(42,143,255,0.14)'" onmouseout="this.style.background='rgba(42,143,255,0.06)'">
+          <span>📧</span> Gmail
+        </button>
+      </div>
     </div>`).join('') + `
-    <div class="inv-card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;cursor:pointer;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'" onclick="openAddInv()">
+    <div class="inv-card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;cursor:pointer;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'" onclick="openAddInv()">
       <div style="font-size:28px;color:var(--muted);margin-bottom:8px;">+</div>
       <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;">Add investigator</div>
     </div>`;
@@ -3432,21 +3407,135 @@ function rebuildAssignDropdown() {
 }
 
 // ═══════════════════════════════════════
+// SEND TASK / GMAIL
 // ═══════════════════════════════════════
-// ═══════════════════════════════════════
-// ADMIN CREDENTIALS STATE
-// ═══════════════════════════════════════
-let adminCreds = { email: 'gauneshthegamer@gmail.com', password: '9896302510' };
-let pendingOTP = null;
-let pendingNewEmail = null;
-let pendingEmailOTP = null;
+let currentTaskInvIdx = null;
+let currentTaskPriority = 'Normal';
+
+function openSendTask(idx) {
+  const inv = investigators[idx];
+  currentTaskInvIdx = idx;
+  currentTaskPriority = 'Normal';
+
+  document.getElementById('send-task-overlay').style.display = 'flex';
+  document.getElementById('task-inv-name').textContent = inv.name + ' · ' + inv.role;
+  document.getElementById('task-to-display').textContent = inv.email || '(no email set)';
+  document.getElementById('task-subject').value = '';
+  document.getElementById('task-body').value = '';
+  document.getElementById('send-task-err').style.display = 'none';
+
+  // Reset priority buttons
+  document.querySelectorAll('.task-pri-btn').forEach(b => {
+    const pri = b.dataset.pri;
+    b.style.background = pri === 'Normal' ? 'rgba(245,196,0,0.08)' : 'none';
+    b.style.fontWeight = pri === 'Normal' ? '600' : 'normal';
+  });
+
+  // Populate complaint dropdown
+  const sel = document.getElementById('task-complaint-select');
+  sel.innerHTML = '<option value="">— No specific complaint —</option>' +
+    Object.entries(DB).map(([id, c]) => `<option value="${id}">${id} · ${c.cat} · ${c.status}</option>`).join('');
+
+  // Pre-fill if a complaint is open
+  if (currentDetailId) {
+    sel.value = currentDetailId;
+    const c = DB[currentDetailId];
+    document.getElementById('task-subject').value = `Case Assignment: ${currentDetailId} – ${c.cat}`;
+    document.getElementById('task-body').value =
+`Dear ${inv.name},
+
+You are being assigned to investigate complaint ${currentDetailId}.
+
+Category: ${c.cat}
+Department: ${c.dept}
+Risk Level: ${c.risk}
+Current Status: ${c.status}
+
+Summary:
+${c.desc}
+
+Please review this case at your earliest convenience and update the status accordingly.
+
+Regards,
+Admin — Reporter Platform`;
+  }
+}
+
+function closeSendTask() {
+  document.getElementById('send-task-overlay').style.display = 'none';
+  currentTaskInvIdx = null;
+}
+
+function selectPriority(btn) {
+  currentTaskPriority = btn.dataset.pri;
+  document.querySelectorAll('.task-pri-btn').forEach(b => {
+    const isThis = b === btn;
+    b.style.fontWeight = isThis ? '600' : 'normal';
+    if (b.dataset.pri === 'Normal') b.style.background = isThis ? 'rgba(245,196,0,0.18)' : 'none';
+    if (b.dataset.pri === 'High') b.style.background = isThis ? 'rgba(251,146,60,0.18)' : 'none';
+    if (b.dataset.pri === 'Urgent') b.style.background = isThis ? 'rgba(255,68,68,0.18)' : 'none';
+  });
+}
+
+function buildGmailUrl() {
+  const inv = investigators[currentTaskInvIdx];
+  const to = inv.email || '';
+  const complaintId = document.getElementById('task-complaint-select').value;
+  let subject = document.getElementById('task-subject').value.trim();
+  let body = document.getElementById('task-body').value.trim();
+
+  if (!subject) subject = complaintId ? `Case Assignment: ${complaintId}` : 'Investigation Task from Reporter';
+  if (!body) body = 'Please see task details below.';
+
+  const priorityTag = currentTaskPriority !== 'Normal' ? `[${currentTaskPriority.toUpperCase()}] ` : '';
+  const fullSubject = priorityTag + subject;
+  const fullBody = body + '\n\n---\nSent from Reporter Whistleblower Platform';
+
+  return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(fullBody)}`;
+}
+
+function sendTaskViaGmail() {
+  const errEl = document.getElementById('send-task-err');
+  const inv = investigators[currentTaskInvIdx];
+  if (!inv.email) {
+    errEl.textContent = 'This investigator has no email address. Please edit and add one.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const subject = document.getElementById('task-subject').value.trim() || 'Investigation Task';
+  window.open(buildGmailUrl(), '_blank');
+  addAuditEntry(`Task sent to ${inv.name} via Gmail: "${subject}"`);
+  showToast(`Gmail opened for ${inv.name} ✓`, 'success');
+  closeSendTask();
+}
+
+function copyTaskEmail() {
+  const subject = document.getElementById('task-subject').value.trim() || '(no subject)';
+  const body = document.getElementById('task-body').value.trim() || '(no message)';
+  const inv = investigators[currentTaskInvIdx];
+  const full = `To: ${inv.email || '(no email)'}\nSubject: ${subject}\n\n${body}`;
+  navigator.clipboard.writeText(full).then(() => {
+    showToast('Email copied to clipboard ✓', 'success');
+  }).catch(() => {
+    showToast('Copy failed — try manually', 'error');
+  });
+}
+
+function quickGmail(idx) {
+  const inv = investigators[idx];
+  if (!inv.email) { showToast('No email set for this investigator', 'error'); return; }
+  const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(inv.email)}&su=${encodeURIComponent('Reporter Platform – Message for ' + inv.name)}`;
+  window.open(url, '_blank');
+  addAuditEntry(`Quick Gmail opened for ${inv.name}`);
+}
 
 // ═══════════════════════════════════════
-// LOGIN / LOGOUT
+// ADMIN CREDENTIALS (mutable)
 // ═══════════════════════════════════════
+const adminCreds = { username: 'admin', password: 'admin123' };
+
 function openAdminLogin() {
   document.getElementById('admin-login-screen').classList.add('show');
-  showLoginView();
 }
 
 function closeAdminLogin() {
@@ -3454,77 +3543,25 @@ function closeAdminLogin() {
   document.getElementById('login-err').classList.remove('show');
 }
 
-function showLoginView() {
-  document.getElementById('login-view').style.display = 'block';
-  document.getElementById('forgot-view').style.display = 'none';
-  document.getElementById('login-err').classList.remove('show');
-}
-
-function showForgotPassword() {
-  document.getElementById('login-view').style.display = 'none';
-  document.getElementById('forgot-view').style.display = 'block';
-  document.getElementById('forgot-err').classList.remove('show');
-  document.getElementById('forgot-success').classList.remove('show');
-  document.getElementById('reset-err').classList.remove('show');
-  document.getElementById('forgot-step1').style.display = 'block';
-  document.getElementById('forgot-step2').style.display = 'none';
-  document.getElementById('forgot-email-input').value = '';
-}
-
-function sendOTP() {
-  const email = document.getElementById('forgot-email-input').value.trim().toLowerCase();
-  const errEl = document.getElementById('forgot-err');
-  const okEl = document.getElementById('forgot-success');
-  errEl.classList.remove('show');
-  okEl.classList.remove('show');
-  if (!email) { errEl.textContent = 'Please enter your registered Gmail.'; errEl.classList.add('show'); return; }
-  if (email !== adminCreds.email.toLowerCase()) { errEl.textContent = 'Email not found in admin records.'; errEl.classList.add('show'); return; }
-  // Generate OTP
-  pendingOTP = String(Math.floor(100000 + Math.random() * 900000));
-  document.getElementById('demo-otp-display').textContent = pendingOTP;
-  okEl.classList.add('show');
-  document.getElementById('forgot-step1').style.display = 'none';
-  document.getElementById('forgot-step2').style.display = 'block';
-  document.getElementById('forgot-otp-input').value = '';
-  document.getElementById('forgot-new-pass').value = '';
-  document.getElementById('forgot-confirm-pass').value = '';
-  console.log('[Demo] OTP:', pendingOTP);
-}
-
-function resetPassword() {
-  const otp = document.getElementById('forgot-otp-input').value.trim();
-  const np = document.getElementById('forgot-new-pass').value;
-  const cp = document.getElementById('forgot-confirm-pass').value;
-  const errEl = document.getElementById('reset-err');
-  errEl.classList.remove('show');
-  if (otp !== pendingOTP) { errEl.textContent = 'Incorrect OTP. Try again.'; errEl.classList.add('show'); return; }
-  if (!np) { errEl.textContent = 'New password cannot be empty.'; errEl.classList.add('show'); return; }
-  if (np !== cp) { errEl.textContent = 'Passwords do not match.'; errEl.classList.add('show'); return; }
-  adminCreds.password = np;
-  pendingOTP = null;
-  showToast('Password reset successfully!', 'success');
-  showLoginView();
-}
-
 function doLogin() {
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value.trim();
-  const errEl = document.getElementById('login-err');
-  errEl.classList.remove('show');
-  if (email === adminCreds.email.toLowerCase() && p === adminCreds.password) {
+  if (u === adminCreds.username && p === adminCreds.password) {
     document.getElementById('admin-login-screen').classList.remove('show');
     document.getElementById('admin-dashboard').classList.add('show');
-    document.getElementById('current-email-display').textContent = adminCreds.email;
+    // Update nav user display
+    document.querySelector('.admin-user span').textContent = adminCreds.username;
+    document.querySelector('.admin-avatar').textContent = adminCreds.username[0].toUpperCase();
     buildComplaintsTable();
     initBars();
     startRealtimeListener();
     renderInvestigatorsGrid();
     rebuildAssignDropdown();
-    vtRebuildAssignDropdown();
     renderOverviewRecent();
   } else {
-    errEl.textContent = 'Invalid credentials. Check your email and password.';
-    errEl.classList.add('show');
+    const err = document.getElementById('login-err');
+    err.textContent = 'Invalid username or password.';
+    err.classList.add('show');
   }
 }
 
@@ -3537,63 +3574,46 @@ function doLogout() {
 // ═══════════════════════════════════════
 // ACCOUNT SETTINGS
 // ═══════════════════════════════════════
-function changeAdminPassword() {
-  const cur = document.getElementById('chpw-current').value;
-  const np = document.getElementById('chpw-new').value;
-  const cp = document.getElementById('chpw-confirm').value;
-  const errEl = document.getElementById('chpw-err');
-  const okEl = document.getElementById('chpw-ok');
-  errEl.classList.remove('show'); okEl.classList.remove('show');
-  if (cur !== adminCreds.password) { errEl.textContent = 'Current password is incorrect.'; errEl.classList.add('show'); return; }
-  if (!np) { errEl.textContent = 'New password cannot be empty.'; errEl.classList.add('show'); return; }
-  if (np !== cp) { errEl.textContent = 'New passwords do not match.'; errEl.classList.add('show'); return; }
+function changeUsername() {
+  const newU = document.getElementById('acc-new-user').value.trim();
+  const pass = document.getElementById('acc-user-pass').value;
+  const errEl = document.getElementById('acc-user-err');
+  const okEl = document.getElementById('acc-user-ok');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+  if (!newU) { errEl.textContent = 'New username cannot be empty.'; errEl.style.display = 'block'; return; }
+  if (pass !== adminCreds.password) { errEl.textContent = 'Incorrect password.'; errEl.style.display = 'block'; return; }
+  adminCreds.username = newU;
+  document.getElementById('acc-current-user-display').textContent = newU;
+  document.getElementById('acc-new-user').value = '';
+  document.getElementById('acc-user-pass').value = '';
+  // Update nav display
+  document.querySelector('.admin-user span').textContent = newU;
+  document.querySelector('.admin-avatar').textContent = newU[0].toUpperCase();
+  okEl.textContent = 'Username updated to "' + newU + '"';
+  okEl.style.display = 'block';
+  addAuditEntry('Admin username changed to "' + newU + '"');
+  showToast('Username updated ✓', 'success');
+}
+
+function changePassword() {
+  const cur = document.getElementById('acc-cur-pass').value;
+  const np = document.getElementById('acc-new-pass').value;
+  const cp = document.getElementById('acc-confirm-pass').value;
+  const errEl = document.getElementById('acc-pass-err');
+  const okEl = document.getElementById('acc-pass-ok');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+  if (cur !== adminCreds.password) { errEl.textContent = 'Current password is incorrect.'; errEl.style.display = 'block'; return; }
+  if (!np) { errEl.textContent = 'New password cannot be empty.'; errEl.style.display = 'block'; return; }
+  if (np !== cp) { errEl.textContent = 'New passwords do not match.'; errEl.style.display = 'block'; return; }
+  if (np.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
   adminCreds.password = np;
-  document.getElementById('chpw-current').value = '';
-  document.getElementById('chpw-new').value = '';
-  document.getElementById('chpw-confirm').value = '';
-  okEl.classList.add('show');
+  document.getElementById('acc-cur-pass').value = '';
+  document.getElementById('acc-new-pass').value = '';
+  document.getElementById('acc-confirm-pass').value = '';
+  okEl.textContent = 'Password updated successfully.';
+  okEl.style.display = 'block';
   addAuditEntry('Admin password changed');
-  showToast('Password updated', 'success');
-}
-
-function sendEmailChangeOTP() {
-  const newEmail = document.getElementById('chemail-new').value.trim();
-  const pass = document.getElementById('chemail-pass').value;
-  const errEl = document.getElementById('chemail-err');
-  errEl.classList.remove('show');
-  if (!newEmail || !newEmail.includes('@')) { errEl.textContent = 'Please enter a valid Gmail address.'; errEl.classList.add('show'); return; }
-  if (pass !== adminCreds.password) { errEl.textContent = 'Password is incorrect.'; errEl.classList.add('show'); return; }
-  pendingNewEmail = newEmail;
-  pendingEmailOTP = String(Math.floor(100000 + Math.random() * 900000));
-  document.getElementById('email-otp-display').textContent = pendingEmailOTP;
-  document.getElementById('email-step1').style.display = 'none';
-  document.getElementById('email-step2').style.display = 'block';
-  document.getElementById('chemail-otp').value = '';
-  console.log('[Demo] Email OTP:', pendingEmailOTP);
-}
-
-function confirmEmailChange() {
-  const otp = document.getElementById('chemail-otp').value.trim();
-  const errEl = document.getElementById('chemail-err');
-  const okEl = document.getElementById('chemail-ok');
-  errEl.classList.remove('show'); okEl.classList.remove('show');
-  if (otp !== pendingEmailOTP) { errEl.textContent = 'Incorrect OTP. Try again.'; errEl.classList.add('show'); return; }
-  adminCreds.email = pendingNewEmail;
-  pendingNewEmail = null; pendingEmailOTP = null;
-  document.getElementById('current-email-display').textContent = adminCreds.email;
-  cancelEmailChange();
-  okEl.textContent = 'Gmail updated to ' + adminCreds.email;
-  okEl.classList.add('show');
-  addAuditEntry('Admin Gmail updated to ' + adminCreds.email);
-  showToast('Gmail updated', 'success');
-}
-
-function cancelEmailChange() {
-  document.getElementById('email-step1').style.display = 'block';
-  document.getElementById('email-step2').style.display = 'none';
-  document.getElementById('chemail-new').value = '';
-  document.getElementById('chemail-pass').value = '';
-  document.getElementById('chemail-otp').value = '';
+  showToast('Password updated ✓', 'success');
 }
 
 // ═══════════════════════════════════════
@@ -3604,186 +3624,6 @@ function showAdminTab(name, btn) {
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   btn.classList.add('active');
-  if (name === 'account') {
-    document.getElementById('current-email-display').textContent = adminCreds.email;
-    document.getElementById('chpw-err').classList.remove('show');
-    document.getElementById('chpw-ok').classList.remove('show');
-    document.getElementById('chemail-err').classList.remove('show');
-    document.getElementById('chemail-ok').classList.remove('show');
-  }
-}
-
-// ═══════════════════════════════════════
-// VIEW TAB FUNCTIONS
-// ═══════════════════════════════════════
-let vtCurrentId = null;
-
-function openViewTab(id) {
-  vtCurrentId = id;
-  const c = DB[id];
-  if (!c) return;
-
-  // Show the tab button and switch to it
-  const tabBtn = document.getElementById('tab-btn-view');
-  tabBtn.style.display = 'inline-block';
-  tabBtn.textContent = 'View: ' + id;
-  showAdminTab('view', tabBtn);
-
-  // Populate header
-  document.getElementById('view-tab-id').textContent = id;
-
-  // Status badge
-  const badge = document.getElementById('vt-status-badge');
-  badge.textContent = c.status;
-  badge.className = 'sp ' + (statusClass[c.status] || 'sp-new');
-
-  // Details rows
-  const rows = [
-    ['ID', id], ['Category', c.cat], ['Department', c.dept],
-    ['Submitted', c.date], ['Reporter', c.anon ? 'Anonymous' : (c.reporter || 'Identified')],
-    ['Assigned', c.assigned || '—'], ['Risk', c.risk]
-  ];
-  document.getElementById('vt-rows').innerHTML = rows.map(([l,v]) =>
-    `<div class="dp-row"><span class="dp-lbl">${l}</span><span class="dp-val">${v}</span></div>`
-  ).join('');
-
-  // Description
-  document.getElementById('vt-desc').textContent = c.desc;
-
-  // AI output reset
-  document.getElementById('vt-ai-output').innerHTML = '<p style="font-family:var(--mono);font-size:12px;color:var(--muted);font-style:italic;">Click "Run AI" to generate an investigative briefing.</p>';
-
-  // Status buttons
-  document.querySelectorAll('#vt-status-btns .st-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent === c.status);
-  });
-
-  // Risk buttons
-  document.querySelectorAll('#vt-risk-btns .st-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent === c.risk);
-  });
-
-  // Assign dropdown
-  vtRebuildAssignDropdown();
-  const vtAssign = document.getElementById('vt-assign');
-  if (vtAssign) vtAssign.value = c.assigned || '';
-
-  // Audit
-  vtBuildAudit(id);
-}
-
-function vtBuildAudit(id) {
-  const c = DB[id];
-  document.getElementById('vt-audit').innerHTML = (c.audit || []).slice().reverse().map(a => {
-    const parts = a.split(' — ');
-    return `<div class="audit-row"><span class="audit-ts">${parts[0]}</span><span class="audit-action">${parts[1] || ''}</span></div>`;
-  }).join('');
-}
-
-function vtRebuildAssignDropdown() {
-  const sel = document.getElementById('vt-assign');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">Unassigned</option>' +
-    investigators.map(inv => {
-      const shortName = inv.name.split(' ').map((w,i) => i===0 ? w[0]+'.' : w).join(' ');
-      return `<option value="${shortName}">${inv.name} · ${inv.role.split('·')[0].trim()}</option>`;
-    }).join('');
-  if (vtCurrentId && DB[vtCurrentId]) sel.value = DB[vtCurrentId].assigned || '';
-}
-
-async function vtUpdateStatus(btn, status) {
-  if (!vtCurrentId) return;
-  const autoRisk = {
-    'New': DB[vtCurrentId].risk || 'Pending',
-    'In review': DB[vtCurrentId].risk === 'Pending' ? 'Low' : DB[vtCurrentId].risk,
-    'In progress': DB[vtCurrentId].risk === 'Pending' ? 'Medium' : DB[vtCurrentId].risk,
-    'Escalated': 'High', 'Closed': DB[vtCurrentId].risk
-  };
-  const newRisk = autoRisk[status] || DB[vtCurrentId].risk;
-  DB[vtCurrentId].status = status;
-  DB[vtCurrentId].risk = newRisk;
-  document.querySelectorAll('#vt-status-btns .st-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const badge = document.getElementById('vt-status-badge');
-  badge.textContent = status;
-  badge.className = 'sp ' + (statusClass[status] || 'sp-new');
-  const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-  DB[vtCurrentId].audit.push(`${ts} — Status → ${status} · admin`);
-  vtBuildAudit(vtCurrentId);
-  addAuditEntry(`${vtCurrentId} status changed → ${status}`);
-  renderComplaintsTable(); renderOverviewRecent();
-  showToast(`Status updated → ${status}`, 'success');
-  if (db) { try { await db.collection('complaints').doc(vtCurrentId).update({ status, risk: newRisk, audit: DB[vtCurrentId].audit }); } catch(e) {} }
-}
-
-async function vtUpdateRisk(btn, risk) {
-  if (!vtCurrentId) return;
-  DB[vtCurrentId].risk = risk;
-  document.querySelectorAll('#vt-risk-btns .st-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-  DB[vtCurrentId].audit.push(`${ts} — Risk → ${risk} · admin`);
-  vtBuildAudit(vtCurrentId);
-  addAuditEntry(`${vtCurrentId} risk set → ${risk}`);
-  renderComplaintsTable(); renderOverviewRecent();
-  showToast(`Risk set → ${risk}`, 'success');
-  if (db) { try { await db.collection('complaints').doc(vtCurrentId).update({ risk, audit: DB[vtCurrentId].audit }); } catch(e) {} }
-}
-
-async function vtLogAssign() {
-  if (!vtCurrentId) return;
-  const val = document.getElementById('vt-assign').value;
-  DB[vtCurrentId].assigned = val;
-  if (val) {
-    const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-    DB[vtCurrentId].audit.push(`${ts} — Assigned to ${val} · admin`);
-    vtBuildAudit(vtCurrentId);
-    addAuditEntry(`${vtCurrentId} assigned to ${val}`);
-    showToast(`Assigned to ${val}`, 'success');
-  }
-  renderComplaintsTable(); renderOverviewRecent();
-  if (db) { try { await db.collection('complaints').doc(vtCurrentId).update({ assigned: val, audit: DB[vtCurrentId].audit }); } catch(e) {} }
-}
-
-async function vtAddNote() {
-  if (!vtCurrentId) return;
-  const note = document.getElementById('vt-note').value.trim();
-  if (!note) return;
-  const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-  DB[vtCurrentId].audit.push(`${ts} — Note: "${note}" · admin`);
-  vtBuildAudit(vtCurrentId);
-  addAuditEntry(`Note added to ${vtCurrentId}`);
-  document.getElementById('vt-note').value = '';
-  showToast('Note saved ✓', 'success');
-  if (db) { try { await db.collection('complaints').doc(vtCurrentId).update({ audit: DB[vtCurrentId].audit }); } catch(e) {} }
-}
-
-async function runVTAIAnalysis() {
-  if (!vtCurrentId) return;
-  const c = DB[vtCurrentId];
-  const out = document.getElementById('vt-ai-output');
-  out.innerHTML = '<div class="ai-loading"><div class="spinner"></div> Analysing complaint data...</div>';
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: 'You are a compliance investigation AI for a secure whistleblower platform. Given complaint details, provide a concise 4-6 sentence investigative briefing. Be professional and factual. No markdown headers or bullet points.',
-        messages: [{ role: 'user', content: `ID: ${vtCurrentId}\nCategory: ${c.cat}\nDept: ${c.dept}\nDate: ${c.date}\nRisk: ${c.risk}\nStatus: ${c.status}\nDescription: ${c.desc}` }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content.map(i => i.text || '').join('');
-    out.innerHTML = `<p style="font-size:13px;line-height:1.7;color:var(--muted2);">${text}</p>`;
-    const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-    DB[vtCurrentId].audit.push(`${ts} — AI analysis run · admin`);
-    vtBuildAudit(vtCurrentId);
-    addAuditEntry(`AI analysis run on ${vtCurrentId}`);
-  } catch(e) {
-    out.innerHTML = '<p style="color:var(--muted)">AI analysis unavailable. Please review manually.</p>';
-  }
 }
 
 // ═══════════════════════════════════════
@@ -3821,7 +3661,7 @@ function renderComplaintsTable(filterStatus = '', filterCat = '') {
     if (filterStatus && c.status !== filterStatus) return;
     if (filterCat && c.cat !== filterCat) return;
     const tr = document.createElement('tr');
-    tr.onclick = () => openViewTab(id);
+    tr.onclick = () => openDetail(id);
     tr.innerHTML = `
       <td><span class="adm-id">${id}</span></td>
       <td><span class="adm-cat">${c.cat}</span></td>
@@ -3831,7 +3671,7 @@ function renderComplaintsTable(filterStatus = '', filterCat = '') {
       <td><span class="sp ${statusClass[c.status] || 'sp-new'}">${c.status}</span></td>
       <td><div class="risk-wrap"><div class="risk-dot ${riskClass[c.risk] || 'risk-low'}"></div><span class="risk-label">${c.risk}</span></div></td>
       <td><span style="font-family:var(--mono);font-size:12px;color:var(--muted2)">${c.assigned || '—'}</span></td>
-      <td><button class="adm-btn adm-btn-accent" onclick="event.stopPropagation();openViewTab('${id}')">View →</button></td>
+      <td><button class="adm-btn" onclick="event.stopPropagation();openDetail('${id}')">View →</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -3894,13 +3734,15 @@ function openDetail(id) {
   document.getElementById('dp-desc').textContent = c.desc;
   rebuildAssignDropdown();
   document.getElementById('dp-assign').value = c.assigned || '';
-  document.getElementById('ai-output').innerHTML = '<p style="color:var(--muted);font-style:italic;">Click "Run" to generate an AI-powered investigative analysis for this complaint.</p>';
+  document.getElementById('ai-output').innerHTML = '<p style="color:var(--muted);font-style:italic;">Click "Scan complaint →" to run an AI analysis that assesses severity and recommends a status.</p>';
   buildDpAudit(id);
-  const stBtns = document.querySelectorAll('.st-btn');
-  stBtns.forEach(b => { b.classList.toggle('active', b.textContent === c.status); });
+  // Highlight correct status button
+  document.querySelectorAll('#status-btns .st-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === c.status);
+  });
   // Highlight current risk button
-  document.querySelectorAll('.dp-section .st-btn[onclick*="updateRisk"]').forEach(b => {
-    b.classList.toggle('active', b.textContent === c.risk);
+  document.querySelectorAll('.risk-btns .st-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === c.risk);
   });
   document.getElementById('detail-panel').classList.add('open');
   document.getElementById('admin-overlay').classList.add('show');
@@ -3937,8 +3779,8 @@ async function updateStatus(btn, status) {
   DB[currentDetailId].status = status;
   DB[currentDetailId].risk = newRisk;
 
-  // Update status buttons
-  document.querySelectorAll('.st-btn').forEach(b => b.classList.remove('active'));
+  // Update status buttons ONLY (not risk buttons)
+  document.querySelectorAll('#status-btns .st-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 
   // Update badge in detail panel
@@ -3981,7 +3823,7 @@ async function updateStatus(btn, status) {
 async function updateRisk(btn, risk) {
   if (!currentDetailId) return;
   DB[currentDetailId].risk = risk;
-  btn.closest('div').querySelectorAll('.st-btn').forEach(b => b.classList.remove('active'));
+  btn.closest('.risk-btns').querySelectorAll('.st-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   const rw = document.getElementById('dp-risk-wrap');
   rw.innerHTML = `<div class="risk-dot ${riskClass[risk]||'risk-low'}"></div><span class="risk-label">${risk} risk</span>`;
@@ -4064,33 +3906,117 @@ function showToast(msg, type = 'success') {
 }
 
 // ═══════════════════════════════════════
-// AI ANALYSIS
+// AI ANALYSIS — scans complaint & recommends status
 // ═══════════════════════════════════════
+let aiRecommendedStatus = null;
+
 async function runAIAnalysis() {
   if (!currentDetailId) return;
   const c = DB[currentDetailId];
   const out = document.getElementById('ai-output');
-  out.innerHTML = '<div class="ai-loading"><div class="spinner"></div> Analysing complaint data...</div>';
+  out.innerHTML = '<div class="ai-loading"><div class="spinner"></div> Scanning complaint with AI…</div>';
+
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: 'You are a compliance investigation AI for a secure whistleblower platform. Given complaint details, provide a concise 4-6 sentence investigative briefing covering: (1) Severity and risk rationale, (2) Key investigation steps recommended, (3) Potential legal or regulatory implications, (4) Suggested next actions and timeline. Be professional and factual. No markdown headers or bullet points — plain paragraph only.',
-        messages: [{ role: 'user', content: `Complaint ID: ${currentDetailId}\nCategory: ${c.cat}\nDepartment: ${c.dept}\nDate: ${c.date}\nRisk: ${c.risk}\nStatus: ${c.status}\nDescription: ${c.desc}` }]
+        max_tokens: 1200,
+        system: `You are a compliance investigation AI. Analyse this whistleblower complaint and respond ONLY with a valid JSON object — no markdown, no extra text — in exactly this format:
+{"recommended_status":"<New|In review|In progress|Escalated|Closed>","recommended_risk":"<Low|Medium|High|Critical>","severity":"<1-2 sentences on severity>","steps":"<2-3 concrete investigation steps>","legal":"<1-2 sentences on legal/regulatory risk>","timeline":"<action timeline e.g. Respond within 48 hours>"}`,
+        messages: [{ role: 'user', content: `ID: ${currentDetailId}\nCategory: ${c.cat}\nDepartment: ${c.dept}\nDate: ${c.date}\nCurrent status: ${c.status}\nCurrent risk: ${c.risk}\nDescription: ${c.desc}` }]
       })
     });
     const data = await res.json();
-    const text = data.content.map(i => i.text || '').join('');
-    out.innerHTML = `<p>${text}</p>`;
-    const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-    DB[currentDetailId].audit.push(`${ts} — AI analysis run · admin`);
+    const raw = data.content.map(i => i.text || '').join('').trim();
+    let parsed;
+    try { parsed = JSON.parse(raw.replace(/```json|```/g,'')); } catch(e) {
+      out.innerHTML = `<p>${raw}</p>`; return;
+    }
+
+    const statusColors = { New:'#60a5fa','In review':'#fbbf24','In progress':'var(--accent)',Escalated:'#ff6b6b',Closed:'var(--muted2)' };
+    const riskColors = { Low:'var(--accent)',Medium:'#fbbf24',High:'#fb923c',Critical:'#ff4444' };
+    const recStatus = parsed.recommended_status || 'In review';
+    const recRisk = parsed.recommended_risk || c.risk;
+
+    out.innerHTML = `
+      <div style="display:grid;gap:10px;padding-top:4px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:140px;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:3px;">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Recommended Status</div>
+            <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:${statusColors[recStatus]||'var(--accent)'};">${recStatus}</div>
+          </div>
+          <div style="flex:1;min-width:140px;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:3px;">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Recommended Risk</div>
+            <div style="font-family:var(--mono);font-size:13px;font-weight:600;color:${riskColors[recRisk]||'var(--accent)'};">${recRisk}</div>
+          </div>
+        </div>
+        <div style="padding:10px 12px;background:rgba(255,255,255,0.02);border-left:2px solid var(--accent);border-radius:0 3px 3px 0;">
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Severity Assessment</div>
+          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.severity}</p>
+        </div>
+        <div style="padding:10px 12px;background:rgba(255,255,255,0.02);border-left:2px solid var(--blue);border-radius:0 3px 3px 0;">
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Investigation Steps</div>
+          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.steps}</p>
+        </div>
+        <div style="padding:10px 12px;background:rgba(255,255,255,0.02);border-left:2px solid #fb923c;border-radius:0 3px 3px 0;">
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Legal & Regulatory Risk</div>
+          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.legal}</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(42,143,255,0.06);border:1px solid rgba(42,143,255,0.18);border-radius:3px;">
+          <span style="font-size:18px;">⏱</span>
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Suggested Timeline</div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--blue);margin-top:2px;">${parsed.timeline}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid rgba(245,196,0,0.15);margin-top:4px;flex-wrap:wrap;">
+          <span style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">AI recommends:</span>
+          <span class="sp ${statusClass[recStatus]||'sp-new'}" style="font-size:11px;">${recStatus}</span>
+          <button onclick="applyAIStatus('${recStatus}','${recRisk}')" style="margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:6px 14px;border:1px solid rgba(42,143,255,0.5);border-radius:2px;background:rgba(42,143,255,0.08);color:var(--blue);cursor:pointer;">Apply recommendation →</button>
+        </div>
+      </div>`;
+
+    const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+    DB[currentDetailId].audit.push(`${ts} — AI scan: recommended "${recStatus}" (${recRisk} risk) · admin`);
     buildDpAudit(currentDetailId);
-    addAuditEntry(`AI analysis run on ${currentDetailId}`);
+    addAuditEntry(`AI scan on ${currentDetailId} → recommended: ${recStatus}`);
   } catch(e) {
-    out.innerHTML = '<p style="color:var(--muted)">AI analysis unavailable. Please review manually.</p>';
+    out.innerHTML = '<p style="color:var(--muted)">AI analysis unavailable. Please check connection and try again.</p>';
+  }
+}
+
+async function applyAIStatus(status, risk) {
+  if (!currentDetailId) return;
+  DB[currentDetailId].status = status;
+  DB[currentDetailId].risk = risk;
+
+  // Update status badge
+  const sb = document.getElementById('dp-status-badge');
+  sb.textContent = status;
+  sb.className = 'sp ' + (statusClass[status] || 'sp-new');
+
+  // Update risk display
+  const rw = document.getElementById('dp-risk-wrap');
+  rw.innerHTML = `<div class="risk-dot ${riskClass[risk]||'risk-low'}"></div><span class="risk-label">${risk} risk</span>`;
+
+  // Update buttons
+  document.querySelectorAll('#status-btns .st-btn').forEach(b => b.classList.toggle('active', b.textContent.trim()===status));
+  document.querySelectorAll('.risk-btns .st-btn').forEach(b => b.classList.toggle('active', b.textContent.trim()===risk));
+
+  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  DB[currentDetailId].audit.push(`${ts} — AI recommendation applied: ${status} / ${risk} · admin`);
+  buildDpAudit(currentDetailId);
+  addAuditEntry(`AI recommendation applied to ${currentDetailId}: ${status}`);
+  renderComplaintsTable();
+  renderOverviewRecent();
+  showToast(`AI status applied → ${status}`, 'success');
+
+  if (db) {
+    try {
+      await db.collection('complaints').doc(currentDetailId).update({ status, risk, audit: DB[currentDetailId].audit });
+    } catch(e) { showToast('Saved locally — sync failed', 'error'); }
   }
 }
 
@@ -4290,8 +4216,6 @@ async function recheckFirebase() {
 
 // Run Firebase check when admin logs in
 // Patch doLogin to also trigger QR init and Firebase status check
-// Post-login init (QR + Firebase) — called after doLogin succeeds
-// Patched into doLogin directly; these wrappers are kept for compatibility
 const _origDoLogin = doLogin;
 window.doLogin = function() {
   _origDoLogin();
@@ -4305,10 +4229,16 @@ window.doLogin = function() {
 const _origShowAdminTab = showAdminTab;
 window.showAdminTab = function(name, btn) {
   _origShowAdminTab(name, btn);
-  if (name === 'qr') setTimeout(() => { initQRCodes(); }, 100);
-  if (name === 'view' && vtCurrentId) { /* already populated */ }
+  if (name === 'qr') {
+    setTimeout(() => { initQRCodes(); }, 100);
+  }
 };
 
 
 const glow = document.createElement('div');
-glow.style.cssText = 'position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(245,196,0,0.05) 0%,rgba(42,143,255,0.04) 55%,transparent 72%);pointer-events:none;z-index:9997;transform:tran
+glow.style.cssText = 'position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(245,196,0,0.05) 0%,rgba(42,143,255,0.04) 55%,transparent 72%);pointer-events:none;z-index:9997;transform:translate(-50%,-50%);transition:all 0.15s ease;';
+document.body.appendChild(glow);
+document.addEventListener('mousemove', e => { glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px'; });
+</script>
+</body>
+</html>
