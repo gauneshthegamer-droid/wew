@@ -3984,6 +3984,8 @@ try {
   console.log('Firebase connected: new-671e9');
 } catch(e) { console.error('Firebase init error:', e); }
 
+
+
 // ═══════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════
@@ -4370,7 +4372,7 @@ function closeAdminLogin() {
 
 function doLogin() {
   const u = document.getElementById('login-user').value.trim();
-  const p = document.getElementById('login-pass').value.trim();
+  const p = document.getElementById('login-pass').value;
   if (u === adminCreds.username && p === adminCreds.password) {
     document.getElementById('admin-login-screen').classList.remove('show');
     document.getElementById('admin-dashboard').classList.add('show');
@@ -4382,6 +4384,7 @@ function doLogin() {
     startRealtimeListener();
     loadSiosFromFirestore();
     loadInvestigatorsFromFirestore();
+    loadTmFromFirestore();
     renderOverviewRecent();
     renderTmManagementTable();
   } else {
@@ -4409,6 +4412,7 @@ function changeUsername() {
   if (!newU) { errEl.textContent = 'New username cannot be empty.'; errEl.style.display = 'block'; return; }
   if (pass !== adminCreds.password) { errEl.textContent = 'Incorrect password.'; errEl.style.display = 'block'; return; }
   adminCreds.username = newU;
+  persistAdminCredsToFirestore();
   document.getElementById('acc-current-user-display').textContent = newU;
   document.getElementById('acc-new-user').value = '';
   document.getElementById('acc-user-pass').value = '';
@@ -4433,6 +4437,7 @@ function changePassword() {
   if (np !== cp) { errEl.textContent = 'New passwords do not match.'; errEl.style.display = 'block'; return; }
   if (np.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
   adminCreds.password = np;
+  persistAdminCredsToFirestore();
   document.getElementById('acc-cur-pass').value = '';
   document.getElementById('acc-new-pass').value = '';
   document.getElementById('acc-confirm-pass').value = '';
@@ -5061,6 +5066,40 @@ let tmRegistry = [
 let currentTm = null; // logged-in TM object
 let loginRole = 'admin'; // 'admin' | 'tm' | 'sio'
 
+// ── Pre-load SIO & TM registries at page startup ────────────
+// Ensures SIO and Top Management users can log in on ANY device
+// without requiring the admin to log in first.
+(async function preloadRegistries() {
+  if (!db) return;
+  try {
+    // Load admin credentials
+    const adminDoc = await db.collection('_config').doc('adminCreds').get();
+    if (adminDoc.exists && adminDoc.data().data) {
+      const loaded = JSON.parse(adminDoc.data().data);
+      if (loaded && loaded.username && loaded.password) {
+        adminCreds.username = loaded.username;
+        adminCreds.password = loaded.password;
+      }
+    }
+  } catch(e) { console.warn('Pre-load admin creds error:', e); }
+  try {
+    const sioDoc = await db.collection('_config').doc('sioRegistry').get();
+    if (sioDoc.exists && sioDoc.data().data) {
+      const loaded = JSON.parse(sioDoc.data().data);
+      if (Array.isArray(loaded)) sioRegistry = loaded;
+    }
+  } catch(e) { console.warn('Pre-load SIO registry error:', e); }
+  try {
+    const tmDoc = await db.collection('_config').doc('tmRegistry').get();
+    if (tmDoc.exists && tmDoc.data().data) {
+      const loaded = JSON.parse(tmDoc.data().data);
+      if (Array.isArray(loaded) && loaded.length > 0) {
+        tmRegistry.splice(0, tmRegistry.length, ...loaded);
+      }
+    }
+  } catch(e) { console.warn('Pre-load TM registry error:', e); }
+})();
+
 
 // ═══════════════════════════════════════
 // TOP MANAGEMENT SYSTEM
@@ -5078,6 +5117,10 @@ function launchTmDashboard() {
 
 function doTmLogout() {
   document.getElementById('tm-dashboard').classList.remove('show');
+  document.getElementById('admin-login-screen').classList.add('show');
+  switchLoginRole('tm');
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
   currentTm = null;
 }
 
@@ -5250,6 +5293,7 @@ function resetTmPassword(username) {
   if (!tm) return;
   tm.password = newPass;
   tm.mustChange = true;
+  persistTmToFirestore();
   renderTmManagementTable();
   addAuditEntry(`TM ${username} password reset by admin`);
   showToast(`Password reset for ${username} ✓`, 'success');
@@ -5258,6 +5302,7 @@ function resetTmPassword(username) {
 function deleteTm(username) {
   if (!confirm('Delete Top Management account "' + username + '"?')) return;
   tmRegistry = tmRegistry.filter(t => t.username !== username);
+  persistTmToFirestore();
   renderTmManagementTable();
   addAuditEntry(`TM account deleted: ${username}`);
   showToast('TM account deleted', 'success');
@@ -5282,6 +5327,7 @@ function saveTm() {
   if (!defpass || defpass.length < 4) { errEl.textContent = 'Password must be at least 4 characters.'; errEl.style.display = 'block'; return; }
   if (tmRegistry.find(t => t.username === username)) { errEl.textContent = 'Username already exists.'; errEl.style.display = 'block'; return; }
   tmRegistry.push({ username, name, password: defpass, mustChange: true });
+  persistTmToFirestore();
   renderTmManagementTable();
   addAuditEntry(`TM account created: ${username} (${name})`);
   showToast(`Top Management account ${name} created ✓`, 'success');
@@ -5386,12 +5432,14 @@ function sioSetFirstPassword() {
     currentTm.password = np;
     currentTm.mustChange = false;
     addAuditEntry(`Top Management ${currentTm.username} changed their default password`);
+    persistTmToFirestore();
     renderTmManagementTable();
     launchTmDashboard();
   } else {
     currentSio.password = np;
     currentSio.mustChange = false;
     addAuditEntry(`SIO ${currentSio.username} changed their default password`);
+    persistSiosToFirestore();
     renderSioManagementTable();
     launchSioDashboard();
   }
@@ -5409,6 +5457,10 @@ function launchSioDashboard() {
 
 function doSioLogout() {
   document.getElementById('sio-dashboard').classList.remove('show');
+  document.getElementById('admin-login-screen').classList.add('show');
+  switchLoginRole('sio');
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
   currentSio = null;
   currentInvCaseId = null;
   const ws = document.getElementById('inv-workspace');
@@ -6335,6 +6387,57 @@ setTimeout(() => {
 // ═══════════════════════════════════════════════════════════
 
 // ── SIO Registry ────────────────────────────────────────────
+
+async function persistAdminCredsToFirestore() {
+  if (!db) return;
+  try {
+    await db.collection('_config').doc('adminCreds').set({ data: JSON.stringify(adminCreds), updatedAt: new Date().toISOString() });
+    showSaveIndicator('Admin credentials saved ✓');
+  } catch(e) {
+    console.error('Admin creds Firestore save error:', e);
+  }
+}
+
+async function loadAdminCredsFromFirestore() {
+  if (!db) return;
+  try {
+    const doc = await db.collection('_config').doc('adminCreds').get();
+    if (doc.exists && doc.data().data) {
+      const loaded = JSON.parse(doc.data().data);
+      if (loaded && loaded.username && loaded.password) {
+        adminCreds.username = loaded.username;
+        adminCreds.password = loaded.password;
+      }
+    }
+  } catch(e) { console.warn('Admin creds load error (using defaults):', e); }
+}
+
+async function persistTmToFirestore() {
+  if (!db) return;
+  try {
+    await db.collection('_config').doc('tmRegistry').set({ data: JSON.stringify(tmRegistry), updatedAt: new Date().toISOString() });
+    showSaveIndicator('Top Mgmt saved ✓');
+  } catch(e) {
+    console.error('TM Firestore save error:', e);
+    showSaveIndicator('TM save failed — check Firestore', true);
+  }
+}
+
+async function loadTmFromFirestore() {
+  if (!db) return;
+  try {
+    const doc = await db.collection('_config').doc('tmRegistry').get();
+    if (doc.exists && doc.data().data) {
+      const loaded = JSON.parse(doc.data().data);
+      if (Array.isArray(loaded) && loaded.length > 0) {
+        tmRegistry.splice(0, tmRegistry.length, ...loaded);
+      }
+    }
+  } catch(e) {
+    console.warn('TM load error (using defaults):', e);
+  }
+  renderTmManagementTable();
+}
 
 async function persistSiosToFirestore() {
   if (!db) return;
