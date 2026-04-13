@@ -4370,9 +4370,11 @@ function closeAdminLogin() {
   document.getElementById('login-err').classList.remove('show');
 }
 
-function doLogin() {
+async function doLogin() {
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value;
+  // Wait for Firestore preload so admin creds are up to date
+  try { await (window._registriesReady || Promise.resolve()); } catch(e) {}
   if (u === adminCreds.username && p === adminCreds.password) {
     document.getElementById('admin-login-screen').classList.remove('show');
     document.getElementById('admin-dashboard').classList.add('show');
@@ -5069,10 +5071,13 @@ let loginRole = 'admin'; // 'admin' | 'tm' | 'sio'
 // ── Pre-load SIO & TM registries at page startup ────────────
 // Ensures SIO and Top Management users can log in on ANY device
 // without requiring the admin to log in first.
-(async function preloadRegistries() {
+// ── Pre-load all registries at startup & expose promise ────────
+// window._registriesReady resolves when Firestore data is loaded.
+// doLogin waits for this before checking credentials, so it works
+// correctly on ANY device even if the user clicks login immediately.
+window._registriesReady = (async function preloadRegistries() {
   if (!db) return;
   try {
-    // Load admin credentials
     const adminDoc = await db.collection('_config').doc('adminCreds').get();
     if (adminDoc.exists && adminDoc.data().data) {
       const loaded = JSON.parse(adminDoc.data().data);
@@ -5098,6 +5103,8 @@ let loginRole = 'admin'; // 'admin' | 'tm' | 'sio'
       }
     }
   } catch(e) { console.warn('Pre-load TM registry error:', e); }
+  // Start realtime SIO listener immediately so any logged-in SIO gets live updates
+  startSioRealtimeListener();
 })();
 
 
@@ -5369,10 +5376,24 @@ function switchLoginRole(role) {
 // Preserve original admin login
 const __origDoLogin = window.doLogin || function(){};
 
-window.doLogin = function() {
+window.doLogin = async function() {
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value;
   const err = document.getElementById('login-err');
+  const btn = document.getElementById('login-submit-btn');
+
+  // Disable button & show loading while Firestore data loads
+  if (btn) { btn.disabled = true; btn.textContent = 'Verifying…'; }
+  err.classList.remove('show');
+
+  // Wait for preload to finish (usually instant if already done)
+  try { await (window._registriesReady || Promise.resolve()); } catch(e) {}
+
+  if (btn) {
+    btn.disabled = false;
+    const btns = { admin: 'Access secure dashboard →', tm: 'Access management portal →', sio: 'Access SIO portal →' };
+    btn.textContent = btns[loginRole] || 'Access secure dashboard →';
+  }
 
   if (loginRole === 'tm') {
     const tm = tmRegistry.find(t => t.username === u && t.password === p);
@@ -5381,7 +5402,6 @@ window.doLogin = function() {
     err.classList.remove('show');
     currentTm = tm;
     if (tm.mustChange) {
-      // Reuse SIO change-pass screen with TM context
       window._changePassContext = 'tm';
       document.getElementById('sio-change-pass-screen').classList.add('show');
       document.getElementById('sio-cp-err').style.display = 'none';
@@ -5453,6 +5473,9 @@ function launchSioDashboard() {
   document.getElementById('sio-avatar').textContent = sio.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   showSioTab('mycases', document.getElementById('sio-tab-mycases-btn'));
   renderSioCasesTable();
+  updateSioStatRow();
+  // Ensure realtime listener is running so new case assignments appear instantly
+  startSioRealtimeListener();
 }
 
 function doSioLogout() {
@@ -5487,6 +5510,20 @@ function showSioTab(name, btn) {
   if (name === 'sio-investigate') {
     populateInvCaseDropdown();
   }
+}
+
+function updateSioStatRow() {
+  if (!currentSio) return;
+  const ids = currentSio.assignedCases || [];
+  const total = ids.length;
+  const resolved = ids.filter(id => DB[id] && (DB[id].status === 'Resolved' || DB[id].status === 'Closed')).length;
+  const open = total - resolved;
+  const tEl = document.getElementById('sio-stat-total');
+  const oEl = document.getElementById('sio-stat-open');
+  const rEl = document.getElementById('sio-stat-resolved');
+  if (tEl) tEl.textContent = total;
+  if (oEl) oEl.textContent = open;
+  if (rEl) rEl.textContent = resolved;
 }
 
 function renderSioCasesTable() {
@@ -6062,7 +6099,11 @@ function logSioAssign() {
   renderSioManagementTable();
   addAuditEntry(chosen ? `SIO ${chosen} assigned to ${id}` : `SIO removed from ${id}`);
   showToast(chosen ? `SIO ${chosen} assigned ✓` : 'SIO assignment removed', 'success');
+  // Save SIO registry (triggers realtime listener on all devices) AND update complaint doc
   persistSiosToFirestore();
+  if (db) {
+    db.collection('complaints').doc(id).set(DB[id]).catch(e => console.warn('Complaint sync error:', e));
+  }
 }
 
 // Patch openDetail to populate SIO dropdown
@@ -6442,7 +6483,20 @@ async function loadTmFromFirestore() {
 async function persistSiosToFirestore() {
   if (!db) return;
   try {
-    await db.collection('_config').doc('sioRegistry').set({ data: JSON.stringify(sioRegistry), updatedAt: new Date().toISOString() });
+    const batch = db.batch();
+    // Save full registry blob (for preload)
+    batch.set(db.collection('_config').doc('sioRegistry'), {
+      data: JSON.stringify(sioRegistry),
+      updatedAt: new Date().toISOString()
+    });
+    // Also save each SIO as individual doc so realtime listeners fire per-SIO
+    sioRegistry.forEach(sio => {
+      batch.set(db.collection('sioAccounts').doc(sio.username), {
+        ...sio,
+        updatedAt: new Date().toISOString()
+      });
+    });
+    await batch.commit();
     showSaveIndicator('SIOs saved ✓');
   } catch(e) {
     console.error('SIO Firestore save error:', e);
@@ -6450,9 +6504,10 @@ async function persistSiosToFirestore() {
   }
 }
 
+let _sioRealtimeListener = null;
+
 async function loadSiosFromFirestore() {
   if (!db) {
-    // fallback: render with empty registry
     renderSioManagementTable();
     rebuildSioAssignDropdown();
     return;
@@ -6468,6 +6523,39 @@ async function loadSiosFromFirestore() {
   }
   renderSioManagementTable();
   rebuildSioAssignDropdown();
+  // Start realtime listener on _config/sioRegistry so ALL devices get updates instantly
+  startSioRealtimeListener();
+}
+
+function startSioRealtimeListener() {
+  if (!db || _sioRealtimeListener) return;
+  _sioRealtimeListener = db.collection('_config').doc('sioRegistry').onSnapshot(doc => {
+    if (!doc.exists || !doc.data().data) return;
+    try {
+      const loaded = JSON.parse(doc.data().data);
+      if (!Array.isArray(loaded)) return;
+      // Update global registry
+      sioRegistry = loaded;
+      // If an SIO is currently logged in, refresh their currentSio reference & dashboard
+      if (currentSio) {
+        const fresh = sioRegistry.find(s => s.username === currentSio.username);
+        if (fresh) {
+          currentSio = fresh;
+          renderSioCasesTable();
+          updateSioStatRow();
+          // Update TM task dropdown if TM dashboard open
+          if (document.getElementById('tm-dashboard')?.classList.contains('show')) {
+            populateTmTaskDropdowns();
+          }
+        }
+      }
+      // Refresh admin views if admin dashboard is open
+      if (document.getElementById('admin-dashboard')?.classList.contains('show')) {
+        renderSioManagementTable();
+        rebuildSioAssignDropdown();
+      }
+    } catch(e) { console.warn('SIO realtime parse error:', e); }
+  }, e => { console.error('SIO realtime listener error:', e); });
 }
 
 // ── Investigators ────────────────────────────────────────────
