@@ -3153,13 +3153,12 @@
     </div>
 
     <div style="display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:1rem;">
-      <button class="adm-btn team-sub-tab active" id="tsub-inv" onclick="showTeamSub('inv',this)" style="border-color:rgba(245,196,0,0.3);color:var(--accent);">🔍 Investigators</button>
-      <button class="adm-btn team-sub-tab" id="tsub-sio" onclick="showTeamSub('sio',this)" style="border-color:rgba(42,143,255,0.3);color:var(--blue);">🛡 SIOs</button>
+      <button class="adm-btn team-sub-tab active" id="tsub-sio" onclick="showTeamSub('sio',this)" style="border-color:rgba(42,143,255,0.3);color:var(--blue);">🛡 SIOs</button>
       <button class="adm-btn team-sub-tab" id="tsub-tm" onclick="showTeamSub('tm',this)" style="border-color:rgba(167,139,250,0.3);color:#a78bfa;">👑 Top Management</button>
     </div>
 
-    <!-- ── SUB: INVESTIGATORS ─────────────────────────────── -->
-    <div id="team-sub-inv">
+    <!-- ── SUB: INVESTIGATORS (hidden - removed) ────────── -->
+    <div id="team-sub-inv" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
         <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);">// Investigators</div>
         <button class="adm-btn adm-btn-accent" onclick="openAddInv()">+ Add investigator</button>
@@ -3233,7 +3232,7 @@
     </div>
 
     <!-- ── SUB: SIOs ──────────────────────────────────────── -->
-    <div id="team-sub-sio" style="display:none;">
+    <div id="team-sub-sio">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
         <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);">// Senior Investigating Officers</div>
         <button class="adm-btn" onclick="openAddSio()" style="border-color:rgba(42,143,255,0.35);color:var(--blue);">+ Add SIO</button>
@@ -3246,10 +3245,10 @@
         <div style="padding:0;">
           <table class="sio-table">
             <thead>
-              <tr><th>Username</th><th>Full name</th><th>Role</th><th>Password</th><th>Assigned cases</th><th>Actions</th></tr>
+              <tr><th>Username</th><th>Full name</th><th>Role</th><th>Email</th><th>Password</th><th>Assigned cases</th><th>Actions</th></tr>
             </thead>
             <tbody id="sio-management-tbody">
-              <tr><td colspan="6" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No SIOs added yet. Click "+ Add SIO" to create one.</td></tr>
+              <tr><td colspan="7" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No SIOs added yet. Click "+ Add SIO" to create one.</td></tr>
             </tbody>
           </table>
         </div>
@@ -3486,6 +3485,7 @@
     </div>
     <div style="display:flex;gap:4px;">
       <button class="admin-tab active" id="sio-tab-mycases-btn" onclick="showSioTab('mycases',this)">My Cases</button>
+      <button class="admin-tab" id="sio-tab-investigate-btn" onclick="showSioTab('sio-investigate',this)" style="border-color:rgba(245,196,0,0.2);color:var(--accent);">🔍 Investigate</button>
       <button class="admin-tab" id="sio-tab-account-btn" onclick="showSioTab('sio-account',this)" style="border-color:rgba(42,143,255,0.2);color:var(--blue);">⚙ Account</button>
     </div>
     <div style="display:flex;align-items:center;gap:1rem;">
@@ -3621,6 +3621,110 @@
 
     </div>
   </div>
+
+  <!-- SIO: INVESTIGATE TAB -->
+  <div class="admin-panel" id="tab-sio-investigate" style="padding:2rem;">
+    <div style="margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">// investigation workspace</div>
+        <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">INVESTIGATE</div>
+      </div>
+    </div>
+
+    <!-- Case Selector -->
+    <div class="adm-card" style="margin-bottom:1.5rem;">
+      <div class="adm-card-header"><span class="adm-card-title" style="color:var(--accent);">Select case to investigate</span></div>
+      <div style="padding:1.25rem;display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Active case</label>
+          <select id="inv-case-select" onchange="loadInvestigationCase(this.value)" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;">
+            <option value="">— Select a case —</option>
+          </select>
+        </div>
+        <div id="inv-case-badge" style="display:none;padding:8px 14px;background:rgba(245,196,0,0.06);border:1px solid rgba(245,196,0,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:var(--accent);"></div>
+      </div>
+    </div>
+
+    <!-- Investigation workspace (shown after case selected) -->
+    <div id="inv-workspace" style="display:none;">
+
+      <!-- Case Summary -->
+      <div class="adm-card" style="margin-bottom:1.5rem;">
+        <div class="adm-card-header"><span class="adm-card-title" style="color:var(--accent);">📋 Case summary</span></div>
+        <div style="padding:1.25rem;" id="inv-case-summary"></div>
+      </div>
+
+      <!-- Two-column layout -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+
+        <!-- Evidence Log -->
+        <div class="adm-card">
+          <div class="adm-card-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <span class="adm-card-title" style="color:var(--accent);">🗂 Evidence log</span>
+          </div>
+          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;gap:8px;">
+              <input id="inv-evidence-input" type="text" placeholder="Describe evidence found…" style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addEvidence()" />
+              <button onclick="addEvidence()" style="padding:8px 14px;background:rgba(245,196,0,0.07);border:1px solid rgba(245,196,0,0.3);border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;">Add</button>
+            </div>
+            <div id="inv-evidence-list" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;"></div>
+            <div id="inv-evidence-empty" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:1rem;border:1px dashed var(--border);border-radius:2px;">No evidence logged yet.</div>
+          </div>
+        </div>
+
+        <!-- Suspects / Persons of Interest -->
+        <div class="adm-card">
+          <div class="adm-card-header"><span class="adm-card-title" style="color:var(--accent);">👤 Persons of interest</span></div>
+          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;gap:8px;">
+              <input id="inv-person-input" type="text" placeholder="Name / role / department…" style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addPerson()" />
+              <button onclick="addPerson()" style="padding:8px 14px;background:rgba(245,196,0,0.07);border:1px solid rgba(245,196,0,0.3);border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;">Add</button>
+            </div>
+            <div id="inv-persons-list" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;"></div>
+            <div id="inv-persons-empty" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:1rem;border:1px dashed var(--border);border-radius:2px;">No persons added yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Investigation Notes -->
+      <div class="adm-card" style="margin-bottom:1.5rem;">
+        <div class="adm-card-header"><span class="adm-card-title" style="color:var(--accent);">📝 Investigation notes</span>
+          <button onclick="saveInvNote()" style="padding:6px 14px;background:rgba(245,196,0,0.07);border:1px solid rgba(245,196,0,0.3);border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;">💾 Save note</button>
+        </div>
+        <div style="padding:1.25rem;display:flex;flex-direction:column;gap:10px;">
+          <textarea id="inv-note-input" rows="3" placeholder="Add investigation note, findings, or observations…" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;resize:vertical;outline:none;line-height:1.6;"></textarea>
+          <div id="inv-notes-timeline" style="display:flex;flex-direction:column;gap:0;" class="case-timeline"></div>
+          <div id="inv-notes-empty" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:1rem;border:1px dashed var(--border);border-radius:2px;">No notes yet. Start documenting your investigation.</div>
+        </div>
+      </div>
+
+      <!-- AI Investigation Analysis -->
+      <div class="adm-card" style="margin-bottom:1.5rem;">
+        <div class="adm-card-header">
+          <span class="adm-card-title" style="color:var(--accent);">🤖 AI investigation analysis</span>
+          <button onclick="runSioAIAnalysis()" style="padding:6px 14px;background:rgba(245,196,0,0.07);border:1px solid rgba(245,196,0,0.3);border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;">Run analysis →</button>
+        </div>
+        <div class="ai-body" id="sio-ai-output" style="padding:1.25rem;">
+          <p style="color:var(--muted);font-style:italic;font-size:13px;">Select a case and click "Run analysis" to get AI-powered investigation guidance.</p>
+        </div>
+      </div>
+
+      <!-- Status Update -->
+      <div class="adm-card">
+        <div class="adm-card-header"><span class="adm-card-title" style="color:var(--blue);">⚡ Update case status</span></div>
+        <div style="padding:1.25rem;">
+          <div class="status-btns" id="inv-status-btns">
+            <button class="st-btn" onclick="updateInvStatus(this,'New')">New</button>
+            <button class="st-btn" onclick="updateInvStatus(this,'In review')">In review</button>
+            <button class="st-btn" onclick="updateInvStatus(this,'In progress')">In progress</button>
+            <button class="st-btn" onclick="updateInvStatus(this,'Escalated')">Escalated</button>
+            <button class="st-btn" onclick="updateInvStatus(this,'Closed')">Closed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /sio-dashboard -->
 
 <!-- DETAIL SIDE PANEL -->
@@ -3649,20 +3753,6 @@
     </div>
 
     <div class="dp-section">
-      <div class="dp-section-title">AI investigative analysis</div>
-      <div class="ai-box">
-        <div class="ai-box-header">
-          <div class="ai-dot"></div>
-          <span class="ai-label">AI analysis engine</span>
-          <button onclick="runAIAnalysis()" style="margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border:1px solid rgba(245,196,0,0.3);border-radius:2px;background:none;color:var(--accent);cursor:pointer;">Run →</button>
-        </div>
-        <div class="ai-body" id="ai-output">
-          <p style="color:var(--muted);font-style:italic;">Click "Run" to generate an AI-powered investigative analysis for this complaint.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="dp-section">
       <div class="dp-section-title">Update status</div>
       <div class="status-btns" id="status-btns">
         <button class="st-btn" onclick="updateStatus(this,'New')">New</button>
@@ -3681,17 +3771,6 @@
         <button class="st-btn" onclick="updateRisk(this,'High')" style="border-color:rgba(251,146,60,0.3);color:#fb923c;">High</button>
         <button class="st-btn" onclick="updateRisk(this,'Critical')" style="border-color:rgba(255,68,68,0.3);color:#ff6b6b;">Critical</button>
       </div>
-    </div>
-
-    <div class="dp-section">
-      <div class="dp-section-title">Assign investigator</div>
-      <select class="dp-assign" id="dp-assign" onchange="logAssign()">
-        <option value="">Unassigned</option>
-        <option value="R. Sharma">Ravi Sharma · Senior Investigator</option>
-        <option value="P. Gupta">Priya Gupta · HR &amp; Compliance</option>
-        <option value="M. Rashid">Mohammed Rashid · IT &amp; Data</option>
-        <option value="S. Joshi">Sunita Joshi · Legal &amp; Ethics</option>
-      </select>
     </div>
 
     <div class="dp-section" id="dp-sio-section">
@@ -3733,6 +3812,9 @@
       </div>
       <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Username (login ID)</label>
         <input id="sio-add-username" type="text" placeholder="e.g. kiran.mehta" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
+      </div>
+      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Email address</label>
+        <input id="sio-add-email" type="email" placeholder="e.g. kiran@company.com" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
       </div>
       <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Role / Specialisation</label>
         <input id="sio-add-role" type="text" placeholder="e.g. Senior IO · Financial Crimes" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
@@ -4386,7 +4468,7 @@ function showAdminTab(name, btn) {
   document.getElementById('tab-' + name).classList.add('active');
   if (btn) btn.classList.add('active');
   if (name === 'team') {
-    showTeamSub('inv', document.getElementById('tsub-inv'));
+    showTeamSub('sio', document.getElementById('tsub-sio'));
   }
 }
 
@@ -4497,8 +4579,6 @@ function openDetail(id) {
   `;
   document.getElementById('dp-desc').textContent = c.desc;
   rebuildAssignDropdown();
-  document.getElementById('dp-assign').value = c.assigned || '';
-  document.getElementById('ai-output').innerHTML = '<p style="color:var(--muted);font-style:italic;">Click "Scan complaint →" to run an AI analysis that assesses severity and recommends a status.</p>';
   buildDpAudit(id);
   // Highlight correct status button
   document.querySelectorAll('#status-btns .st-btn').forEach(b => {
@@ -4608,23 +4688,7 @@ async function updateRisk(btn, risk) {
 }
 
 async function logAssign() {
-  if (!currentDetailId) return;
-  const val = document.getElementById('dp-assign').value;
-  DB[currentDetailId].assigned = val;
-  if (val) {
-    const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-    DB[currentDetailId].audit.push(`${ts} — Assigned to ${val} · admin`);
-    buildDpAudit(currentDetailId);
-    addAuditEntry(`${currentDetailId} assigned to ${val}`);
-    showToast(`Assigned to ${val}`, 'success');
-  }
-  renderComplaintsTable();
-  renderOverviewRecent();
-  if (db) {
-    try {
-      await db.collection('complaints').doc(currentDetailId).update({ assigned: val, audit: DB[currentDetailId].audit });
-    } catch(e) { console.error('Firestore assign error:', e); }
-  }
+  // dp-assign element removed — function kept for compatibility
 }
 
 async function addNote() {
@@ -5071,7 +5135,6 @@ function openTmCaseDetail(id) {
   // TM: read-only — disable write actions
   document.getElementById('status-btns').querySelectorAll('.st-btn').forEach(b => b.disabled = true);
   document.querySelectorAll('.risk-btns .st-btn').forEach(b => b.disabled = true);
-  document.getElementById('dp-assign').disabled = true;
   document.getElementById('dp-sio-assign').disabled = true;
 }
 
@@ -5121,6 +5184,38 @@ function tmAssignTask() {
   document.getElementById('tm-task-complaint').value = '';
   document.getElementById('tm-task-sio').value = '';
   document.getElementById('tm-task-note').value = '';
+
+  // Auto-share credentials via Gmail if SIO has an email
+  if (sio && sio.email) {
+    const sioLink = `${location.origin}${location.pathname}?sio=${encodeURIComponent(sio.username)}`;
+    const subject = `[Reporter] Task Assignment – Case ${cid}`;
+    const emailBody = `Dear ${sio.name},
+
+You have been assigned a new investigation task by Top Management.
+
+─────────────────────────────────
+TASK DETAILS
+─────────────────────────────────
+Case ID    : ${cid}
+Category   : ${DB[cid]?.cat || '—'}
+Department : ${DB[cid]?.dept || '—'}
+${note ? 'Instructions: ' + note : ''}
+─────────────────────────────────
+YOUR LOGIN CREDENTIALS
+─────────────────────────────────
+Portal URL : ${sioLink}
+Username   : ${sio.username}
+Password   : ${sio.password}${sio.mustChange ? '\n(Change password on first login)' : ''}
+─────────────────────────────────
+
+Please log in to view the full case details.
+
+Sent from Reporter Whistleblower Platform`;
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(sio.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+    window.open(gmailUrl, '_blank');
+    showToast(`Task assigned & Gmail opened for ${sio.name} ✓`, 'success');
+    addAuditEntry(`TM auto-shared credentials with SIO ${sioUser} via Gmail`);
+  }
 
   // Refresh overview counts
   renderTmOverview();
@@ -5315,6 +5410,13 @@ function launchSioDashboard() {
 function doSioLogout() {
   document.getElementById('sio-dashboard').classList.remove('show');
   currentSio = null;
+  currentInvCaseId = null;
+  const ws = document.getElementById('inv-workspace');
+  if (ws) ws.style.display = 'none';
+  const badge = document.getElementById('inv-case-badge');
+  if (badge) badge.style.display = 'none';
+  const sel = document.getElementById('inv-case-select');
+  if (sel) sel.value = '';
 }
 
 function showSioTab(name, btn) {
@@ -5329,6 +5431,9 @@ function showSioTab(name, btn) {
       document.getElementById('sio-notif-email').value = currentSio.notifEmail;
       document.getElementById('sio-send-to-email').value = currentSio.notifEmail;
     }
+  }
+  if (name === 'sio-investigate') {
+    populateInvCaseDropdown();
   }
 }
 
@@ -5365,7 +5470,6 @@ function openSioCaseDetail(id) {
   // SIO can update status only — disable everything else
   document.getElementById('status-btns').querySelectorAll('.st-btn').forEach(b => b.disabled = false);
   document.querySelectorAll('.risk-btns .st-btn').forEach(b => b.disabled = true);
-  document.getElementById('dp-assign').disabled = true;
   document.getElementById('dp-sio-assign').disabled = true;
   // Mark context so status changes log as SIO
   window._detailContext = 'sio';
@@ -5490,11 +5594,278 @@ function sioQuickSendEmail(id) {
   }, 100);
 }
 
+// ═══════════════════════════════════════
+// SIO INVESTIGATION WORKSPACE
+// ═══════════════════════════════════════
+let currentInvCaseId = null;
+// invData: { caseId: { evidence:[], persons:[], notes:[] } }
+const invData = {};
+
+function populateInvCaseDropdown() {
+  const sio = currentSio;
+  const sel = document.getElementById('inv-case-select');
+  if (!sel) return;
+  const ids = sio.assignedCases || [];
+  sel.innerHTML = '<option value="">— Select a case —</option>' +
+    ids.map(id => {
+      const c = DB[id];
+      return c ? `<option value="${id}">${id} · ${c.cat} · ${c.status}</option>` : '';
+    }).join('');
+}
+
+function loadInvestigationCase(id) {
+  const ws = document.getElementById('inv-workspace');
+  const badge = document.getElementById('inv-case-badge');
+  if (!id) { ws.style.display = 'none'; badge.style.display = 'none'; return; }
+  const c = DB[id];
+  if (!c) return;
+  currentInvCaseId = id;
+  if (!invData[id]) invData[id] = { evidence: [], persons: [], notes: [] };
+
+  ws.style.display = 'block';
+  badge.style.display = 'block';
+  badge.textContent = id + ' · ' + c.status;
+
+  // Case summary
+  document.getElementById('inv-case-summary').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+      <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Category</div>
+        <div style="font-size:13px;color:var(--text);">${c.cat}</div>
+      </div>
+      <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Department</div>
+        <div style="font-size:13px;color:var(--text);">${c.dept}</div>
+      </div>
+      <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Filed</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--text);">${c.date}</div>
+      </div>
+      <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Risk</div>
+        <div class="risk-wrap"><div class="risk-dot ${riskClass[c.risk]||'risk-low'}" style="width:8px;height:8px;"></div><span style="font-family:var(--mono);font-size:12px;">${c.risk}</span></div>
+      </div>
+    </div>
+    <div style="margin-top:12px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Description</div>
+      <div style="font-size:13px;color:var(--muted2);line-height:1.7;">${c.desc}</div>
+    </div>`;
+
+  // Highlight current status
+  document.querySelectorAll('#inv-status-btns .st-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === c.status);
+  });
+
+  renderInvEvidence();
+  renderInvPersons();
+  renderInvNotes();
+  document.getElementById('sio-ai-output').innerHTML = '<p style="color:var(--muted);font-style:italic;font-size:13px;">Click "Run analysis" to get AI-powered investigation guidance for this case.</p>';
+}
+
+function renderInvEvidence() {
+  const id = currentInvCaseId;
+  if (!id || !invData[id]) return;
+  const items = invData[id].evidence;
+  const list = document.getElementById('inv-evidence-list');
+  const empty = document.getElementById('inv-evidence-empty');
+  if (items.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  list.innerHTML = items.map((e, i) => `
+    <div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--accent);flex-shrink:0;margin-top:1px;">${String(i+1).padStart(2,'0')}</span>
+      <div style="flex:1;font-size:13px;color:var(--text);line-height:1.5;">${e.text}</div>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0;">${e.ts}</span>
+      <button onclick="removeInvEvidence(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;" title="Remove">×</button>
+    </div>`).join('');
+}
+
+function addEvidence() {
+  const id = currentInvCaseId;
+  if (!id) return;
+  const input = document.getElementById('inv-evidence-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  invData[id].evidence.push({ text, ts });
+  input.value = '';
+  renderInvEvidence();
+  showToast('Evidence logged ✓', 'success');
+}
+
+function removeInvEvidence(i) {
+  const id = currentInvCaseId;
+  if (!id) return;
+  invData[id].evidence.splice(i, 1);
+  renderInvEvidence();
+}
+
+function renderInvPersons() {
+  const id = currentInvCaseId;
+  if (!id || !invData[id]) return;
+  const items = invData[id].persons;
+  const list = document.getElementById('inv-persons-list');
+  const empty = document.getElementById('inv-persons-empty');
+  if (items.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  list.innerHTML = items.map((p, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
+      <div style="width:28px;height:28px;border-radius:50%;background:rgba(245,196,0,0.1);border:1px solid rgba(245,196,0,0.2);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:12px;color:var(--accent);flex-shrink:0;">${p.text.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+      <div style="flex:1;font-size:13px;color:var(--text);">${p.text}</div>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">${p.ts}</span>
+      <button onclick="removeInvPerson(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:0;" title="Remove">×</button>
+    </div>`).join('');
+}
+
+function addPerson() {
+  const id = currentInvCaseId;
+  if (!id) return;
+  const input = document.getElementById('inv-person-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  invData[id].persons.push({ text, ts });
+  input.value = '';
+  renderInvPersons();
+  showToast('Person of interest added ✓', 'success');
+}
+
+function removeInvPerson(i) {
+  const id = currentInvCaseId;
+  if (!id) return;
+  invData[id].persons.splice(i, 1);
+  renderInvPersons();
+}
+
+function renderInvNotes() {
+  const id = currentInvCaseId;
+  if (!id || !invData[id]) return;
+  const items = invData[id].notes;
+  const tl = document.getElementById('inv-notes-timeline');
+  const empty = document.getElementById('inv-notes-empty');
+  if (items.length === 0) { tl.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  tl.innerHTML = items.slice().reverse().map(n => `
+    <div class="ct-item">
+      <div class="ct-spine">
+        <div class="ct-dot" style="background:var(--accent);"></div>
+        <div class="ct-line"></div>
+      </div>
+      <div class="ct-body">
+        <div class="ct-action">${n.text}</div>
+        <div class="ct-when">${n.ts} · ${currentSio?.name || 'SIO'}</div>
+      </div>
+    </div>`).join('');
+}
+
+function saveInvNote() {
+  const id = currentInvCaseId;
+  if (!id) return;
+  const input = document.getElementById('inv-note-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  invData[id].notes.push({ text, ts });
+  // Also push to case audit
+  DB[id].audit.push(`${ts} — Investigation note: "${text.slice(0,60)}${text.length>60?'…':''}" · SIO ${currentSio?.username||''}`);
+  input.value = '';
+  renderInvNotes();
+  showToast('Note saved ✓', 'success');
+  if (db) {
+    db.collection('complaints').doc(id).update({ audit: DB[id].audit }).catch(e => console.warn('Audit sync failed:', e));
+  }
+}
+
+function updateInvStatus(btn, status) {
+  const id = currentInvCaseId;
+  if (!id) return;
+  DB[id].status = status;
+  document.querySelectorAll('#inv-status-btns .st-btn').forEach(b => b.classList.toggle('active', b.textContent.trim() === status));
+  document.getElementById('inv-case-badge').textContent = id + ' · ' + status;
+  // Sync to case audit
+  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  DB[id].audit.push(`${ts} — Status → ${status} · SIO ${currentSio?.username||''}`);
+  addAuditEntry(`SIO updated ${id} status → ${status}`);
+  renderSioCasesTable();
+  showToast(`Status updated → ${status}`, 'success');
+  if (db) {
+    db.collection('complaints').doc(id).update({ status, audit: DB[id].audit }).catch(e => console.warn('Firestore sync failed:', e));
+  }
+}
+
+async function runSioAIAnalysis() {
+  const id = currentInvCaseId;
+  if (!id) { showToast('Please select a case first', 'error'); return; }
+  const c = DB[id];
+  const out = document.getElementById('sio-ai-output');
+  out.innerHTML = '<div class="ai-loading"><div class="spinner"></div> Analysing case with AI…</div>';
+  const evidence = (invData[id]?.evidence || []).map(e => e.text).join('; ');
+  const persons = (invData[id]?.persons || []).map(p => p.text).join('; ');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        system: `You are an expert investigation analyst. Analyse the whistleblower case and any evidence/persons of interest provided. Respond ONLY with valid JSON — no markdown, no extra text — in exactly this format:
+{"priority_actions":"<3-4 immediate steps the investigator should take>","interview_questions":"<3 key questions to ask persons of interest>","red_flags":"<2-3 red flags or patterns to watch for>","evidence_needed":"<what additional evidence should be gathered>","recommended_status":"<New|In review|In progress|Escalated|Closed>","risk_assessment":"<brief risk summary>"}`,
+        messages: [{ role: 'user', content: `Case ID: ${id}\nCategory: ${c.cat}\nDept: ${c.dept}\nStatus: ${c.status}\nRisk: ${c.risk}\nDescription: ${c.desc}\nEvidence logged: ${evidence || 'None yet'}\nPersons of interest: ${persons || 'None yet'}` }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content.map(i => i.text || '').join('').trim();
+    let parsed;
+    try { parsed = JSON.parse(raw.replace(/```json|```/g,'')); } catch(e) { out.innerHTML = `<p style="font-size:13px;color:var(--muted2);">${raw}</p>`; return; }
+    const recStatus = parsed.recommended_status || c.status;
+    const statusColors = { New:'#60a5fa','In review':'#fbbf24','In progress':'var(--accent)',Escalated:'#ff6b6b',Closed:'var(--muted2)' };
+    out.innerHTML = `
+      <div style="display:grid;gap:10px;padding:4px 0;">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(42,143,255,0.07);border:1px solid rgba(42,143,255,0.18);border-radius:3px;">
+          <span style="font-size:14px;">⚡</span>
+          <div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Recommended Status</div>
+            <div style="font-family:var(--mono);font-size:12px;font-weight:600;color:${statusColors[recStatus]||'var(--accent)'};">${recStatus}</div>
+          </div>
+        </div>
+        <div style="padding:10px 12px;background:rgba(255,255,255,0.02);border-left:2px solid var(--accent);border-radius:0 3px 3px 0;">
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Priority Actions</div>
+          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.priority_actions}</p>
+        </div>
+        <div style="padding:10px 12px;background:rgba(255,255,255,0.02);border-left:2px solid var(--blue);border-radius:0 3px 3px 0;">
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Interview Questions</div>
+          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.interview_questions}</p>
+        </div>
+        <div style="padding:10px 12px;background:rgba(255,68,68,0.04);border-left:2px solid #ff6b6b;border-radius:0 3px 3px 0;">
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Red Flags to Watch</div>
+          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.red_flags}</p>
+        </div>
+        <div style="padding:10px 12px;background:rgba(255,255,255,0.02);border-left:2px solid #fbbf24;border-radius:0 3px 3px 0;">
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Additional Evidence Needed</div>
+          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.evidence_needed}</p>
+        </div>
+        <div style="padding:10px 12px;background:rgba(255,255,255,0.02);border-left:2px solid #a78bfa;border-radius:0 3px 3px 0;">
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Risk Assessment</div>
+          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.risk_assessment}</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid rgba(245,196,0,0.15);margin-top:4px;flex-wrap:wrap;">
+          <span style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Apply recommended status:</span>
+          <button onclick="updateInvStatus(this,'${recStatus}')" style="padding:6px 14px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(42,143,255,0.5);border-radius:2px;background:rgba(42,143,255,0.08);color:var(--blue);cursor:pointer;">${recStatus} →</button>
+        </div>
+      </div>`;
+    const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+    DB[id].audit.push(`${ts} — AI investigation analysis run · SIO ${currentSio?.username||''}`);
+    if (db) db.collection('complaints').doc(id).update({ audit: DB[id].audit }).catch(()=>{});
+  } catch(e) {
+    out.innerHTML = '<p style="color:var(--muted);font-style:italic;font-size:13px;">AI analysis unavailable. Please check connection.</p>';
+  }
+}
+
 // ── Admin: Add / Remove SIOs ──────────
 function openAddSio() {
   document.getElementById('add-sio-overlay').style.display = 'flex';
   document.getElementById('sio-add-name').value = '';
   document.getElementById('sio-add-username').value = '';
+  document.getElementById('sio-add-email').value = '';
   document.getElementById('sio-add-role').value = '';
   document.getElementById('sio-add-defpass').value = 'Welcome@123';
   document.getElementById('add-sio-err').style.display = 'none';
@@ -5507,13 +5878,15 @@ function closeAddSio() {
 function saveSio() {
   const name = document.getElementById('sio-add-name').value.trim();
   const username = document.getElementById('sio-add-username').value.trim().toLowerCase();
+  const email = document.getElementById('sio-add-email').value.trim();
   const role = document.getElementById('sio-add-role').value.trim();
   const defpass = document.getElementById('sio-add-defpass').value.trim();
   const errEl = document.getElementById('add-sio-err');
   if (!name || !username) { errEl.textContent = 'Name and username are required.'; errEl.style.display = 'block'; return; }
   if (!defpass || defpass.length < 4) { errEl.textContent = 'Default password must be at least 4 characters.'; errEl.style.display = 'block'; return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'Please enter a valid email address.'; errEl.style.display = 'block'; return; }
   if (sioRegistry.find(s => s.username === username)) { errEl.textContent = 'Username already exists.'; errEl.style.display = 'block'; return; }
-  const newSio = { name, username, role: role || 'Senior Investigating Officer', password: defpass, mustChange: true, assignedCases: [] };
+  const newSio = { name, username, email: email || '', role: role || 'Senior Investigating Officer', password: defpass, mustChange: true, assignedCases: [] };
   sioRegistry.push(newSio);
   renderSioManagementTable();
   rebuildSioAssignDropdown();
@@ -5552,7 +5925,7 @@ function renderSioManagementTable() {
   const tbody = document.getElementById('sio-management-tbody');
   if (!tbody) return;
   if (sioRegistry.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No SIOs added yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No SIOs added yet.</td></tr>';
     return;
   }
   tbody.innerHTML = sioRegistry.map(sio => `
@@ -5560,15 +5933,47 @@ function renderSioManagementTable() {
       <td><span class="adm-id">${sio.username}</span></td>
       <td style="color:var(--text);">${sio.name}</td>
       <td><span class="adm-dept">${sio.role}</span></td>
+      <td><span style="font-family:var(--mono);font-size:12px;color:var(--blue);">${sio.email || '<span style="color:var(--muted);font-style:italic;">No email</span>'}</span></td>
       <td>${sio.mustChange ? '<span class="sio-must-change">Must change</span>' : '<span class="sio-pass-ok">Set</span>'}</td>
       <td><span style="font-family:var(--mono);font-size:12px;color:var(--blue);">${(sio.assignedCases||[]).length} case${(sio.assignedCases||[]).length !== 1 ? 's' : ''}</span></td>
       <td>
-        <div style="display:flex;gap:6px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="adm-btn" onclick="resetSioPassword('${sio.username}')" style="font-size:10px;padding:5px 10px;">Reset pwd</button>
+          ${sio.email ? `<button class="adm-btn" onclick="sharePasswordViaGmail('${sio.username}')" style="font-size:10px;padding:5px 10px;color:var(--blue);border-color:rgba(42,143,255,0.3);" title="Share login credentials via Gmail">📧 Share creds</button>` : ''}
           <button class="adm-btn" onclick="deleteSio('${sio.username}')" style="font-size:10px;padding:5px 10px;color:#ff6b6b;border-color:rgba(255,68,68,0.3);">Delete</button>
         </div>
       </td>
     </tr>`).join('');
+}
+
+// ── Share SIO login credentials via Gmail ──
+function sharePasswordViaGmail(username) {
+  const sio = sioRegistry.find(s => s.username === username);
+  if (!sio || !sio.email) { showToast('No email address set for this SIO', 'error'); return; }
+  const sioLink = `${location.origin}${location.pathname}?sio=${encodeURIComponent(sio.username)}`;
+  const subject = `[Reporter] Your SIO Portal Credentials`;
+  const body = `Dear ${sio.name},
+
+Your Senior Investigating Officer (SIO) account has been created on the Reporter Whistleblower Platform.
+
+─────────────────────────────────
+YOUR LOGIN CREDENTIALS
+─────────────────────────────────
+Portal URL : ${sioLink}
+Username   : ${sio.username}
+Password   : ${sio.password}
+Role       : ${sio.role}
+─────────────────────────────────
+
+⚠ You will be required to change your password on first login.
+
+Please keep these credentials confidential and do not share them with anyone.
+
+Sent from Reporter Whistleblower Platform`;
+  const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(sio.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open(url, '_blank');
+  addAuditEntry(`Credentials shared with SIO ${username} via Gmail`);
+  showToast(`Gmail opened — credentials sent to ${sio.email} ✓`, 'success');
 }
 
 // ── SIO dropdown in detail panel ──────
@@ -5618,7 +6023,6 @@ window.openDetail = function(id) {
   // Re-enable all controls (admin context)
   document.getElementById('status-btns').querySelectorAll('.st-btn').forEach(b => b.disabled = false);
   document.querySelectorAll('.risk-btns .st-btn').forEach(b => b.disabled = false);
-  document.getElementById('dp-assign').disabled = false;
   document.getElementById('dp-sio-assign').disabled = false;
   window._detailContext = 'admin';
 };
