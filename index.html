@@ -35,230 +35,6 @@
     --mono:        'DM Mono', monospace;
   }
 
-
-  /* ══════════════════════════════════════════
-     ENHANCED UI — ANIMATIONS & GRAPHICS
-  ══════════════════════════════════════════ */
-
-  /* Animated gradient border */
-  @property --angle { syntax:'<angle>'; initial-value:0deg; inherits:false; }
-  @keyframes spin-border { to { --angle: 360deg; } }
-
-  .glow-card {
-    position: relative;
-    border-radius: 4px;
-    background: var(--bg3);
-    border: 1px solid var(--border-hi);
-    overflow: hidden;
-  }
-  .glow-card::before {
-    content:''; position:absolute; inset:-1px; border-radius:5px; z-index:0;
-    background: conic-gradient(from var(--angle), transparent 70%, rgba(245,196,0,0.4) 80%, rgba(42,143,255,0.4) 90%, transparent 100%);
-    animation: spin-border 4s linear infinite;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .glow-card:hover::before { opacity: 1; }
-  .glow-card > * { position: relative; z-index: 1; }
-
-  /* Animated number counter */
-  .count-up { font-variant-numeric: tabular-nums; }
-
-  /* Pulse dot */
-  .live-dot {
-    display: inline-block; width:8px; height:8px; border-radius:50%;
-    background: #22c55e; box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
-    animation: live-pulse 2s ease-in-out infinite;
-  }
-  @keyframes live-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
-    70% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
-    100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
-  }
-
-  /* Activity feed */
-  .activity-feed { display:flex; flex-direction:column; gap:0; }
-  .activity-item {
-    display:flex; align-items:flex-start; gap:12px;
-    padding:10px 0; border-bottom:1px solid var(--border);
-    animation: fadeSlideIn 0.4s ease both;
-  }
-  .activity-item:last-child { border-bottom: none; }
-  @keyframes fadeSlideIn {
-    from { opacity:0; transform:translateX(-8px); }
-    to   { opacity:1; transform:translateX(0); }
-  }
-  .activity-icon {
-    width:28px; height:28px; border-radius:50%; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-    font-size:12px; margin-top:2px;
-  }
-  .act-new    { background:rgba(42,143,255,0.15); border:1px solid rgba(42,143,255,0.3); }
-  .act-status { background:rgba(245,196,0,0.12); border:1px solid rgba(245,196,0,0.25); }
-  .act-assign { background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.25); }
-  .act-esc    { background:rgba(255,68,68,0.12); border:1px solid rgba(255,68,68,0.3); }
-  .activity-text { font-size:13px; line-height:1.5; color:var(--text); }
-  .activity-time { font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:0.06em; }
-
-  /* Donut chart */
-  .donut-wrap { position:relative; display:inline-flex; align-items:center; justify-content:center; }
-  .donut-center { position:absolute; text-align:center; }
-  .donut-val { font-family:var(--display); font-size:28px; line-height:1; color:var(--text); letter-spacing:0.04em; }
-  .donut-sub { font-family:var(--mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
-
-  /* Radial progress bars */
-  .radial-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:1rem; }
-  @media(max-width:900px){ .radial-grid { grid-template-columns: repeat(2,1fr); } }
-  .radial-item { display:flex; flex-direction:column; align-items:center; gap:8px; }
-  .radial-label { font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted2); text-align:center; }
-  .radial-val { font-family:var(--display); font-size:22px; letter-spacing:0.04em; color:var(--text); }
-
-  /* Enhanced metric cards */
-  .metric-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 1.25rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-  .metric-card:hover { border-color: var(--border-hi); transform: translateY(-2px); }
-  .metric-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-    border-radius: 0 0 4px 4px;
-  }
-  .metric-card.mc-yellow::after { background: linear-gradient(90deg, var(--accent), transparent); }
-  .metric-card.mc-blue::after   { background: linear-gradient(90deg, var(--blue), transparent); }
-  .metric-card.mc-red::after    { background: linear-gradient(90deg, var(--red), transparent); }
-  .metric-card.mc-green::after  { background: linear-gradient(90deg, #22c55e, transparent); }
-  .metric-card.mc-purple::after { background: linear-gradient(90deg, #a78bfa, transparent); }
-  .mc-icon { font-size: 20px; margin-bottom:2px; }
-  .mc-val { font-family: var(--display); font-size:38px; letter-spacing:0.04em; line-height:1; }
-  .mc-lbl { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted2); }
-  .mc-trend { font-family:var(--mono); font-size:11px; margin-top:4px; }
-
-  /* Horizontal bar chart */
-  .bar-chart { display:flex; flex-direction:column; gap:10px; }
-  .bar-row { display:flex; align-items:center; gap:10px; }
-  .bar-label { font-family:var(--mono); font-size:11px; color:var(--muted2); width:110px; flex-shrink:0; text-align:right; letter-spacing:0.04em; }
-  .bar-track { flex:1; height:6px; background:var(--bg); border-radius:3px; overflow:hidden; }
-  .bar-fill { height:100%; border-radius:3px; transition: width 1s cubic-bezier(.16,1,.3,1); width:0; }
-  .bar-count { font-family:var(--mono); font-size:11px; color:var(--muted2); width:28px; text-align:right; }
-
-  /* Timeline in case detail */
-  .case-timeline { display:flex; flex-direction:column; gap:0; }
-  .ct-item { display:flex; gap:12px; padding-bottom:14px; position:relative; }
-  .ct-item:last-child { padding-bottom:0; }
-  .ct-spine { display:flex; flex-direction:column; align-items:center; gap:0; flex-shrink:0; }
-  .ct-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:3px; }
-  .ct-line { flex:1; width:1px; background:var(--border); margin:3px 0 0; }
-  .ct-item:last-child .ct-line { display:none; }
-  .ct-body { padding-bottom:4px; }
-  .ct-action { font-family:var(--mono); font-size:11px; color:var(--text); letter-spacing:0.04em; }
-  .ct-when { font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:0.04em; margin-top:2px; }
-
-  /* Public stats section */
-  .pub-stats { padding:5rem 2.5rem; background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
-  .pub-stats-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:2rem; max-width:900px; margin:3rem auto 0; }
-  @media(max-width:700px){ .pub-stats-grid { grid-template-columns:repeat(2,1fr); } }
-  .pub-stat { text-align:center; }
-  .pub-stat-val { font-family:var(--display); font-size:56px; letter-spacing:0.04em; color:var(--accent); display:block; line-height:1; }
-  .pub-stat-lbl { font-family:var(--mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted2); margin-top:8px; display:block; }
-
-  /* Floating orbs behind hero */
-  .hero-orb {
-    position:absolute; border-radius:50%; pointer-events:none;
-    filter: blur(60px); animation: orbFloat 8s ease-in-out infinite;
-  }
-  @keyframes orbFloat2 {
-    0%,100%{ transform:translate(0,0) scale(1); }
-    33%{ transform:translate(20px,-15px) scale(1.05); }
-    66%{ transform:translate(-10px,20px) scale(0.97); }
-  }
-
-  /* Status sparkline (mini bar) */
-  .sparkline { display:flex; align-items:flex-end; gap:2px; height:28px; }
-  .spark-bar { width:6px; border-radius:1px; background:var(--accent); opacity:0.7; transition:opacity 0.2s; }
-  .spark-bar:hover { opacity:1; }
-
-  /* SIO dashboard enhanced */
-  .sio-stat-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem; }
-  .sio-stat { background:var(--bg2); border:1px solid rgba(42,143,255,0.15); border-radius:4px; padding:1rem 1.25rem; }
-  .sio-stat-val { font-family:var(--display); font-size:32px; letter-spacing:0.04em; color:var(--blue); }
-  .sio-stat-lbl { font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted2); }
-
-  /* TM stat row */
-  .tm-stat-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.5rem; }
-  .tm-stat { background:var(--bg2); border:1px solid rgba(167,139,250,0.15); border-radius:4px; padding:1rem 1.25rem; }
-  .tm-stat-val { font-family:var(--display); font-size:32px; letter-spacing:0.04em; color:#a78bfa; }
-  .tm-stat-lbl { font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted2); }
-
-  /* Heat row (risk heatmap) */
-  .heat-row { display:flex; gap:4px; flex-wrap:wrap; }
-  .heat-cell {
-    width:18px; height:18px; border-radius:2px; cursor:pointer;
-    transition:transform 0.15s;
-  }
-  .heat-cell:hover { transform:scale(1.4); z-index:2; position:relative; }
-  .heat-0 { background:rgba(255,255,255,0.04); }
-  .heat-1 { background:rgba(245,196,0,0.3); }
-  .heat-2 { background:rgba(251,146,60,0.5); }
-  .heat-3 { background:rgba(255,68,68,0.7); }
-
-  /* Login screen animated background */
-  .login-animated-bg {
-    position:absolute; inset:0; overflow:hidden; pointer-events:none;
-  }
-  .login-particle {
-    position:absolute; width:2px; height:2px; border-radius:50%;
-    background:var(--accent); opacity:0.4;
-    animation: particle-drift linear infinite;
-  }
-  @keyframes particle-drift {
-    from { transform: translateY(100vh) translateX(0); opacity:0.4; }
-    to   { transform: translateY(-100px) translateX(var(--drift)); opacity:0; }
-  }
-
-  /* Case card grid (SIO my cases alternative view) */
-  .case-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; }
-  .case-card {
-    background:var(--bg2); border:1px solid var(--border); border-radius:4px;
-    padding:1rem 1.25rem; cursor:pointer;
-    transition:border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-    position:relative; overflow:hidden;
-  }
-  .case-card:hover {
-    border-color:rgba(42,143,255,0.35); transform:translateY(-2px);
-    box-shadow:0 8px 24px rgba(0,0,0,0.3);
-  }
-  .case-card::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:2px;
-  }
-  .case-card.cc-new::before    { background:var(--blue); }
-  .case-card.cc-progress::before { background:var(--accent); }
-  .case-card.cc-escalated::before { background:var(--red); }
-  .case-card.cc-resolved::before  { background:#22c55e; }
-  .case-card-id { font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:0.1em; margin-bottom:6px; }
-  .case-card-title { font-size:14px; font-weight:500; color:var(--text); margin-bottom:8px; }
-  .case-card-meta { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-
-  /* View toggle buttons */
-  .view-toggle { display:flex; gap:4px; }
-  .vt-btn { padding:5px 10px; background:none; border:1px solid var(--border); border-radius:2px; color:var(--muted2); cursor:pointer; font-size:14px; transition:all 0.15s; }
-  .vt-btn.active { background:var(--bg3); border-color:var(--border-hi); color:var(--text); }
-
-  /* Animated progress ring */
-  .progress-ring { transform:rotate(-90deg); }
-  .progress-ring-track { fill:none; stroke:rgba(255,255,255,0.05); }
-  .progress-ring-fill  { fill:none; stroke-linecap:round; transition:stroke-dashoffset 1s cubic-bezier(.16,1,.3,1); }
-
   html { scroll-behavior: smooth; }
 
   body {
@@ -858,76 +634,6 @@
   /* OVERLAY */
   .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 450; }
   .admin-overlay.show { display: block; }
-
-  /* SIO BADGE & ROLE TABS */
-  .sio-badge {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 4px 10px; border: 1px solid rgba(42,143,255,0.35); border-radius: 2px; color: var(--blue);
-  }
-  .login-role-tabs { display: flex; gap: 4px; margin-bottom: 1.5rem; background: var(--bg); border-radius: 2px; padding: 4px; }
-  .login-role-tab {
-    flex: 1; padding: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
-    text-transform: uppercase; border: none; background: none; color: var(--muted2); cursor: pointer;
-    border-radius: 1px; transition: all 0.15s;
-  }
-  .login-role-tab.active { background: var(--bg3); color: var(--accent); border: 1px solid rgba(245,196,0,0.25); }
-  .login-role-tab.sio-role.active { color: var(--blue); border-color: rgba(42,143,255,0.25); background: rgba(42,143,255,0.08); }
-  .login-role-tab.tm-role.active { color: #a78bfa; border-color: rgba(167,139,250,0.25); background: rgba(167,139,250,0.08); }
-
-  /* TOP MANAGEMENT DASHBOARD */
-  #tm-dashboard {
-    display: none; position: fixed; inset: 0; z-index: 200;
-    background: var(--bg); overflow-y: auto;
-  }
-  #tm-dashboard.show { display: block; }
-  .tm-nav {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(8,8,14,0.97); backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(167,139,250,0.22);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 2rem; height: 56px;
-  }
-  .tm-badge {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 4px 10px; border: 1px solid rgba(167,139,250,0.4); border-radius: 2px; color: #a78bfa;
-  }
-  .admin-tab.tm-tab.active { color: #a78bfa; border-color: rgba(167,139,250,0.25); background: rgba(167,139,250,0.08); }
-
-  /* SIO FORCE-CHANGE PASSWORD SCREEN */
-  #sio-change-pass-screen {
-    display: none; position: fixed; inset: 0; z-index: 220;
-    background: var(--bg); align-items: center; justify-content: center; flex-direction: column;
-  }
-  #sio-change-pass-screen.show { display: flex; }
-
-  /* SIO DASHBOARD */
-  #sio-dashboard {
-    display: none; position: fixed; inset: 0; z-index: 200;
-    background: var(--bg); overflow-y: auto;
-  }
-  #sio-dashboard.show { display: block; }
-
-  .sio-nav {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(8,8,14,0.97); backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(42,143,255,0.18);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 2rem; height: 56px;
-  }
-
-  /* MANAGE SIO MODAL */
-  #manage-sio-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
-    z-index: 350; align-items: center; justify-content: center;
-  }
-  #manage-sio-overlay.show { display: flex; }
-
-  .sio-table { width: 100%; border-collapse: collapse; }
-  .sio-table th { text-align:left; padding:8px 12px; font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); }
-  .sio-table td { padding:10px 12px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:middle; }
-  .sio-table tr:last-child td { border-bottom:none; }
-  .sio-must-change { font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:2px;background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.2); }
-  .sio-pass-ok { font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:2px;background:rgba(245,196,0,0.08);color:var(--accent);border:1px solid rgba(245,196,0,0.2); }
 
   /* HERO */
   .hero {
@@ -2240,11 +1946,10 @@
   .sp-escalated { box-shadow: 0 0 8px rgba(255,68,68,0.2) !important; }
 
   /* ── Detail modal premium ── */
-  .dp-modal {
+  .detail-panel {
     background: linear-gradient(135deg, rgba(13,13,22,0.97) 0%, rgba(18,18,31,0.98) 100%) !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
-    box-shadow: 0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(245,196,0,0.05), inset 0 1px 0 rgba(255,255,255,0.04) !important;
-    border-radius: 10px !important;
+    border-left: 1px solid rgba(255,255,255,0.08) !important;
+    box-shadow: -20px 0 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,196,0,0.05) !important;
   }
   .dp-header {
     background: linear-gradient(90deg, rgba(18,18,31,0.95) 0%, rgba(22,22,36,0.95) 100%) !important;
@@ -2733,55 +2438,20 @@
   </div>
 </section>
 
-
-<!-- PUBLIC STATS SECTION -->
-<section class="pub-stats">
-  <div style="text-align:center;">
-    <div class="section-label reveal" style="justify-content:center;">Platform stats</div>
-    <div class="section-title reveal" style="text-align:center;font-size:clamp(36px,6vw,72px);">TRUSTED<br>REPORTING</div>
-  </div>
-  <div class="pub-stats-grid">
-    <div class="pub-stat reveal">
-      <span class="pub-stat-val count-up" data-target="2847">0</span>
-      <span class="pub-stat-lbl">Reports filed</span>
-    </div>
-    <div class="pub-stat reveal">
-      <span class="pub-stat-val count-up" data-target="94" style="color:var(--blue);">0</span>
-      <span class="pub-stat-lbl">Resolution rate %</span>
-    </div>
-    <div class="pub-stat reveal">
-      <span class="pub-stat-val count-up" data-target="4" style="color:#22c55e;">0</span>
-      <span class="pub-stat-lbl">Avg days to respond</span>
-    </div>
-    <div class="pub-stat reveal">
-      <span class="pub-stat-val count-up" data-target="100" style="color:#a78bfa;">0</span>
-      <span class="pub-stat-lbl">Anonymity preserved %</span>
-    </div>
-  </div>
-  <!-- Mini sparkline decoration -->
-  <div style="display:flex;justify-content:center;gap:3px;margin-top:2.5rem;opacity:0.4;" id="pub-sparkline"></div>
-</section>
-
 <!-- ══════════════════════════════════════
      ADMIN LOGIN SCREEN
 ══════════════════════════════════════ -->
 <div id="admin-login-screen">
   <div style="position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:0.5;"></div>
-  <div class="login-animated-bg" id="login-particles"></div>
   <div class="login-box" style="position:relative;z-index:2">
     <div class="login-header">
-      <span class="login-header-title" id="login-header-title">Restricted access · Admin only</span>
+      <span class="login-header-title">Restricted access · Admin only</span>
       <div class="form-dots"><div class="form-dot"></div><div class="form-dot"></div><div class="form-dot"></div></div>
     </div>
     <div class="login-body">
       <div class="login-logo">REPORTER</div>
-      <div class="login-sub" id="login-sub">Admin portal · Authorised personnel only</div>
-      <div class="login-role-tabs">
-        <button class="login-role-tab active" id="tab-admin-role" onclick="switchLoginRole('admin')">Admin</button>
-        <button class="login-role-tab tm-role" id="tab-tm-role" onclick="switchLoginRole('tm')">Top Mgmt</button>
-        <button class="login-role-tab sio-role" id="tab-sio-role" onclick="switchLoginRole('sio')">SIO Login</button>
-      </div>
-      <div class="login-err" id="login-err">Invalid credentials. Try admin / admin123</div>
+      <div class="login-sub">Admin portal · Authorised personnel only</div>
+      <div class="login-err" id="login-err">Invalid username or password.</div>
       <div class="fld">
         <label>Username</label>
         <input type="text" id="login-user" placeholder="admin" autocomplete="off" />
@@ -2790,8 +2460,8 @@
         <label>Password</label>
         <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
       </div>
-      <button class="login-submit" id="login-submit-btn" onclick="doLogin()">Access secure dashboard →</button>
-      <div class="login-hint" id="login-hint">Demo credentials: admin / admin123</div>
+      <button class="login-submit" onclick="doLogin()">Access secure dashboard →</button>
+      <div class="login-hint">Demo credentials: admin / admin123</div>
       <div style="text-align:center;margin-top:1.25rem;">
         <button onclick="closeAdminLogin()" style="background:none;border:none;font-family:var(--mono);font-size:11px;color:var(--muted);cursor:pointer;letter-spacing:0.06em;">← Back to site</button>
       </div>
@@ -2808,12 +2478,12 @@
   <div class="admin-nav">
     <div class="admin-nav-left">
       <div class="admin-logo">REPORTER</div>
-      <div class="admin-badge" id="admin-role-badge">Admin</div>
+      <div class="admin-badge">Admin</div>
     </div>
     <div class="admin-nav-tabs">
       <button class="admin-tab active" onclick="showAdminTab('overview',this)">Overview</button>
       <button class="admin-tab" onclick="showAdminTab('complaints',this)">Complaints</button>
-      <button class="admin-tab" onclick="showAdminTab('team',this)">Team</button>
+      <button class="admin-tab" onclick="showAdminTab('investigators',this)">Investigators</button>
       <button class="admin-tab" onclick="showAdminTab('analytics',this)">Analytics</button>
       <button class="admin-tab" onclick="showAdminTab('audit',this)">Audit log</button>
       <button class="admin-tab" onclick="showAdminTab('qr',this)">QR Code</button>
@@ -2834,110 +2504,32 @@
 
   <!-- OVERVIEW TAB -->
   <div class="admin-panel active" id="tab-overview">
-    <!-- ENHANCED METRIC CARDS -->
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;padding:1.5rem 1.5rem 0;">
-      <div class="metric-card mc-yellow glow-card">
-        <div class="mc-icon">📋</div>
-        <div class="mc-val count-up" id="mc-total" data-target="24" style="color:var(--text);">24</div>
-        <div class="mc-lbl">Total complaints</div>
-        <div class="mc-trend" style="color:var(--accent);">↑ 3 this week</div>
+    <!-- METRICS -->
+    <div class="metrics-row">
+      <div class="adm-metric">
+        <span class="adm-metric-val" style="color:var(--text)">24</span>
+        <span class="adm-metric-lbl">Total complaints</span>
+        <span class="adm-metric-trend" style="color:var(--accent)">↑ 3 this week</span>
       </div>
-      <div class="metric-card mc-blue glow-card">
-        <div class="mc-icon">🔵</div>
-        <div class="mc-val count-up" id="mc-new" data-target="7" style="color:#60a5fa;">7</div>
-        <div class="mc-lbl">Awaiting review</div>
-        <div class="mc-trend" style="color:#60a5fa;">New submissions</div>
+      <div class="adm-metric">
+        <span class="adm-metric-val" style="color:#60a5fa">7</span>
+        <span class="adm-metric-lbl">Awaiting review</span>
+        <span class="adm-metric-trend" style="color:#60a5fa">New submissions</span>
       </div>
-      <div class="metric-card mc-yellow glow-card">
-        <div class="mc-icon">⚡</div>
-        <div class="mc-val count-up" id="mc-progress" data-target="5" style="color:#fbbf24;">5</div>
-        <div class="mc-lbl">In progress</div>
-        <div class="mc-trend" style="color:var(--muted);">Active investigations</div>
+      <div class="adm-metric">
+        <span class="adm-metric-val" style="color:#fbbf24">5</span>
+        <span class="adm-metric-lbl">In progress</span>
+        <span class="adm-metric-trend" style="color:var(--muted)">Active investigations</span>
       </div>
-      <div class="metric-card mc-red glow-card">
-        <div class="mc-icon">🚨</div>
-        <div class="mc-val count-up" id="mc-escalated" data-target="2" style="color:#ff6b6b;">2</div>
-        <div class="mc-lbl">Escalated</div>
-        <div class="mc-trend" style="color:#ff6b6b;">Urgent action needed</div>
+      <div class="adm-metric">
+        <span class="adm-metric-val" style="color:#ff6b6b">2</span>
+        <span class="adm-metric-lbl">Escalated</span>
+        <span class="adm-metric-trend" style="color:#ff6b6b">Needs urgent action</span>
       </div>
-      <div class="metric-card mc-green glow-card">
-        <div class="mc-icon">✅</div>
-        <div class="mc-val count-up" id="mc-resolved" data-target="10" style="color:#22c55e;">10</div>
-        <div class="mc-lbl">Resolved</div>
-        <div class="mc-trend" style="color:var(--muted);">This month</div>
-      </div>
-    </div>
-
-    <!-- CHARTS ROW -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;padding:1rem 1.5rem;">
-      <!-- Donut: Status breakdown -->
-      <div class="adm-card glow-card" style="display:flex;flex-direction:column;">
-        <div class="adm-card-header"><span class="adm-card-title">Status breakdown</span></div>
-        <div style="padding:1.25rem;display:flex;align-items:center;justify-content:center;gap:1.5rem;flex:1;">
-          <div class="donut-wrap">
-            <svg width="120" height="120" viewBox="0 0 120 120">
-              <circle class="progress-ring-track" cx="60" cy="60" r="46" stroke-width="10"/>
-              <circle class="progress-ring-fill" id="donut-resolved" cx="60" cy="60" r="46" stroke="#22c55e" stroke-width="10" stroke-dasharray="289" stroke-dashoffset="289"/>
-              <circle class="progress-ring-fill" id="donut-progress" cx="60" cy="60" r="46" stroke="#fbbf24" stroke-width="10" stroke-dasharray="289" stroke-dashoffset="289" style="opacity:0.7"/>
-              <circle class="progress-ring-fill" id="donut-new" cx="60" cy="60" r="46" stroke="#60a5fa" stroke-width="10" stroke-dasharray="289" stroke-dashoffset="289" style="opacity:0.5"/>
-            </svg>
-            <div class="donut-center">
-              <div class="donut-val" id="donut-total-val">24</div>
-              <div class="donut-sub">total</div>
-            </div>
-          </div>
-          <div class="donut-legend" id="donut-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#22c55e;"></div>Resolved</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#fbbf24;"></div>In progress</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#60a5fa;"></div>New</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#ff6b6b;"></div>Escalated</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bar chart: Category breakdown -->
-      <div class="adm-card glow-card">
-        <div class="adm-card-header"><span class="adm-card-title">By category</span></div>
-        <div style="padding:1.25rem;" id="cat-bar-chart">
-          <div class="bar-chart">
-            <div class="bar-row"><div class="bar-label">Financial</div><div class="bar-track"><div class="bar-fill" style="background:var(--accent);width:0%" data-w="75%"></div></div><div class="bar-count">6</div></div>
-            <div class="bar-row"><div class="bar-label">Harassment</div><div class="bar-track"><div class="bar-fill" style="background:#60a5fa;width:0%" data-w="62%"></div></div><div class="bar-count">5</div></div>
-            <div class="bar-row"><div class="bar-label">Safety</div><div class="bar-track"><div class="bar-fill" style="background:#fbbf24;width:0%" data-w="50%"></div></div><div class="bar-count">4</div></div>
-            <div class="bar-row"><div class="bar-label">Data breach</div><div class="bar-track"><div class="bar-fill" style="background:#a78bfa;width:0%" data-w="37%"></div></div><div class="bar-count">3</div></div>
-            <div class="bar-row"><div class="bar-label">Bribery</div><div class="bar-track"><div class="bar-fill" style="background:#fb923c;width:0%" data-w="25%"></div></div><div class="bar-count">2</div></div>
-            <div class="bar-row"><div class="bar-label">Other</div><div class="bar-track"><div class="bar-fill" style="background:var(--muted);width:0%" data-w="50%"></div></div><div class="bar-count">4</div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Live activity feed -->
-      <div class="adm-card glow-card" style="display:flex;flex-direction:column;">
-        <div class="adm-card-header">
-          <span class="adm-card-title">Live activity</span>
-          <span style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:#22c55e;"><span class="live-dot"></span>Live</span>
-        </div>
-        <div style="padding:0 1rem 1rem;flex:1;overflow:hidden;" id="live-activity-feed">
-          <div class="activity-feed" id="activity-list"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RISK HEATMAP -->
-    <div style="padding:0 1.5rem 1rem;">
-      <div class="adm-card glow-card">
-        <div class="adm-card-header">
-          <span class="adm-card-title">Risk heatmap — last 52 weeks</span>
-          <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--muted);">
-            <span>Low</span>
-            <div style="width:10px;height:10px;border-radius:2px;background:rgba(245,196,0,0.3);"></div>
-            <div style="width:10px;height:10px;border-radius:2px;background:rgba(251,146,60,0.5);"></div>
-            <div style="width:10px;height:10px;border-radius:2px;background:rgba(255,68,68,0.7);"></div>
-            <span>High</span>
-          </div>
-        </div>
-        <div style="padding:1rem 1.25rem;overflow-x:auto;">
-          <div class="heat-row" id="risk-heatmap"></div>
-        </div>
+      <div class="adm-metric">
+        <span class="adm-metric-val" style="color:var(--accent)">10</span>
+        <span class="adm-metric-lbl">Resolved</span>
+        <span class="adm-metric-trend" style="color:var(--muted)">This month</span>
       </div>
     </div>
 
@@ -3141,143 +2733,172 @@
       </div>
     </div>
   </div>
-  <!-- TEAM TAB — Investigators + SIOs + Top Management -->
-  <div class="admin-panel" id="tab-team">
-
-    <!-- Inner sub-tab bar -->
+  <div class="admin-panel" id="tab-investigators">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
       <div>
-        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">// personnel</div>
-        <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">TEAM</div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">// team</div>
+        <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">INVESTIGATORS</div>
+      </div>
+      <button class="adm-btn adm-btn-accent" onclick="openAddInv()">+ Add investigator</button>
+    </div>
+    <div class="inv-grid">
+      <div class="inv-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="inv-avatar">RS</div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
+        </div>
+        <div class="inv-name">Ravi Sharma</div>
+        <div class="inv-role">Investigator · Fraud</div>
+        <div class="inv-stats">
+          <div><span class="inv-stat-val">8</span><span class="inv-stat-lbl">Active cases</span></div>
+          <div><span class="inv-stat-val">47</span><span class="inv-stat-lbl">Resolved</span></div>
+        </div>
+      </div>
+      <div class="inv-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="inv-avatar">PG</div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
+        </div>
+        <div class="inv-name">Priya Gupta</div>
+        <div class="inv-role">Investigator · HR &amp; Compliance</div>
+        <div class="inv-stats">
+          <div><span class="inv-stat-val">5</span><span class="inv-stat-lbl">Active cases</span></div>
+          <div><span class="inv-stat-val">31</span><span class="inv-stat-lbl">Resolved</span></div>
+        </div>
+      </div>
+      <div class="inv-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="inv-avatar">MR</div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
+        </div>
+        <div class="inv-name">Mohammed Rashid</div>
+        <div class="inv-role">Investigator · Data &amp; IT</div>
+        <div class="inv-stats">
+          <div><span class="inv-stat-val">3</span><span class="inv-stat-lbl">Active cases</span></div>
+          <div><span class="inv-stat-val">18</span><span class="inv-stat-lbl">Resolved</span></div>
+        </div>
+      </div>
+      <div class="inv-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="inv-avatar">SJ</div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
+        </div>
+        <div class="inv-name">Sunita Joshi</div>
+        <div class="inv-role">Investigator · Legal &amp; Ethics</div>
+        <div class="inv-stats">
+          <div><span class="inv-stat-val">4</span><span class="inv-stat-lbl">Active cases</span></div>
+          <div><span class="inv-stat-val">25</span><span class="inv-stat-lbl">Resolved</span></div>
+        </div>
+      </div>
+      <div class="inv-card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;cursor:pointer;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'" onclick="openAddInv()">
+        <div style="font-size:28px;color:var(--muted);margin-bottom:8px;">+</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;">Add investigator</div>
       </div>
     </div>
+  </div>
 
-    <div style="display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:1rem;">
-      <button class="adm-btn team-sub-tab active" id="tsub-sio" onclick="showTeamSub('sio',this)" style="border-color:rgba(42,143,255,0.3);color:var(--blue);">🛡 SIOs</button>
-      <button class="adm-btn team-sub-tab" id="tsub-tm" onclick="showTeamSub('tm',this)" style="border-color:rgba(167,139,250,0.3);color:#a78bfa;">👑 Top Management</button>
+  <!-- ANALYTICS TAB -->
+  <div class="admin-panel" id="tab-analytics">
+    <div style="margin-bottom:1.5rem;">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">// insights</div>
+      <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">ANALYTICS</div>
     </div>
-
-    <!-- ── SUB: INVESTIGATORS (hidden - removed) ────────── -->
-    <div id="team-sub-inv" style="display:none;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
-        <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);">// Investigators</div>
-        <button class="adm-btn adm-btn-accent" onclick="openAddInv()">+ Add investigator</button>
-      </div>
-      <div class="inv-grid">
-        <div class="inv-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <div class="inv-avatar">RS</div>
-            <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
-          </div>
-          <div class="inv-name">Ravi Sharma</div>
-          <div class="inv-role">Senior Investigator · Fraud</div>
-          <div class="inv-stats">
-            <div><span class="inv-stat-val">8</span><span class="inv-stat-lbl">Active cases</span></div>
-            <div><span class="inv-stat-val">47</span><span class="inv-stat-lbl">Resolved</span></div>
-          </div>
-        </div>
-        <div class="inv-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <div class="inv-avatar">PG</div>
-            <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
-          </div>
-          <div class="inv-name">Priya Gupta</div>
-          <div class="inv-role">Investigator · HR &amp; Compliance</div>
-          <div class="inv-stats">
-            <div><span class="inv-stat-val">5</span><span class="inv-stat-lbl">Active cases</span></div>
-            <div><span class="inv-stat-val">31</span><span class="inv-stat-lbl">Resolved</span></div>
-          </div>
-        </div>
-        <div class="inv-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <div class="inv-avatar">AK</div>
-            <span style="font-family:var(--mono);font-size:10px;color:#fbbf24;"><span class="inv-status-dot" style="background:#fbbf24"></span>On leave</span>
-          </div>
-          <div class="inv-name">Anita Krishnan</div>
-          <div class="inv-role">Lead Investigator · Safety</div>
-          <div class="inv-stats">
-            <div><span class="inv-stat-val">0</span><span class="inv-stat-lbl">Active cases</span></div>
-            <div><span class="inv-stat-val">62</span><span class="inv-stat-lbl">Resolved</span></div>
-          </div>
-        </div>
-        <div class="inv-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <div class="inv-avatar">MR</div>
-            <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
-          </div>
-          <div class="inv-name">Mohammed Rashid</div>
-          <div class="inv-role">Investigator · Data &amp; IT</div>
-          <div class="inv-stats">
-            <div><span class="inv-stat-val">3</span><span class="inv-stat-lbl">Active cases</span></div>
-            <div><span class="inv-stat-val">18</span><span class="inv-stat-lbl">Resolved</span></div>
-          </div>
-        </div>
-        <div class="inv-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <div class="inv-avatar">SJ</div>
-            <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
-          </div>
-          <div class="inv-name">Sunita Joshi</div>
-          <div class="inv-role">Investigator · Legal &amp; Ethics</div>
-          <div class="inv-stats">
-            <div><span class="inv-stat-val">4</span><span class="inv-stat-lbl">Active cases</span></div>
-            <div><span class="inv-stat-val">25</span><span class="inv-stat-lbl">Resolved</span></div>
-          </div>
-        </div>
-        <div class="inv-card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;cursor:pointer;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'" onclick="openAddInv()">
-          <div style="font-size:28px;color:var(--muted);margin-bottom:8px;">+</div>
-          <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;">Add investigator</div>
+    <div class="analytics-grid">
+      <div class="chart-card">
+        <div class="chart-title">Complaints by category</div>
+        <div class="bar-chart">
+          <div class="bar-row"><span class="bar-label">Financial fraud</span><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="bar-val">8</span></div>
+          <div class="bar-row"><span class="bar-label">Harassment</span><div class="bar-track"><div class="bar-fill" style="width:55%;background:#fbbf24"></div></div><span class="bar-val">6</span></div>
+          <div class="bar-row"><span class="bar-label">Safety</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:#fb923c"></div></div><span class="bar-val">4</span></div>
+          <div class="bar-row"><span class="bar-label">Data breach</span><div class="bar-track"><div class="bar-fill" style="width:28%;background:#60a5fa"></div></div><span class="bar-val">3</span></div>
+          <div class="bar-row"><span class="bar-label">Bribery</span><div class="bar-track"><div class="bar-fill" style="width:18%;background:#a78bfa"></div></div><span class="bar-val">2</span></div>
+          <div class="bar-row"><span class="bar-label">Other</span><div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--muted)"></div></div><span class="bar-val">1</span></div>
         </div>
       </div>
-    </div>
-
-    <!-- ── SUB: SIOs ──────────────────────────────────────── -->
-    <div id="team-sub-sio">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
-        <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);">// Senior Investigating Officers</div>
-        <button class="adm-btn" onclick="openAddSio()" style="border-color:rgba(42,143,255,0.35);color:var(--blue);">+ Add SIO</button>
-      </div>
-      <div class="adm-card">
-        <div class="adm-card-header">
-          <span class="adm-card-title" style="color:var(--blue);">SIO Accounts</span>
-          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">SIOs can only view cases assigned to them</span>
+      <div class="chart-card">
+        <div class="chart-title">Resolution status</div>
+        <div class="donut-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="var(--border)" stroke-width="18"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#f5c400" stroke-width="18" stroke-dasharray="113 188" stroke-dashoffset="47" stroke-linecap="butt"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#fbbf24" stroke-width="18" stroke-dasharray="62 239" stroke-dashoffset="-66" stroke-linecap="butt"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#60a5fa" stroke-width="18" stroke-dasharray="50 251" stroke-dashoffset="-128" stroke-linecap="butt"/>
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#ff6b6b" stroke-width="18" stroke-dasharray="25 276" stroke-dashoffset="-178" stroke-linecap="butt"/>
+            <text x="60" y="55" text-anchor="middle" font-family="'Bebas Neue'" font-size="22" fill="#e8ede9">24</text>
+            <text x="60" y="70" text-anchor="middle" font-family="'DM Mono'" font-size="9" fill="#6b7a6e" letter-spacing="1">TOTAL</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#f5c400"></div>Resolved (10)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>In progress (5)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div>Under review (7)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ff6b6b"></div>Escalated (2)</div>
+          </div>
         </div>
-        <div style="padding:0;">
-          <table class="sio-table">
-            <thead>
-              <tr><th>Username</th><th>Full name</th><th>Role</th><th>Email</th><th>Password</th><th>Assigned cases</th><th>Actions</th></tr>
-            </thead>
-            <tbody id="sio-management-tbody">
-              <tr><td colspan="7" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No SIOs added yet. Click "+ Add SIO" to create one.</td></tr>
-            </tbody>
-          </table>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Monthly submissions (2024)</div>
+        <div style="display:flex;align-items:flex-end;gap:8px;height:100px;margin-top:1rem;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="width:100%;background:var(--accent);border-radius:2px 2px 0 0;opacity:0.7;" data-h="40"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Jul</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="width:100%;background:var(--accent);border-radius:2px 2px 0 0;opacity:0.7;" data-h="55"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Aug</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="width:100%;background:var(--accent);border-radius:2px 2px 0 0;opacity:0.7;" data-h="35"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Sep</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="width:100%;background:var(--accent);border-radius:2px 2px 0 0;opacity:0.7;" data-h="70"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Oct</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="width:100%;background:var(--accent);border-radius:2px 2px 0 0;opacity:0.7;" data-h="85"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Nov</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="width:100%;background:var(--accent);border-radius:2px 2px 0 0;" data-h="100"></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--accent)">Dec</span>
+          </div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Risk level distribution</div>
+        <div class="bar-chart" style="margin-top:1rem;">
+          <div class="bar-row"><span class="bar-label">Critical</span><div class="bar-track"><div class="bar-fill" style="width:20%;background:#ff4444"></div></div><span class="bar-val" style="color:#ff6b6b">2</span></div>
+          <div class="bar-row"><span class="bar-label">High</span><div class="bar-track"><div class="bar-fill" style="width:45%;background:#fb923c"></div></div><span class="bar-val" style="color:#fb923c">7</span></div>
+          <div class="bar-row"><span class="bar-label">Medium</span><div class="bar-track"><div class="bar-fill" style="width:55%;background:#fbbf24"></div></div><span class="bar-val" style="color:#fbbf24">9</span></div>
+          <div class="bar-row"><span class="bar-label">Low</span><div class="bar-track"><div class="bar-fill" style="width:37%;background:var(--accent)"></div></div><span class="bar-val" style="color:var(--accent)">6</span></div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ── SUB: TOP MANAGEMENT ────────────────────────────── -->
-    <div id="team-sub-tm" style="display:none;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
-        <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#a78bfa;">// Top Management Accounts</div>
-        <button class="adm-btn" onclick="openAddTm()" style="border-color:rgba(167,139,250,0.4);color:#a78bfa;">+ Add TM Account</button>
+  <!-- AUDIT LOG TAB -->
+  <div class="admin-panel" id="tab-audit">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">// compliance</div>
+        <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">AUDIT LOG</div>
       </div>
-      <div class="adm-card">
-        <div class="adm-card-header">
-          <span class="adm-card-title" style="color:#a78bfa;">Top Management Accounts</span>
-        </div>
-        <div style="padding:0;">
-          <table class="sio-table">
-            <thead>
-              <tr><th>Username</th><th>Full name</th><th>Password status</th><th>Actions</th></tr>
-            </thead>
-            <tbody id="tm-management-tbody">
-              <tr><td colspan="4" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
+      <button class="adm-btn adm-btn-accent">Export log</button>
+    </div>
+    <div class="adm-card">
+      <div class="adm-card-header"><span class="adm-card-title">All system actions</span></div>
+      <div style="padding:1rem 1.5rem;" id="audit-list">
+        <div class="audit-row"><span class="audit-ts">Dec 16 · 14:15</span><span class="audit-action">SV-2025-7834 assigned to R. Sharma</span><span class="audit-by">admin</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 16 · 11:02</span><span class="audit-action">SV-2025-7762 status changed → Escalated</span><span class="audit-by">admin</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 15 · 16:45</span><span class="audit-action">SV-2025-7791 status changed → In review</span><span class="audit-by">P. Gupta</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 15 · 11:00</span><span class="audit-action">SV-2025-7834 status changed → In progress</span><span class="audit-by">R. Sharma</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 14 · 09:41</span><span class="audit-action">SV-2025-7834 received and encrypted by system</span><span class="audit-by">System</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 11 · 08:20</span><span class="audit-action">SV-2025-7791 received and encrypted by system</span><span class="audit-by">System</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 10 · 17:33</span><span class="audit-action">SV-2025-7701 status changed → Closed · resolved</span><span class="audit-by">R. Sharma</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 8 · 14:05</span><span class="audit-action">SV-2025-7762 received and encrypted by system</span><span class="audit-by">System</span></div>
+        <div class="audit-row"><span class="audit-ts">Dec 3 · 10:12</span><span class="audit-action">SV-2025-7701 received and encrypted by system</span><span class="audit-by">System</span></div>
       </div>
     </div>
-
   </div>
 
   <!-- ACCOUNT SETTINGS TAB -->
@@ -3334,399 +2955,6 @@
 
 </div><!-- /admin-dashboard -->
 
-
-<!-- ══════════════════════════════════════
-     TOP MANAGEMENT DASHBOARD
-══════════════════════════════════════ -->
-<div id="tm-dashboard">
-  <div class="tm-nav">
-    <div style="display:flex;align-items:center;gap:1rem;">
-      <div class="admin-logo" style="color:#a78bfa;">REPORTER</div>
-      <div class="tm-badge">Top Management</div>
-    </div>
-    <div style="display:flex;gap:4px;">
-      <button class="admin-tab tm-tab active" id="tm-tab-overview-btn" onclick="showTmTab('tm-overview',this)">Overview</button>
-      <button class="admin-tab tm-tab" id="tm-tab-complaints-btn" onclick="showTmTab('tm-complaints',this)">All Complaints</button>
-      <button class="admin-tab tm-tab" id="tm-tab-tasks-btn" onclick="showTmTab('tm-tasks',this)">Assign Tasks</button>
-    </div>
-    <div style="display:flex;align-items:center;gap:1rem;">
-      <div class="admin-user">
-        <div class="admin-avatar" id="tm-avatar" style="background:rgba(167,139,250,0.13);border-color:rgba(167,139,250,0.3);color:#a78bfa;">T</div>
-        <span id="tm-username-display">TM</span>
-      </div>
-      <button class="btn-logout" onclick="doTmLogout()">Log out</button>
-    </div>
-  </div>
-
-  <!-- TM: OVERVIEW TAB -->
-  <div class="admin-panel active" id="tab-tm-overview" style="padding:2rem;">
-    <div style="margin-bottom:1.5rem;">
-      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:4px;">// executive view</div>
-      <div style="font-family:var(--display);font-size:32px;letter-spacing:0.06em;">OVERVIEW</div>
-    </div>
-    <!-- TM STAT ROW -->
-    <div class="tm-stat-row" style="margin-bottom:1.5rem;">
-      <div class="tm-stat glow-card">
-        <div class="tm-stat-val" id="tm-stat-total">—</div>
-        <div class="tm-stat-lbl">Total complaints</div>
-      </div>
-      <div class="tm-stat glow-card" style="border-color:rgba(255,68,68,0.2);">
-        <div class="tm-stat-val" id="tm-stat-esc" style="color:#ff6b6b;">—</div>
-        <div class="tm-stat-lbl">Escalated (urgent)</div>
-      </div>
-      <div class="tm-stat glow-card" style="border-color:rgba(34,197,94,0.2);">
-        <div class="tm-stat-val" id="tm-stat-res" style="color:#22c55e;">—</div>
-        <div class="tm-stat-lbl">Resolved this month</div>
-      </div>
-    </div>
-    <div class="metrics-row">
-      <div class="adm-metric"><span class="adm-metric-val" id="tm-metric-total" style="color:var(--text)">—</span><span class="adm-metric-lbl">Total complaints</span></div>
-      <div class="adm-metric"><span class="adm-metric-val" id="tm-metric-new" style="color:#60a5fa">—</span><span class="adm-metric-lbl">Awaiting review</span></div>
-      <div class="adm-metric"><span class="adm-metric-val" id="tm-metric-progress" style="color:#fbbf24">—</span><span class="adm-metric-lbl">In progress</span></div>
-      <div class="adm-metric"><span class="adm-metric-val" id="tm-metric-escalated" style="color:#ff6b6b">—</span><span class="adm-metric-lbl">Escalated</span></div>
-      <div class="adm-metric"><span class="adm-metric-val" id="tm-metric-resolved" style="color:var(--accent)">—</span><span class="adm-metric-lbl">Resolved</span></div>
-    </div>
-    <div class="adm-card">
-      <div class="adm-card-header">
-        <span class="adm-card-title" style="color:#a78bfa;">Recent Complaints</span>
-      </div>
-      <table class="adm-table">
-        <thead><tr><th>ID</th><th>Category</th><th>Department</th><th>Date</th><th>Status</th><th>Risk</th><th>Assigned SIO</th><th></th></tr></thead>
-        <tbody id="tm-overview-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- TM: ALL COMPLAINTS TAB -->
-  <div class="admin-panel" id="tab-tm-complaints" style="padding:2rem;">
-    <div style="margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:4px;">// all cases</div>
-        <div style="font-family:var(--display);font-size:32px;letter-spacing:0.06em;">ALL COMPLAINTS</div>
-      </div>
-    </div>
-    <div class="adm-card">
-      <table class="adm-table">
-        <thead><tr><th>ID</th><th>Category</th><th>Department</th><th>Date</th><th>Status</th><th>Risk</th><th>Assigned SIO</th><th></th></tr></thead>
-        <tbody id="tm-complaints-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- TM: ASSIGN TASKS TAB -->
-  <div class="admin-panel" id="tab-tm-tasks" style="padding:2rem;">
-    <div style="margin-bottom:1.5rem;">
-      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:4px;">// task assignment</div>
-      <div style="font-family:var(--display);font-size:32px;letter-spacing:0.06em;">ASSIGN TASKS</div>
-    </div>
-    <div class="adm-card" style="max-width:600px;">
-      <div class="adm-card-header"><span class="adm-card-title" style="color:#a78bfa;">Create & Assign Task to SIO</span></div>
-      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
-        <div id="tm-task-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
-        <div id="tm-task-ok" style="display:none;padding:8px 12px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#a78bfa;"></div>
-        <div class="fld">
-          <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Select Complaint</label>
-          <select id="tm-task-complaint" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;">
-            <option value="">— Select a complaint —</option>
-          </select>
-        </div>
-        <div class="fld">
-          <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Assign to SIO</label>
-          <select id="tm-task-sio" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;">
-            <option value="">— Select an SIO —</option>
-          </select>
-        </div>
-        <div class="fld">
-          <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Task Instructions</label>
-          <textarea id="tm-task-note" rows="4" placeholder="Describe the task or special instructions for the SIO…" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;resize:vertical;outline:none;line-height:1.6;"></textarea>
-        </div>
-        <button onclick="tmAssignTask()" style="padding:12px;background:transparent;border:1px solid rgba(167,139,250,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#a78bfa;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(167,139,250,0.1)'" onmouseout="this.style.background='transparent'">Assign Task →</button>
-      </div>
-    </div>
-  </div>
-</div><!-- /tm-dashboard -->
-
-<!-- ══════════════════════════════════════
-     SIO FORCE CHANGE PASSWORD SCREEN
-══════════════════════════════════════ -->
-<div id="sio-change-pass-screen">
-  <div style="position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:0.5;"></div>
-  <div class="login-box" style="position:relative;z-index:2;max-width:460px;">
-    <div class="login-header" style="border-color:rgba(42,143,255,0.25);">
-      <span class="login-header-title" style="color:var(--blue);">🔐 Set New Password · Required</span>
-      <div class="form-dots"><div class="form-dot"></div><div class="form-dot"></div><div class="form-dot"></div></div>
-    </div>
-    <div class="login-body">
-      <div class="login-logo" style="color:var(--blue);">SIO PORTAL</div>
-      <div class="login-sub">You must change your default password before continuing.</div>
-      <div class="login-err" id="sio-cp-err"></div>
-      <div class="fld">
-        <label>New Password</label>
-        <input type="password" id="sio-new-pass" placeholder="Min 6 characters" />
-      </div>
-      <div class="fld">
-        <label>Confirm New Password</label>
-        <input type="password" id="sio-confirm-pass" placeholder="Repeat password" onkeydown="if(event.key==='Enter')sioSetFirstPassword()" />
-      </div>
-      <button class="login-submit" style="border-color:rgba(42,143,255,0.5);color:var(--blue);" onclick="sioSetFirstPassword()">Set password &amp; continue →</button>
-      <div class="login-hint">Your new password will be required on all future logins.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════
-     SIO DASHBOARD
-══════════════════════════════════════ -->
-<div id="sio-dashboard">
-  <div class="sio-nav">
-    <div style="display:flex;align-items:center;gap:1rem;">
-      <div class="admin-logo" style="color:var(--blue);">REPORTER</div>
-      <div class="sio-badge">SIO Portal</div>
-    </div>
-    <div style="display:flex;gap:4px;">
-      <button class="admin-tab active" id="sio-tab-mycases-btn" onclick="showSioTab('mycases',this)">My Cases</button>
-      <button class="admin-tab" id="sio-tab-investigate-btn" onclick="showSioTab('sio-investigate',this)" style="border-color:rgba(245,196,0,0.2);color:var(--accent);">🔍 Investigate</button>
-      <button class="admin-tab" id="sio-tab-account-btn" onclick="showSioTab('sio-account',this)" style="border-color:rgba(42,143,255,0.2);color:var(--blue);">⚙ Account</button>
-    </div>
-    <div style="display:flex;align-items:center;gap:1rem;">
-      <div class="admin-user">
-        <div class="admin-avatar" id="sio-avatar" style="background:rgba(42,143,255,0.13);border-color:rgba(42,143,255,0.25);color:var(--blue);">S</div>
-        <span id="sio-username-display">SIO</span>
-      </div>
-      <button class="btn-logout" onclick="doSioLogout()">Log out</button>
-    </div>
-  </div>
-
-  <!-- SIO: MY CASES TAB -->
-  <div class="admin-panel active" id="tab-mycases" style="padding:2rem;">
-    <!-- SIO STAT ROW -->
-    <div class="sio-stat-row" style="margin-bottom:1.5rem;">
-      <div class="sio-stat glow-card">
-        <div class="sio-stat-val" id="sio-stat-total">0</div>
-        <div class="sio-stat-lbl">Assigned cases</div>
-      </div>
-      <div class="sio-stat glow-card" style="border-color:rgba(251,191,36,0.2);">
-        <div class="sio-stat-val" id="sio-stat-open" style="color:#fbbf24;">0</div>
-        <div class="sio-stat-lbl">Open / in progress</div>
-      </div>
-      <div class="sio-stat glow-card" style="border-color:rgba(34,197,94,0.2);">
-        <div class="sio-stat-val" id="sio-stat-resolved" style="color:#22c55e;">0</div>
-        <div class="sio-stat-lbl">Resolved</div>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-      <div>
-        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue);margin-bottom:4px;">// your assigned cases</div>
-        <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">MY CASES</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:1rem;">
-        <div id="sio-case-count" style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;"></div>
-        <div class="view-toggle">
-          <button class="vt-btn active" id="vt-table" onclick="setSioView('table',this)" title="Table view">☰</button>
-          <button class="vt-btn" id="vt-cards" onclick="setSioView('cards',this)" title="Card view">⊞</button>
-        </div>
-      </div>
-    </div>
-    <!-- TABLE VIEW -->
-    <div id="sio-table-view">
-      <div class="adm-card">
-        <div class="adm-card-header">
-          <span class="adm-card-title" style="color:var(--blue);">Assigned to me</span>
-        </div>
-        <table class="adm-table">
-          <thead>
-            <tr>
-              <th>ID</th><th>Category</th><th>Department</th><th>Date</th><th>Status</th><th>Risk</th><th></th><th></th>
-            </tr>
-          </thead>
-          <tbody id="sio-cases-tbody">
-            <tr><td colspan="8" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No cases assigned yet.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <!-- CARD VIEW -->
-    <div id="sio-cards-view" style="display:none;">
-      <div class="case-cards" id="sio-case-cards"></div>
-    </div>
-  </div>
-
-  <!-- SIO: ACCOUNT TAB -->
-  <div class="admin-panel" id="tab-sio-account" style="padding:2rem;">
-    <div style="max-width:520px;">
-      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--blue);margin-bottom:4px;">// settings</div>
-      <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;margin-bottom:2rem;">SIO ACCOUNT</div>
-      <div class="adm-card">
-        <div class="adm-card-header"><span class="adm-card-title" style="color:var(--blue);">Change password</span></div>
-        <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
-          <div id="sio-acc-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
-          <div id="sio-acc-ok" style="display:none;padding:8px 12px;background:rgba(42,143,255,0.08);border:1px solid rgba(42,143,255,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:var(--blue);"></div>
-          <div class="fld">
-            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Current password</label>
-            <input type="password" id="sio-cur-pass" placeholder="Current password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
-          </div>
-          <div class="fld">
-            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">New password</label>
-            <input type="password" id="sio-new-pass2" placeholder="New password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
-          </div>
-          <div class="fld">
-            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Confirm new password</label>
-            <input type="password" id="sio-confirm-pass2" placeholder="Confirm new password" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
-          </div>
-          <button onclick="sioChangePassword()" style="padding:12px;background:transparent;border:1px solid rgba(42,143,255,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(42,143,255,0.1)'" onmouseout="this.style.background='transparent'">Update password →</button>
-        </div>
-      </div>
-
-      <!-- Email Settings Card -->
-      <div class="adm-card" style="margin-top:1.5rem;">
-        <div class="adm-card-header"><span class="adm-card-title" style="color:var(--blue);">📧 My notification email</span></div>
-        <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
-          <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.04em;">Save your email address here. It will be pre-filled when sending cases.</div>
-          <div id="sio-email-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
-          <div id="sio-email-ok" style="display:none;padding:8px 12px;background:rgba(42,143,255,0.08);border:1px solid rgba(42,143,255,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:var(--blue);"></div>
-          <div class="fld">
-            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Email address</label>
-            <input type="email" id="sio-notif-email" placeholder="e.g. you@example.com" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
-          </div>
-          <button onclick="sioSaveEmail()" style="padding:12px;background:transparent;border:1px solid rgba(42,143,255,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(42,143,255,0.1)'" onmouseout="this.style.background='transparent'">Save email →</button>
-        </div>
-      </div>
-
-      <!-- Send Case via Email Card -->
-      <div class="adm-card" style="margin-top:1.5rem;">
-        <div class="adm-card-header"><span class="adm-card-title" style="color:var(--blue);">📤 Send case to email</span></div>
-        <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
-          <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.04em;">Select one of your assigned cases and send its details via Gmail.</div>
-          <div id="sio-send-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
-          <div class="fld">
-            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Select case</label>
-            <select id="sio-send-case-select" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;">
-              <option value="">— Select a case —</option>
-            </select>
-          </div>
-          <div class="fld">
-            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Recipient email</label>
-            <input type="email" id="sio-send-to-email" placeholder="e.g. supervisor@example.com" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
-          </div>
-          <div class="fld">
-            <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Additional note <span style="color:var(--muted);font-style:italic;">(optional)</span></label>
-            <textarea id="sio-send-note" rows="3" placeholder="Any additional remarks to include in the email…" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;resize:vertical;outline:none;line-height:1.6;"></textarea>
-          </div>
-          <button onclick="sioSendCaseEmail()" style="padding:12px;background:rgba(42,143,255,0.07);border:1px solid rgba(42,143,255,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.background='rgba(42,143,255,0.15)'" onmouseout="this.style.background='rgba(42,143,255,0.07)'">
-            <span>📧</span> Open in Gmail →
-          </button>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;letter-spacing:0.04em;">Opens Gmail compose pre-filled with the case details</div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- SIO: INVESTIGATE TAB -->
-  <div class="admin-panel" id="tab-sio-investigate" style="padding:2rem;">
-    <div style="margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
-      <div>
-        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">// investigation workspace</div>
-        <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">INVESTIGATE</div>
-      </div>
-    </div>
-
-    <!-- Case Selector -->
-    <div class="adm-card" style="margin-bottom:1.5rem;">
-      <div class="adm-card-header"><span class="adm-card-title" style="color:var(--accent);">Select case to investigate</span></div>
-      <div style="padding:1.25rem;display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap;">
-        <div style="flex:1;min-width:200px;">
-          <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Active case</label>
-          <select id="inv-case-select" onchange="loadInvestigationCase(this.value)" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;">
-            <option value="">— Select a case —</option>
-          </select>
-        </div>
-        <div id="inv-case-badge" style="display:none;padding:8px 14px;background:rgba(245,196,0,0.06);border:1px solid rgba(245,196,0,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:var(--accent);"></div>
-      </div>
-    </div>
-
-    <!-- Investigation workspace (shown after case selected) -->
-    <div id="inv-workspace" style="display:none;">
-
-      <!-- Case Summary -->
-      <div class="adm-card" style="margin-bottom:1.5rem;">
-        <div class="adm-card-header"><span class="adm-card-title" style="color:var(--accent);">📋 Case summary</span></div>
-        <div style="padding:1.25rem;" id="inv-case-summary"></div>
-      </div>
-
-      <!-- Two-column layout -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
-
-        <!-- Evidence Log -->
-        <div class="adm-card">
-          <div class="adm-card-header" style="display:flex;align-items:center;justify-content:space-between;">
-            <span class="adm-card-title" style="color:var(--accent);">🗂 Evidence log</span>
-          </div>
-          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:10px;">
-            <div style="display:flex;gap:8px;">
-              <input id="inv-evidence-input" type="text" placeholder="Describe evidence found…" style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addEvidence()" />
-              <button onclick="addEvidence()" style="padding:8px 14px;background:rgba(245,196,0,0.07);border:1px solid rgba(245,196,0,0.3);border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;">Add</button>
-            </div>
-            <div id="inv-evidence-list" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;"></div>
-            <div id="inv-evidence-empty" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:1rem;border:1px dashed var(--border);border-radius:2px;">No evidence logged yet.</div>
-          </div>
-        </div>
-
-        <!-- Suspects / Persons of Interest -->
-        <div class="adm-card">
-          <div class="adm-card-header"><span class="adm-card-title" style="color:var(--accent);">👤 Persons of interest</span></div>
-          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:10px;">
-            <div style="display:flex;gap:8px;">
-              <input id="inv-person-input" type="text" placeholder="Name / role / department…" style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')addPerson()" />
-              <button onclick="addPerson()" style="padding:8px 14px;background:rgba(245,196,0,0.07);border:1px solid rgba(245,196,0,0.3);border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;">Add</button>
-            </div>
-            <div id="inv-persons-list" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;"></div>
-            <div id="inv-persons-empty" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:1rem;border:1px dashed var(--border);border-radius:2px;">No persons added yet.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Investigation Notes -->
-      <div class="adm-card" style="margin-bottom:1.5rem;">
-        <div class="adm-card-header"><span class="adm-card-title" style="color:var(--accent);">📝 Investigation notes</span>
-          <button onclick="saveInvNote()" style="padding:6px 14px;background:rgba(245,196,0,0.07);border:1px solid rgba(245,196,0,0.3);border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;">💾 Save note</button>
-        </div>
-        <div style="padding:1.25rem;display:flex;flex-direction:column;gap:10px;">
-          <textarea id="inv-note-input" rows="3" placeholder="Add investigation note, findings, or observations…" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;resize:vertical;outline:none;line-height:1.6;"></textarea>
-          <div id="inv-notes-timeline" style="display:flex;flex-direction:column;gap:0;" class="case-timeline"></div>
-          <div id="inv-notes-empty" style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;padding:1rem;border:1px dashed var(--border);border-radius:2px;">No notes yet. Start documenting your investigation.</div>
-        </div>
-      </div>
-
-      <!-- AI Investigation Analysis -->
-      <div class="adm-card" style="margin-bottom:1.5rem;">
-        <div class="adm-card-header">
-          <span class="adm-card-title" style="color:var(--accent);">🤖 AI investigation analysis</span>
-          <button onclick="runSioAIAnalysis()" style="padding:6px 14px;background:rgba(245,196,0,0.07);border:1px solid rgba(245,196,0,0.3);border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;">Run analysis →</button>
-        </div>
-        <div class="ai-body" id="sio-ai-output" style="padding:1.25rem;">
-          <p style="color:var(--muted);font-style:italic;font-size:13px;">Select a case and click "Run analysis" to get AI-powered investigation guidance.</p>
-        </div>
-      </div>
-
-      <!-- Status Update -->
-      <div class="adm-card">
-        <div class="adm-card-header"><span class="adm-card-title" style="color:var(--blue);">⚡ Update case status</span></div>
-        <div style="padding:1.25rem;">
-          <div class="status-btns" id="inv-status-btns">
-            <button class="st-btn" onclick="updateInvStatus(this,'New')">New</button>
-            <button class="st-btn" onclick="updateInvStatus(this,'In review')">In review</button>
-            <button class="st-btn" onclick="updateInvStatus(this,'In progress')">In progress</button>
-            <button class="st-btn" onclick="updateInvStatus(this,'Escalated')">Escalated</button>
-            <button class="st-btn" onclick="updateInvStatus(this,'Closed')">Closed</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div><!-- /sio-dashboard -->
-
 <!-- DETAIL SIDE PANEL -->
 <div class="admin-overlay" id="admin-overlay" onclick="closeDetail()"></div>
 <div class="detail-panel" id="detail-panel">
@@ -3753,6 +2981,20 @@
     </div>
 
     <div class="dp-section">
+      <div class="dp-section-title">AI investigative analysis</div>
+      <div class="ai-box">
+        <div class="ai-box-header">
+          <div class="ai-dot"></div>
+          <span class="ai-label">AI analysis engine</span>
+          <button onclick="runAIAnalysis()" style="margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border:1px solid rgba(245,196,0,0.3);border-radius:2px;background:none;color:var(--accent);cursor:pointer;">Run →</button>
+        </div>
+        <div class="ai-body" id="ai-output">
+          <p style="color:var(--muted);font-style:italic;">Click "Run" to generate an AI-powered investigative analysis for this complaint.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dp-section">
       <div class="dp-section-title">Update status</div>
       <div class="status-btns" id="status-btns">
         <button class="st-btn" onclick="updateStatus(this,'New')">New</button>
@@ -3773,12 +3015,15 @@
       </div>
     </div>
 
-    <div class="dp-section" id="dp-sio-section">
-      <div class="dp-section-title" style="color:var(--blue);">Assign SIO (Senior Investigating Officer)</div>
-      <select class="dp-assign" id="dp-sio-assign" onchange="logSioAssign()" style="border-color:rgba(42,143,255,0.25);">
-        <option value="">— No SIO assigned —</option>
+    <div class="dp-section">
+      <div class="dp-section-title">Assign investigator</div>
+      <select class="dp-assign" id="dp-assign" onchange="logAssign()">
+        <option value="">Unassigned</option>
+        <option value="R. Sharma">Ravi Sharma · Investigator</option>
+        <option value="P. Gupta">Priya Gupta · HR &amp; Compliance</option>
+        <option value="M. Rashid">Mohammed Rashid · IT &amp; Data</option>
+        <option value="S. Joshi">Sunita Joshi · Legal &amp; Ethics</option>
       </select>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:0.04em;">SIO will see this case in their restricted portal.</div>
     </div>
 
     <div class="dp-section">
@@ -3795,59 +3040,6 @@
   </div>
 </div>
 
-<!-- ADD SIO MODAL -->
-<div id="add-sio-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:350;align-items:center;justify-content:center;" onclick="if(event.target===this)closeAddSio()">
-  <div style="background:var(--bg3);border:1px solid rgba(42,143,255,0.25);border-radius:4px;width:100%;max-width:440px;overflow:hidden;">
-    <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);">// Add SIO Account</span>
-      <button onclick="closeAddSio()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;">✕</button>
-    </div>
-    <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
-      <div id="add-sio-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
-      <div style="padding:10px 14px;background:rgba(42,143,255,0.06);border:1px solid rgba(42,143,255,0.18);border-radius:2px;font-family:var(--mono);font-size:11px;color:var(--blue);">
-        A default password will be set. The SIO must change it on first login.
-      </div>
-      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Full Name</label>
-        <input id="sio-add-name" type="text" placeholder="e.g. Kiran Mehta" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
-      </div>
-      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Username (login ID)</label>
-        <input id="sio-add-username" type="text" placeholder="e.g. kiran.mehta" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
-      </div>
-      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Email address</label>
-        <input id="sio-add-email" type="email" placeholder="e.g. kiran@company.com" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
-      </div>
-      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Role / Specialisation</label>
-        <input id="sio-add-role" type="text" placeholder="e.g. Senior IO · Financial Crimes" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
-      </div>
-      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Default Password</label>
-        <input id="sio-add-defpass" type="text" placeholder="e.g. Welcome@123" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
-      </div>
-      <button onclick="saveSio()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(42,143,255,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);cursor:pointer;transition:all 0.2s;margin-top:4px;" onmouseover="this.style.background='rgba(42,143,255,0.1)'" onmouseout="this.style.background='transparent'">Create SIO Account →</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADD TOP MANAGEMENT MODAL -->
-<div id="add-tm-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:400;align-items:center;justify-content:center;">
-  <div style="background:var(--bg3);border:1px solid rgba(167,139,250,0.25);border-radius:4px;width:100%;max-width:420px;overflow:hidden;">
-    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#a78bfa;">// Add Top Management Account</span>
-      <button onclick="closeAddTm()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;">✕</button>
-    </div>
-    <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
-      <div id="add-tm-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
-      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Full Name</label>
-        <input id="tm-add-name" type="text" placeholder="e.g. Rajesh Kapoor" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" /></div>
-      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Username</label>
-        <input id="tm-add-username" type="text" placeholder="e.g. rajesh.kapoor" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" /></div>
-      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Default Password</label>
-        <input id="tm-add-defpass" type="text" placeholder="e.g. Mgmt@123" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" /></div>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.04em;">TM user must change password on first login.</div>
-      <button onclick="saveTm()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(167,139,250,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#a78bfa;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(167,139,250,0.1)'" onmouseout="this.style.background='transparent'">Create TM Account →</button>
-    </div>
-  </div>
-</div>
-
 <!-- ADD INVESTIGATOR MODAL -->
 <div id="add-inv-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;align-items:center;justify-content:center;" onclick="if(event.target===this)closeAddInv()">
   <div style="background:var(--bg3);border:1px solid var(--border-hi);border-radius:4px;width:100%;max-width:440px;overflow:hidden;">
@@ -3860,9 +3052,6 @@
       <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Full Name</label>
         <input id="inv-name" type="text" placeholder="e.g. Arjun Mehta" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
       </div>
-      <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Gmail address</label>
-        <input id="inv-email" type="email" placeholder="e.g. arjun@reporter.com" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
-      </div>
       <div class="fld"><label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Role / Specialisation</label>
         <input id="inv-role" type="text" placeholder="e.g. Investigator · Finance" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
       </div>
@@ -3874,72 +3063,6 @@
         </select>
       </div>
       <button onclick="saveInvestigator()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(245,196,0,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);cursor:pointer;transition:all 0.2s;margin-top:4px;" onmouseover="this.style.background='rgba(245,196,0,0.1)'" onmouseout="this.style.background='transparent'">Add Investigator →</button>
-    </div>
-  </div>
-</div>
-
-<!-- SEND TASK / GMAIL MODAL -->
-<div id="send-task-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;align-items:center;justify-content:center;" onclick="if(event.target===this)closeSendTask()">
-  <div style="background:var(--bg3);border:1px solid var(--border-hi);border-radius:6px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.7);">
-    <!-- Header -->
-    <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:18px;">📧</span>
-        <div>
-          <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);">Send via Gmail</div>
-          <div id="task-inv-name" style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:1px;"></div>
-        </div>
-      </div>
-      <button onclick="closeSendTask()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;padding:4px;">✕</button>
-    </div>
-    <!-- Body -->
-    <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;">
-      <div id="send-task-err" style="display:none;padding:8px 12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:2px;font-family:var(--mono);font-size:12px;color:#ff6b6b;"></div>
-
-      <!-- To (read-only display) -->
-      <div>
-        <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">To</label>
-        <div id="task-to-display" style="padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--blue);font-family:var(--mono);font-size:13px;"></div>
-      </div>
-
-      <!-- Complaint link (optional) -->
-      <div>
-        <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Link complaint (optional)</label>
-        <select id="task-complaint-select" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;cursor:pointer;">
-          <option value="">— No specific complaint —</option>
-        </select>
-      </div>
-
-      <!-- Subject -->
-      <div>
-        <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Subject</label>
-        <input id="task-subject" type="text" placeholder="e.g. New case assignment – SV-2025-7834" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;outline:none;" />
-      </div>
-
-      <!-- Task / Message -->
-      <div>
-        <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Task / Message</label>
-        <textarea id="task-body" rows="5" placeholder="Describe the task or instructions for the investigator…" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;resize:vertical;outline:none;line-height:1.6;"></textarea>
-      </div>
-
-      <!-- Priority -->
-      <div>
-        <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px;">Priority</label>
-        <div style="display:flex;gap:8px;">
-          <button class="task-pri-btn active" data-pri="Normal" onclick="selectPriority(this)" style="flex:1;padding:7px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(245,196,0,0.3);border-radius:2px;background:rgba(245,196,0,0.08);color:var(--accent);cursor:pointer;">Normal</button>
-          <button class="task-pri-btn" data-pri="High" onclick="selectPriority(this)" style="flex:1;padding:7px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(251,146,60,0.3);border-radius:2px;background:none;color:#fb923c;cursor:pointer;">High</button>
-          <button class="task-pri-btn" data-pri="Urgent" onclick="selectPriority(this)" style="flex:1;padding:7px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(255,68,68,0.3);border-radius:2px;background:none;color:#ff6b6b;cursor:pointer;">Urgent</button>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div style="display:flex;gap:8px;margin-top:4px;">
-        <button onclick="sendTaskViaGmail()" style="flex:1;padding:12px;background:rgba(245,196,0,0.1);border:1px solid rgba(245,196,0,0.4);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;" onmouseover="this.style.background='rgba(245,196,0,0.18)'" onmouseout="this.style.background='rgba(245,196,0,0.1)'">
-          <span>📧</span> Open in Gmail →
-        </button>
-        <button onclick="copyTaskEmail()" style="padding:12px 16px;background:none;border:1px solid var(--border-hi);border-radius:2px;font-family:var(--mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted2);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.2)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.13)'">Copy</button>
-      </div>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;letter-spacing:0.04em;">Opens Gmail compose in a new tab · pre-filled with the task details</div>
     </div>
   </div>
 </div>
@@ -3984,11 +3107,20 @@ try {
   console.log('Firebase connected: new-671e9');
 } catch(e) { console.error('Firebase init error:', e); }
 
+// ═══════════════════════════════════════
+// ADMIN AUTH STATE
+// ═══════════════════════════════════════
+let isAdminLoggedIn = false;
+
+function requireAdmin(action) {
+  if (!isAdminLoggedIn) {
+    showToast('🔒 Admin login required', 'error');
+    return false;
+  }
+  return true;
+}
 
 
-// ═══════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════
 const DB = {
   'SV-2025-7834': { cat: 'Financial fraud', dept: 'Finance dept, HQ', date: 'Dec 14, 2024', status: 'In progress', risk: 'High', anon: true, assigned: 'R. Sharma', desc: 'Repeated irregularities noticed in vendor payment approvals. Invoices appear to be duplicated across Q2 and Q3 with inflated amounts. Three vendors share the same bank account routing details.', audit: ['Dec 14 · 09:41 — Complaint received · System', 'Dec 15 · 11:00 — Status → In progress · admin', 'Dec 16 · 14:15 — Assigned to R. Sharma · admin'] },
   'SV-2025-7791': { cat: 'Safety violation', dept: 'Warehouse, Pune', date: 'Dec 11, 2024', status: 'New', risk: 'Medium', anon: false, reporter: 'J. Mehta', assigned: '', desc: 'Fire exits on Floor 3 have been blocked by inventory for over 2 months. Multiple requests to the facilities manager have been ignored.', audit: ['Dec 11 · 08:20 — Complaint received · System'] },
@@ -4116,18 +3248,16 @@ function renderOverviewRecent() {
 // ADD INVESTIGATOR MODAL
 // ═══════════════════════════════════════
 const investigators = [
-  { initials:'RS', name:'Ravi Sharma', role:'Senior Investigator · Fraud', email:'ravi.sharma@reporter.com', status:'Active', active:8, resolved:47 },
-  { initials:'PG', name:'Priya Gupta', role:'Investigator · HR & Compliance', email:'priya.gupta@reporter.com', status:'Active', active:5, resolved:31 },
-  { initials:'AK', name:'Anita Krishnan', role:'Lead Investigator · Safety', email:'anita.krishnan@reporter.com', status:'On leave', active:0, resolved:62 },
-  { initials:'MR', name:'Mohammed Rashid', role:'Investigator · Data & IT', email:'m.rashid@reporter.com', status:'Active', active:3, resolved:18 },
-  { initials:'SJ', name:'Sunita Joshi', role:'Investigator · Legal & Ethics', email:'sunita.joshi@reporter.com', status:'Active', active:4, resolved:25 },
+  { initials:'RS', name:'Ravi Sharma', role:'Investigator · Fraud', status:'Active', active:8, resolved:47 },
+  { initials:'PG', name:'Priya Gupta', role:'Investigator · HR & Compliance', status:'Active', active:5, resolved:31 },
+  { initials:'MR', name:'Mohammed Rashid', role:'Investigator · Data & IT', status:'Active', active:3, resolved:18 },
+  { initials:'SJ', name:'Sunita Joshi', role:'Investigator · Legal & Ethics', status:'Active', active:4, resolved:25 },
 ];
 
 function openAddInv() {
   const overlay = document.getElementById('add-inv-overlay');
   overlay.style.display = 'flex';
   document.getElementById('inv-name').value = '';
-  document.getElementById('inv-email').value = '';
   document.getElementById('inv-role').value = '';
   document.getElementById('inv-status').value = 'Active';
   document.getElementById('add-inv-err').style.display = 'none';
@@ -4138,8 +3268,8 @@ function closeAddInv() {
 }
 
 function saveInvestigator() {
+  if (!requireAdmin()) return;
   const name = document.getElementById('inv-name').value.trim();
-  const email = document.getElementById('inv-email').value.trim();
   const role = document.getElementById('inv-role').value.trim();
   const status = document.getElementById('inv-status').value;
   const errEl = document.getElementById('add-inv-err');
@@ -4148,53 +3278,33 @@ function saveInvestigator() {
     errEl.style.display = 'block';
     return;
   }
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errEl.textContent = 'Please enter a valid email address.';
-    errEl.style.display = 'block';
-    return;
-  }
   errEl.style.display = 'none';
   const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
-  const newInv = { initials, name, role, email: email || '', status, active:0, resolved:0 };
-  investigators.push(newInv);
+  investigators.push({ initials, name, role, status, active:0, resolved:0 });
   renderInvestigatorsGrid();
   rebuildAssignDropdown();
-  addAuditEntry(`Investigator added: ${name}${email ? ' (' + email + ')' : ''}`);
-  showToast(`${name} added ✓`, 'success');
+  addAuditEntry(`Investigator added: ${name}`);
   closeAddInv();
-  persistInvestigatorsToFirestore();
 }
 
 function renderInvestigatorsGrid() {
   const grid = document.querySelector('.inv-grid');
   if (!grid) return;
   const statusColor = { Active: 'var(--accent)', 'On leave': '#fbbf24', Inactive: 'var(--muted)' };
-  grid.innerHTML = investigators.map((inv, idx) => `
-    <div class="inv-card" style="display:flex;flex-direction:column;gap:0;">
+  grid.innerHTML = investigators.map(inv => `
+    <div class="inv-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div class="inv-avatar">${inv.initials}</div>
         <span style="font-family:var(--mono);font-size:10px;color:${statusColor[inv.status]||'var(--muted)'};"><span class="inv-status-dot" style="background:${statusColor[inv.status]||'var(--muted)'};"></span>${inv.status}</span>
       </div>
       <div class="inv-name">${inv.name}</div>
       <div class="inv-role">${inv.role}</div>
-      <div style="font-family:var(--mono);font-size:11px;color:var(--blue);margin-top:4px;display:flex;align-items:center;gap:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-        <span style="opacity:0.6;">✉</span>
-        <span style="overflow:hidden;text-overflow:ellipsis;">${inv.email || '—'}</span>
-      </div>
-      <div class="inv-stats" style="margin-top:10px;margin-bottom:12px;">
+      <div class="inv-stats">
         <div><span class="inv-stat-val">${inv.active}</span><span class="inv-stat-lbl">Active cases</span></div>
         <div><span class="inv-stat-val">${inv.resolved}</span><span class="inv-stat-lbl">Resolved</span></div>
       </div>
-      <div style="display:flex;gap:6px;margin-top:auto;padding-top:10px;border-top:1px solid var(--border);">
-        <button onclick="openSendTask(${idx})" style="flex:1;padding:7px 10px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(245,196,0,0.35);border-radius:2px;background:rgba(245,196,0,0.06);color:var(--accent);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:5px;" onmouseover="this.style.background='rgba(245,196,0,0.14)'" onmouseout="this.style.background='rgba(245,196,0,0.06)'">
-          <span>📋</span> Send Task
-        </button>
-        <button onclick="quickGmail(${idx})" title="Send quick Gmail" style="padding:7px 10px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(42,143,255,0.35);border-radius:2px;background:rgba(42,143,255,0.06);color:var(--blue);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:5px;" onmouseover="this.style.background='rgba(42,143,255,0.14)'" onmouseout="this.style.background='rgba(42,143,255,0.06)'">
-          <span>📧</span> Gmail
-        </button>
-      </div>
     </div>`).join('') + `
-    <div class="inv-card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;cursor:pointer;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'" onclick="openAddInv()">
+    <div class="inv-card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;cursor:pointer;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'" onclick="openAddInv()">
       <div style="font-size:28px;color:var(--muted);margin-bottom:8px;">+</div>
       <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;">Add investigator</div>
     </div>`;
@@ -4211,152 +3321,6 @@ function rebuildAssignDropdown() {
 }
 
 // ═══════════════════════════════════════
-// SEND TASK / GMAIL
-// ═══════════════════════════════════════
-let currentTaskInvIdx = null;
-let currentTaskPriority = 'Normal';
-
-function openSendTask(idx) {
-  const inv = investigators[idx];
-  currentTaskInvIdx = idx;
-  currentTaskPriority = 'Normal';
-
-  document.getElementById('send-task-overlay').style.display = 'flex';
-  document.getElementById('task-inv-name').textContent = inv.name + ' · ' + inv.role;
-  document.getElementById('task-to-display').textContent = inv.email || '(no email set)';
-  document.getElementById('task-subject').value = '';
-  document.getElementById('task-body').value = '';
-  document.getElementById('send-task-err').style.display = 'none';
-
-  // Reset priority buttons
-  document.querySelectorAll('.task-pri-btn').forEach(b => {
-    const pri = b.dataset.pri;
-    b.style.background = pri === 'Normal' ? 'rgba(245,196,0,0.08)' : 'none';
-    b.style.fontWeight = pri === 'Normal' ? '600' : 'normal';
-  });
-
-  // Populate complaint dropdown
-  const sel = document.getElementById('task-complaint-select');
-  sel.innerHTML = '<option value="">— No specific complaint —</option>' +
-    Object.entries(DB).map(([id, c]) => `<option value="${id}">${id} · ${c.cat} · ${c.status}</option>`).join('');
-
-  // Pre-fill if a complaint is open
-  if (currentDetailId) {
-    sel.value = currentDetailId;
-    const c = DB[currentDetailId];
-    document.getElementById('task-subject').value = `Case Assignment: ${currentDetailId} – ${c.cat}`;
-    const matchedSio = sioRegistry.find(s =>
-      s.name.toLowerCase() === inv.name.toLowerCase() ||
-      (inv.email && s.username && inv.email.toLowerCase().startsWith(s.username.toLowerCase()))
-    );
-    const sioUsername = matchedSio ? matchedSio.username : (inv.username || inv.name.split(' ')[0].toLowerCase());
-    const sioLink = `${location.origin}${location.pathname}?sio=${encodeURIComponent(sioUsername)}`;
-    const credBlock = matchedSio
-      ? `\nYour login credentials:\n  Username : ${matchedSio.username}\n  Password : ${matchedSio.password}${matchedSio.mustChange ? '\n  (You will be prompted to set a new password on first login.)' : ''}\n`
-      : '';
-    document.getElementById('task-body').value =
-`Dear ${inv.name},
-
-You are being assigned to investigate complaint ${currentDetailId}.
-
-Category: ${c.cat}
-Department: ${c.dept}
-Risk Level: ${c.risk}
-Current Status: ${c.status}
-
-Summary:
-${c.desc}
-
-Please review this case at your earliest convenience and update the status accordingly.
-
-─────────────────────────────────
-Access your SIO portal directly:
-${sioLink}
-${credBlock}─────────────────────────────────
-
-Regards,
-Admin — Reporter Platform`;
-  }
-}
-
-function closeSendTask() {
-  document.getElementById('send-task-overlay').style.display = 'none';
-  currentTaskInvIdx = null;
-}
-
-function selectPriority(btn) {
-  currentTaskPriority = btn.dataset.pri;
-  document.querySelectorAll('.task-pri-btn').forEach(b => {
-    const isThis = b === btn;
-    b.style.fontWeight = isThis ? '600' : 'normal';
-    if (b.dataset.pri === 'Normal') b.style.background = isThis ? 'rgba(245,196,0,0.18)' : 'none';
-    if (b.dataset.pri === 'High') b.style.background = isThis ? 'rgba(251,146,60,0.18)' : 'none';
-    if (b.dataset.pri === 'Urgent') b.style.background = isThis ? 'rgba(255,68,68,0.18)' : 'none';
-  });
-}
-
-function buildGmailUrl() {
-  const inv = investigators[currentTaskInvIdx];
-  const to = inv.email || '';
-  const complaintId = document.getElementById('task-complaint-select').value;
-  let subject = document.getElementById('task-subject').value.trim();
-  let body = document.getElementById('task-body').value.trim();
-
-  if (!subject) subject = complaintId ? `Case Assignment: ${complaintId}` : 'Investigation Task from Reporter';
-  if (!body) body = 'Please see task details below.';
-
-  const priorityTag = currentTaskPriority !== 'Normal' ? `[${currentTaskPriority.toUpperCase()}] ` : '';
-  const fullSubject = priorityTag + subject;
-  const matchedSio2 = sioRegistry.find(s =>
-    s.name.toLowerCase() === inv.name.toLowerCase() ||
-    (inv.email && s.username && inv.email.toLowerCase().startsWith(s.username.toLowerCase()))
-  );
-  const sioUsername = matchedSio2 ? matchedSio2.username : (inv.username || inv.name.split(' ')[0].toLowerCase());
-  const sioLink = `${location.origin}${location.pathname}?sio=${encodeURIComponent(sioUsername)}`;
-  const credLine = matchedSio2
-    ? `\nUsername : ${matchedSio2.username}\nPassword : ${matchedSio2.password}${matchedSio2.mustChange ? '\n(Change password on first login)' : ''}\n`
-    : '';
-  const fullBody = body + `\n\n─────────────────────────────────\nAccess your SIO portal directly:\n${sioLink}\n${credLine}─────────────────────────────────\nSent from Reporter Whistleblower Platform`;
-
-  return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(fullBody)}`;
-}
-
-function sendTaskViaGmail() {
-  const errEl = document.getElementById('send-task-err');
-  const inv = investigators[currentTaskInvIdx];
-  if (!inv.email) {
-    errEl.textContent = 'This investigator has no email address. Please edit and add one.';
-    errEl.style.display = 'block';
-    return;
-  }
-  const subject = document.getElementById('task-subject').value.trim() || 'Investigation Task';
-  window.open(buildGmailUrl(), '_blank');
-  addAuditEntry(`Task sent to ${inv.name} via Gmail: "${subject}"`);
-  showToast(`Gmail opened for ${inv.name} ✓`, 'success');
-  closeSendTask();
-}
-
-function copyTaskEmail() {
-  const subject = document.getElementById('task-subject').value.trim() || '(no subject)';
-  const body = document.getElementById('task-body').value.trim() || '(no message)';
-  const inv = investigators[currentTaskInvIdx];
-  const full = `To: ${inv.email || '(no email)'}\nSubject: ${subject}\n\n${body}`;
-  navigator.clipboard.writeText(full).then(() => {
-    showToast('Email copied to clipboard ✓', 'success');
-  }).catch(() => {
-    showToast('Copy failed — try manually', 'error');
-  });
-}
-
-function quickGmail(idx) {
-  const inv = investigators[idx];
-  if (!inv.email) { showToast('No email set for this investigator', 'error'); return; }
-  const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(inv.email)}&su=${encodeURIComponent('Reporter Platform – Message for ' + inv.name)}`;
-  window.open(url, '_blank');
-  addAuditEntry(`Quick Gmail opened for ${inv.name}`);
-}
-
-// ═══════════════════════════════════════
 // ADMIN CREDENTIALS (mutable)
 // ═══════════════════════════════════════
 const adminCreds = { username: 'admin', password: 'admin123' };
@@ -4370,12 +3334,11 @@ function closeAdminLogin() {
   document.getElementById('login-err').classList.remove('show');
 }
 
-async function doLogin() {
+function doLogin() {
   const u = document.getElementById('login-user').value.trim();
-  const p = document.getElementById('login-pass').value;
-  // Wait for Firestore preload so admin creds are up to date
-  try { await (window._registriesReady || Promise.resolve()); } catch(e) {}
+  const p = document.getElementById('login-pass').value.trim();
   if (u === adminCreds.username && p === adminCreds.password) {
+    isAdminLoggedIn = true;
     document.getElementById('admin-login-screen').classList.remove('show');
     document.getElementById('admin-dashboard').classList.add('show');
     // Update nav user display
@@ -4384,11 +3347,9 @@ async function doLogin() {
     buildComplaintsTable();
     initBars();
     startRealtimeListener();
-    loadSiosFromFirestore();
-    loadInvestigatorsFromFirestore();
-    loadTmFromFirestore();
+    renderInvestigatorsGrid();
+    rebuildAssignDropdown();
     renderOverviewRecent();
-    renderTmManagementTable();
   } else {
     const err = document.getElementById('login-err');
     err.textContent = 'Invalid username or password.';
@@ -4397,6 +3358,7 @@ async function doLogin() {
 }
 
 function doLogout() {
+  isAdminLoggedIn = false;
   document.getElementById('admin-dashboard').classList.remove('show');
   closeDetail();
   if (firestoreListener) { firestoreListener(); firestoreListener = null; }
@@ -4414,7 +3376,6 @@ function changeUsername() {
   if (!newU) { errEl.textContent = 'New username cannot be empty.'; errEl.style.display = 'block'; return; }
   if (pass !== adminCreds.password) { errEl.textContent = 'Incorrect password.'; errEl.style.display = 'block'; return; }
   adminCreds.username = newU;
-  persistAdminCredsToFirestore();
   document.getElementById('acc-current-user-display').textContent = newU;
   document.getElementById('acc-new-user').value = '';
   document.getElementById('acc-user-pass').value = '';
@@ -4439,7 +3400,6 @@ function changePassword() {
   if (np !== cp) { errEl.textContent = 'New passwords do not match.'; errEl.style.display = 'block'; return; }
   if (np.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
   adminCreds.password = np;
-  persistAdminCredsToFirestore();
   document.getElementById('acc-cur-pass').value = '';
   document.getElementById('acc-new-pass').value = '';
   document.getElementById('acc-confirm-pass').value = '';
@@ -4452,31 +3412,11 @@ function changePassword() {
 // ═══════════════════════════════════════
 // ADMIN TABS
 // ═══════════════════════════════════════
-// ── Team sub-tab switcher ──────────────────────────
-function showTeamSub(sub, btn) {
-  ['inv','sio','tm'].forEach(s => {
-    const el = document.getElementById('team-sub-' + s);
-    if (el) el.style.display = s === sub ? 'block' : 'none';
-  });
-  document.querySelectorAll('.team-sub-tab').forEach(b => {
-    b.style.fontWeight = 'normal';
-    b.style.opacity = '0.7';
-  });
-  if (btn) { btn.style.fontWeight = '600'; btn.style.opacity = '1'; }
-  // Render relevant grid/table when switching
-  if (sub === 'inv') { renderInvestigatorsGrid(); rebuildAssignDropdown(); }
-  if (sub === 'sio') { renderSioManagementTable(); rebuildSioAssignDropdown(); }
-  if (sub === 'tm')  { renderTmManagementTable(); }
-}
-
 function showAdminTab(name, btn) {
-  document.querySelectorAll('#admin-dashboard > .admin-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.admin-nav-tabs .admin-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
-  if (name === 'team') {
-    showTeamSub('sio', document.getElementById('tsub-sio'));
-  }
+  btn.classList.add('active');
 }
 
 // ═══════════════════════════════════════
@@ -4586,6 +3526,8 @@ function openDetail(id) {
   `;
   document.getElementById('dp-desc').textContent = c.desc;
   rebuildAssignDropdown();
+  document.getElementById('dp-assign').value = c.assigned || '';
+  document.getElementById('ai-output').innerHTML = '<p style="color:var(--muted);font-style:italic;">Click "Scan complaint →" to run an AI analysis that assesses severity and recommends a status.</p>';
   buildDpAudit(id);
   // Highlight correct status button
   document.querySelectorAll('#status-btns .st-btn').forEach(b => {
@@ -4614,6 +3556,7 @@ function buildDpAudit(id) {
 }
 
 async function updateStatus(btn, status) {
+  if (!requireAdmin()) return;
   if (!currentDetailId) return;
 
   // Determine risk based on status
@@ -4645,15 +3588,13 @@ async function updateStatus(btn, status) {
 
   // Add audit entry
   const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-  const statusActor = (window._detailContext === 'sio' && currentSio) ? ('SIO · ' + currentSio.username) : 'admin';
-  DB[currentDetailId].audit.push(`${ts} — Status → ${status} · ${statusActor}`);
+  DB[currentDetailId].audit.push(`${ts} — Status → ${status} · admin`);
   buildDpAudit(currentDetailId);
   addAuditEntry(`${currentDetailId} status changed → ${status}`);
 
-  // Refresh tables
+  // Refresh both tables
   renderComplaintsTable();
   renderOverviewRecent();
-  if (window._detailContext === 'sio') renderSioCasesTable();
 
   // Show toast
   showToast(`Status updated → ${status}`, 'success');
@@ -4674,6 +3615,7 @@ async function updateStatus(btn, status) {
 }
 
 async function updateRisk(btn, risk) {
+  if (!requireAdmin()) return;
   if (!currentDetailId) return;
   DB[currentDetailId].risk = risk;
   btn.closest('.risk-btns').querySelectorAll('.st-btn').forEach(b => b.classList.remove('active'));
@@ -4695,10 +3637,28 @@ async function updateRisk(btn, risk) {
 }
 
 async function logAssign() {
-  // dp-assign element removed — function kept for compatibility
+  if (!requireAdmin()) return;
+  if (!currentDetailId) return;
+  const val = document.getElementById('dp-assign').value;
+  DB[currentDetailId].assigned = val;
+  if (val) {
+    const ts = new Date().toLocaleString('en-GB', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+    DB[currentDetailId].audit.push(`${ts} — Assigned to ${val} · admin`);
+    buildDpAudit(currentDetailId);
+    addAuditEntry(`${currentDetailId} assigned to ${val}`);
+    showToast(`Assigned to ${val}`, 'success');
+  }
+  renderComplaintsTable();
+  renderOverviewRecent();
+  if (db) {
+    try {
+      await db.collection('complaints').doc(currentDetailId).update({ assigned: val, audit: DB[currentDetailId].audit });
+    } catch(e) { console.error('Firestore assign error:', e); }
+  }
 }
 
 async function addNote() {
+  if (!requireAdmin()) return;
   if (!currentDetailId) return;
   const note = document.getElementById('dp-note').value.trim();
   if (!note) return;
@@ -4748,6 +3708,7 @@ function showToast(msg, type = 'success') {
 let aiRecommendedStatus = null;
 
 async function runAIAnalysis() {
+  if (!requireAdmin()) return;
   if (!currentDetailId) return;
   const c = DB[currentDetailId];
   const out = document.getElementById('ai-output');
@@ -4825,6 +3786,7 @@ async function runAIAnalysis() {
 }
 
 async function applyAIStatus(status, risk) {
+  if (!requireAdmin()) return;
   if (!currentDetailId) return;
   DB[currentDetailId].status = status;
   DB[currentDetailId].risk = risk;
@@ -5051,1566 +4013,31 @@ async function recheckFirebase() {
   }
 }
 
-// Firebase check is triggered from within the SIO-aware doLogin patch below
-
-
-// ═══════════════════════════════════════
-// SIO SYSTEM
-// ═══════════════════════════════════════
-
-// SIO registry: { username, name, role, password, mustChange, assignedCases[] }
-let sioRegistry = [];
-let currentSio = null; // logged-in SIO object
-// Top Management registry: { username, name, password, mustChange }
-let tmRegistry = [
-  { username: 'topmgmt', name: 'Top Management', password: 'Mgmt@123', mustChange: true }
-];
-let currentTm = null; // logged-in TM object
-let loginRole = 'admin'; // 'admin' | 'tm' | 'sio'
-
-// ── Pre-load SIO & TM registries at page startup ────────────
-// Ensures SIO and Top Management users can log in on ANY device
-// without requiring the admin to log in first.
-// ── Pre-load all registries at startup & expose promise ────────
-// window._registriesReady resolves when Firestore data is loaded.
-// doLogin waits for this before checking credentials, so it works
-// correctly on ANY device even if the user clicks login immediately.
-window._registriesReady = (async function preloadRegistries() {
-  if (!db) return;
-  try {
-    const adminDoc = await db.collection('_config').doc('adminCreds').get();
-    if (adminDoc.exists && adminDoc.data().data) {
-      const loaded = JSON.parse(adminDoc.data().data);
-      if (loaded && loaded.username && loaded.password) {
-        adminCreds.username = loaded.username;
-        adminCreds.password = loaded.password;
-      }
-    }
-  } catch(e) { console.warn('Pre-load admin creds error:', e); }
-  try {
-    const sioDoc = await db.collection('_config').doc('sioRegistry').get();
-    if (sioDoc.exists && sioDoc.data().data) {
-      const loaded = JSON.parse(sioDoc.data().data);
-      if (Array.isArray(loaded)) sioRegistry = loaded;
-    }
-  } catch(e) { console.warn('Pre-load SIO registry error:', e); }
-  try {
-    const tmDoc = await db.collection('_config').doc('tmRegistry').get();
-    if (tmDoc.exists && tmDoc.data().data) {
-      const loaded = JSON.parse(tmDoc.data().data);
-      if (Array.isArray(loaded) && loaded.length > 0) {
-        tmRegistry.splice(0, tmRegistry.length, ...loaded);
-      }
-    }
-  } catch(e) { console.warn('Pre-load TM registry error:', e); }
-  // Start realtime SIO listener immediately so any logged-in SIO gets live updates
-  startSioRealtimeListener();
-})();
-
-
-// ═══════════════════════════════════════
-// TOP MANAGEMENT SYSTEM
-// ═══════════════════════════════════════
-
-function launchTmDashboard() {
-  const tm = currentTm;
-  document.getElementById('tm-dashboard').classList.add('show');
-  document.getElementById('tm-username-display').textContent = tm.name;
-  document.getElementById('tm-avatar').textContent = tm.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  showTmTab('tm-overview', document.getElementById('tm-tab-overview-btn'));
-  renderTmOverview();
-  populateTmTaskDropdowns();
-}
-
-function doTmLogout() {
-  document.getElementById('tm-dashboard').classList.remove('show');
-  document.getElementById('admin-login-screen').classList.add('show');
-  switchLoginRole('tm');
-  document.getElementById('login-user').value = '';
-  document.getElementById('login-pass').value = '';
-  currentTm = null;
-}
-
-function showTmTab(name, btn) {
-  document.querySelectorAll('#tm-dashboard .admin-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('#tm-dashboard .admin-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
-  if (name === 'tm-complaints') renderTmComplaintsTable();
-  if (name === 'tm-tasks') populateTmTaskDropdowns();
-}
-
-function renderTmComplaintsRow(id, c) {
-  const sioLabel = c.sioAssigned
-    ? (sioRegistry.find(s=>s.username===c.sioAssigned)?.name || c.sioAssigned)
-    : '<span style="color:var(--muted);font-style:italic;">Unassigned</span>';
-  return `<tr>
-    <td><span class="adm-id">${id}</span></td>
-    <td><span class="adm-cat">${c.cat}</span></td>
-    <td><span class="adm-dept">${c.dept}</span></td>
-    <td><span class="adm-date">${c.date}</span></td>
-    <td><span class="sp ${statusClass[c.status]||'sp-new'}">${c.status}</span></td>
-    <td><div class="risk-wrap"><div class="risk-dot ${riskClass[c.risk]||'risk-low'}"></div><span class="risk-label">${c.risk}</span></div></td>
-    <td style="font-family:var(--mono);font-size:12px;">${sioLabel}</td>
-    <td><button class="adm-btn" onclick="openTmCaseDetail('${id}')">View →</button></td>
-  </tr>`;
-}
-
-function renderTmComplaintsTable() {
-  const tbody = document.getElementById('tm-complaints-tbody');
-  const entries = Object.entries(DB);
-  if (entries.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No complaints yet.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = entries.map(([id,c]) => renderTmComplaintsRow(id,c)).join('');
-}
-
-function renderTmOverview() {
-  const entries = Object.entries(DB);
-  const total = entries.length;
-  document.getElementById('tm-metric-total').textContent = total;
-  document.getElementById('tm-metric-new').textContent = entries.filter(([,c])=>c.status==='New').length;
-  document.getElementById('tm-metric-progress').textContent = entries.filter(([,c])=>c.status==='In progress').length;
-  document.getElementById('tm-metric-escalated').textContent = entries.filter(([,c])=>c.status==='Escalated').length;
-  document.getElementById('tm-metric-resolved').textContent = entries.filter(([,c])=>c.status==='Resolved').length;
-  const tbody = document.getElementById('tm-overview-tbody');
-  const recent = entries.slice(-8).reverse();
-  tbody.innerHTML = recent.map(([id,c]) => renderTmComplaintsRow(id,c)).join('') ||
-    '<tr><td colspan="8" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No complaints yet.</td></tr>';
-}
-
-function openTmCaseDetail(id) {
-  openDetail(id);
-  // TM: read-only — disable write actions
-  document.getElementById('status-btns').querySelectorAll('.st-btn').forEach(b => b.disabled = true);
-  document.querySelectorAll('.risk-btns .st-btn').forEach(b => b.disabled = true);
-  document.getElementById('dp-sio-assign').disabled = true;
-}
-
-function populateTmTaskDropdowns() {
-  // Complaints dropdown
-  const cSel = document.getElementById('tm-task-complaint');
-  cSel.innerHTML = '<option value="">— Select a complaint —</option>' +
-    Object.entries(DB).map(([id,c]) => `<option value="${id}">${id} · ${c.cat} · ${c.status}</option>`).join('');
-
-  // SIO dropdown
-  const sSel = document.getElementById('tm-task-sio');
-  sSel.innerHTML = '<option value="">— Select an SIO —</option>' +
-    sioRegistry.map(s => `<option value="${s.username}">${s.name} · ${s.role}</option>`).join('');
-}
-
-function tmAssignTask() {
-  const cid = document.getElementById('tm-task-complaint').value;
-  const sioUser = document.getElementById('tm-task-sio').value;
-  const note = document.getElementById('tm-task-note').value.trim();
-  const errEl = document.getElementById('tm-task-err');
-  const okEl = document.getElementById('tm-task-ok');
-  errEl.style.display = 'none'; okEl.style.display = 'none';
-
-  if (!cid) { errEl.textContent = 'Please select a complaint.'; errEl.style.display = 'block'; return; }
-  if (!sioUser) { errEl.textContent = 'Please select an SIO to assign.'; errEl.style.display = 'block'; return; }
-
-  // Assign SIO to complaint
-  DB[cid].sioAssigned = sioUser;
-  const sio = sioRegistry.find(s => s.username === sioUser);
-  if (sio) {
-    sio.assignedCases = (sio.assignedCases || []).filter(id => id !== cid);
-    sio.assignedCases.push(cid);
-  }
-
-  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-  const auditNote = note
-    ? `${ts} — Task assigned to SIO ${sioUser} by Top Management · Note: ${note}`
-    : `${ts} — Task assigned to SIO ${sioUser} by Top Management`;
-  DB[cid].audit.push(auditNote);
-
-  addAuditEntry(`TM assigned complaint ${cid} to SIO ${sioUser}`);
-  showToast(`Complaint ${cid} assigned to ${sio?.name || sioUser} ✓`, 'success');
-  persistSiosToFirestore();
-
-  okEl.textContent = `✓ Complaint ${cid} successfully assigned to ${sio?.name || sioUser}.`;
-  okEl.style.display = 'block';
-  document.getElementById('tm-task-complaint').value = '';
-  document.getElementById('tm-task-sio').value = '';
-  document.getElementById('tm-task-note').value = '';
-
-  // Auto-share credentials via Gmail if SIO has an email
-  if (sio && sio.email) {
-    const sioLink = `${location.origin}${location.pathname}?sio=${encodeURIComponent(sio.username)}`;
-    const subject = `[Reporter] Task Assignment – Case ${cid}`;
-    const emailBody = `Dear ${sio.name},
-
-You have been assigned a new investigation task by Top Management.
-
-─────────────────────────────────
-TASK DETAILS
-─────────────────────────────────
-Case ID    : ${cid}
-Category   : ${DB[cid]?.cat || '—'}
-Department : ${DB[cid]?.dept || '—'}
-${note ? 'Instructions: ' + note : ''}
-─────────────────────────────────
-YOUR LOGIN CREDENTIALS
-─────────────────────────────────
-Portal URL : ${sioLink}
-Username   : ${sio.username}
-Password   : ${sio.password}${sio.mustChange ? '\n(Change password on first login)' : ''}
-─────────────────────────────────
-
-Please log in to view the full case details.
-
-Sent from Reporter Whistleblower Platform`;
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(sio.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
-    window.open(gmailUrl, '_blank');
-    showToast(`Task assigned & Gmail opened for ${sio.name} ✓`, 'success');
-    addAuditEntry(`TM auto-shared credentials with SIO ${sioUser} via Gmail`);
-  }
-
-  // Refresh overview counts
-  renderTmOverview();
-}
-
-// ── TM Management table (shown in Admin's Manage SIOs tab) ──
-function renderTmManagementTable() {
-  const tbody = document.getElementById('tm-management-tbody');
-  if (!tbody) return;
-  if (tmRegistry.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No TM accounts added yet.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = tmRegistry.map(tm => `
-    <tr>
-      <td><span class="adm-id">${tm.username}</span></td>
-      <td style="color:var(--text);">${tm.name}</td>
-      <td>${tm.mustChange ? '<span class="sio-must-change">Must change</span>' : '<span class="sio-pass-ok">Set</span>'}</td>
-      <td>
-        <div style="display:flex;gap:6px;">
-          <button class="adm-btn" onclick="resetTmPassword('${tm.username}')" style="font-size:10px;padding:5px 10px;">Reset pwd</button>
-          <button class="adm-btn" onclick="deleteTm('${tm.username}')" style="font-size:10px;padding:5px 10px;color:#ff6b6b;border-color:rgba(255,68,68,0.3);">Delete</button>
-        </div>
-      </td>
-    </tr>`).join('');
-}
-
-function resetTmPassword(username) {
-  const newPass = prompt('Enter new password for Top Management account "' + username + '":');
-  if (!newPass || newPass.length < 4) { showToast('Password too short — minimum 4 characters', 'error'); return; }
-  const tm = tmRegistry.find(t => t.username === username);
-  if (!tm) return;
-  tm.password = newPass;
-  tm.mustChange = true;
-  persistTmToFirestore();
-  renderTmManagementTable();
-  addAuditEntry(`TM ${username} password reset by admin`);
-  showToast(`Password reset for ${username} ✓`, 'success');
-}
-
-function deleteTm(username) {
-  if (!confirm('Delete Top Management account "' + username + '"?')) return;
-  tmRegistry = tmRegistry.filter(t => t.username !== username);
-  persistTmToFirestore();
-  renderTmManagementTable();
-  addAuditEntry(`TM account deleted: ${username}`);
-  showToast('TM account deleted', 'success');
-}
-
-function openAddTm() {
-  document.getElementById('add-tm-overlay').style.display = 'flex';
-  document.getElementById('tm-add-name').value = '';
-  document.getElementById('tm-add-username').value = '';
-  document.getElementById('tm-add-defpass').value = 'Mgmt@123';
-  document.getElementById('add-tm-err').style.display = 'none';
-}
-function closeAddTm() {
-  document.getElementById('add-tm-overlay').style.display = 'none';
-}
-function saveTm() {
-  const name = document.getElementById('tm-add-name').value.trim();
-  const username = document.getElementById('tm-add-username').value.trim().toLowerCase();
-  const defpass = document.getElementById('tm-add-defpass').value.trim();
-  const errEl = document.getElementById('add-tm-err');
-  if (!name || !username) { errEl.textContent = 'Name and username are required.'; errEl.style.display = 'block'; return; }
-  if (!defpass || defpass.length < 4) { errEl.textContent = 'Password must be at least 4 characters.'; errEl.style.display = 'block'; return; }
-  if (tmRegistry.find(t => t.username === username)) { errEl.textContent = 'Username already exists.'; errEl.style.display = 'block'; return; }
-  tmRegistry.push({ username, name, password: defpass, mustChange: true });
-  persistTmToFirestore();
-  renderTmManagementTable();
-  addAuditEntry(`TM account created: ${username} (${name})`);
-  showToast(`Top Management account ${name} created ✓`, 'success');
-  closeAddTm();
-}
-
-// ── Deep-link ?tm= handler ──
-(function() {
-  const params = new URLSearchParams(location.search);
-  const tmParam = params.get('tm');
-  if (tmParam) {
-    document.getElementById('admin-login-screen').classList.add('show');
-    switchLoginRole('tm');
-    document.getElementById('login-user').value = tmParam;
-    setTimeout(() => { document.getElementById('login-pass').focus(); }, 100);
-  }
-})();
-
-// ── Login role tab toggle ──────────────
-function switchLoginRole(role) {
-  loginRole = role;
-  document.getElementById('tab-admin-role').classList.toggle('active', role === 'admin');
-  document.getElementById('tab-tm-role').classList.toggle('active', role === 'tm');
-  document.getElementById('tab-sio-role').classList.toggle('active', role === 'sio');
-  const titles = { admin: 'Restricted access · Admin only', tm: 'Top Management Portal · Secure login', sio: 'SIO Portal · Secure login' };
-  const subs   = { admin: 'Admin portal · Authorised personnel only', tm: 'Top Management · Executive access', sio: 'Senior Investigating Officer access' };
-  const hints  = { admin: 'Demo credentials: admin / admin123', tm: 'Use credentials assigned by admin', sio: 'Use credentials provided by admin' };
-  const btns   = { admin: 'Access secure dashboard →', tm: 'Access management portal →', sio: 'Access SIO portal →' };
-  document.getElementById('login-header-title').textContent = titles[role];
-  document.getElementById('login-sub').textContent = subs[role];
-  document.getElementById('login-hint').textContent = hints[role];
-  document.getElementById('login-submit-btn').textContent = btns[role];
-  document.getElementById('login-err').classList.remove('show');
-  document.getElementById('login-user').value = '';
-  document.getElementById('login-pass').value = '';
-}
-
-// ── Patch doLogin to handle SIO ────────
-// Preserve original admin login
-const __origDoLogin = window.doLogin || function(){};
-
-window.doLogin = async function() {
-  const u = document.getElementById('login-user').value.trim();
-  const p = document.getElementById('login-pass').value;
-  const err = document.getElementById('login-err');
-  const btn = document.getElementById('login-submit-btn');
-
-  // Disable button & show loading while Firestore data loads
-  if (btn) { btn.disabled = true; btn.textContent = 'Verifying…'; }
-  err.classList.remove('show');
-
-  // Wait for preload to finish (usually instant if already done)
-  try { await (window._registriesReady || Promise.resolve()); } catch(e) {}
-
-  if (btn) {
-    btn.disabled = false;
-    const btns = { admin: 'Access secure dashboard →', tm: 'Access management portal →', sio: 'Access SIO portal →' };
-    btn.textContent = btns[loginRole] || 'Access secure dashboard →';
-  }
-
-  if (loginRole === 'tm') {
-    const tm = tmRegistry.find(t => t.username === u && t.password === p);
-    if (!tm) { err.textContent = 'Invalid Top Management credentials.'; err.classList.add('show'); return; }
-    document.getElementById('admin-login-screen').classList.remove('show');
-    err.classList.remove('show');
-    currentTm = tm;
-    if (tm.mustChange) {
-      window._changePassContext = 'tm';
-      document.getElementById('sio-change-pass-screen').classList.add('show');
-      document.getElementById('sio-cp-err').style.display = 'none';
-      document.getElementById('sio-new-pass').value = '';
-      document.getElementById('sio-confirm-pass').value = '';
-    } else {
-      launchTmDashboard();
-    }
-    return;
-  }
-
-  if (loginRole === 'sio') {
-    const sio = sioRegistry.find(s => s.username === u && s.password === p);
-    if (!sio) { err.textContent = 'Invalid SIO credentials.'; err.classList.add('show'); return; }
-    document.getElementById('admin-login-screen').classList.remove('show');
-    err.classList.remove('show');
-    currentSio = sio;
-    if (sio.mustChange) {
-      window._changePassContext = 'sio';
-      document.getElementById('sio-change-pass-screen').classList.add('show');
-      document.getElementById('sio-cp-err').style.display = 'none';
-      document.getElementById('sio-new-pass').value = '';
-      document.getElementById('sio-confirm-pass').value = '';
-    } else {
-      launchSioDashboard();
-    }
-    return;
-  }
-
-  // Admin login — call original, then trigger QR + Firebase
-  __origDoLogin();
+// Run Firebase check when admin logs in
+// Patch doLogin to also trigger QR init and Firebase status check
+const _origDoLogin = doLogin;
+window.doLogin = function() {
+  _origDoLogin();
   setTimeout(() => {
     initQRCodes();
     recheckFirebase();
   }, 200);
 };
 
-function sioSetFirstPassword() {
-  const np = document.getElementById('sio-new-pass').value;
-  const cp = document.getElementById('sio-confirm-pass').value;
-  const err = document.getElementById('sio-cp-err');
-  err.style.display = 'none';
-  if (!np) { err.textContent = 'Password cannot be empty.'; err.style.display = 'block'; return; }
-  if (np.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.style.display = 'block'; return; }
-  if (np !== cp) { err.textContent = 'Passwords do not match.'; err.style.display = 'block'; return; }
-  document.getElementById('sio-change-pass-screen').classList.remove('show');
-  if (window._changePassContext === 'tm' && currentTm) {
-    currentTm.password = np;
-    currentTm.mustChange = false;
-    addAuditEntry(`Top Management ${currentTm.username} changed their default password`);
-    persistTmToFirestore();
-    renderTmManagementTable();
-    launchTmDashboard();
-  } else {
-    currentSio.password = np;
-    currentSio.mustChange = false;
-    addAuditEntry(`SIO ${currentSio.username} changed their default password`);
-    persistSiosToFirestore();
-    renderSioManagementTable();
-    launchSioDashboard();
-  }
-  window._changePassContext = null;
-}
-
-function launchSioDashboard() {
-  const sio = currentSio;
-  document.getElementById('sio-dashboard').classList.add('show');
-  document.getElementById('sio-username-display').textContent = sio.username;
-  document.getElementById('sio-avatar').textContent = sio.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  showSioTab('mycases', document.getElementById('sio-tab-mycases-btn'));
-  renderSioCasesTable();
-  updateSioStatRow();
-  // Ensure realtime listener is running so new case assignments appear instantly
-  startSioRealtimeListener();
-}
-
-function doSioLogout() {
-  document.getElementById('sio-dashboard').classList.remove('show');
-  document.getElementById('admin-login-screen').classList.add('show');
-  switchLoginRole('sio');
-  document.getElementById('login-user').value = '';
-  document.getElementById('login-pass').value = '';
-  currentSio = null;
-  currentInvCaseId = null;
-  const ws = document.getElementById('inv-workspace');
-  if (ws) ws.style.display = 'none';
-  const badge = document.getElementById('inv-case-badge');
-  if (badge) badge.style.display = 'none';
-  const sel = document.getElementById('inv-case-select');
-  if (sel) sel.value = '';
-}
-
-function showSioTab(name, btn) {
-  document.querySelectorAll('#sio-dashboard .admin-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('#sio-dashboard .admin-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
-  if (name === 'sio-account') {
-    sioPopulateCaseDropdown();
-    // Pre-fill saved email
-    if (currentSio && currentSio.notifEmail) {
-      document.getElementById('sio-notif-email').value = currentSio.notifEmail;
-      document.getElementById('sio-send-to-email').value = currentSio.notifEmail;
-    }
-  }
-  if (name === 'sio-investigate') {
-    populateInvCaseDropdown();
-  }
-}
-
-function updateSioStatRow() {
-  if (!currentSio) return;
-  const ids = currentSio.assignedCases || [];
-  const total = ids.length;
-  const resolved = ids.filter(id => DB[id] && (DB[id].status === 'Resolved' || DB[id].status === 'Closed')).length;
-  const open = total - resolved;
-  const tEl = document.getElementById('sio-stat-total');
-  const oEl = document.getElementById('sio-stat-open');
-  const rEl = document.getElementById('sio-stat-resolved');
-  if (tEl) tEl.textContent = total;
-  if (oEl) oEl.textContent = open;
-  if (rEl) rEl.textContent = resolved;
-}
-
-function renderSioCasesTable() {
-  if (!currentSio) return;
-  const tbody = document.getElementById('sio-cases-tbody');
-  const assignedIds = currentSio.assignedCases || [];
-  const count = document.getElementById('sio-case-count');
-  if (assignedIds.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No cases assigned to you yet.</td></tr>';
-    count.textContent = '0 cases';
-    return;
-  }
-  count.textContent = assignedIds.length + ' case' + (assignedIds.length !== 1 ? 's' : '');
-  const rows = assignedIds.map(id => {
-    const c = DB[id];
-    if (!c) return '';
-    return `<tr>
-      <td><span class="adm-id">${id}</span></td>
-      <td><span class="adm-cat">${c.cat}</span></td>
-      <td><span class="adm-dept">${c.dept}</span></td>
-      <td><span class="adm-date">${c.date}</span></td>
-      <td><span class="sp ${statusClass[c.status]||'sp-new'}">${c.status}</span></td>
-      <td><div class="risk-wrap"><div class="risk-dot ${riskClass[c.risk]||'risk-low'}"></div><span class="risk-label">${c.risk}</span></div></td>
-      <td><button class="adm-btn" onclick="openSioCaseDetail('${id}')">View →</button></td>
-      <td><button class="adm-btn" onclick="sioQuickSendEmail('${id}')" style="border-color:rgba(42,143,255,0.35);color:var(--blue);background:rgba(42,143,255,0.06);" title="Send case via email">📧</button></td>
-    </tr>`;
-  }).join('');
-  tbody.innerHTML = rows || '<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No matching cases found.</td></tr>';
-}
-
-function openSioCaseDetail(id) {
-  openDetail(id);
-  // SIO can update status only — disable everything else
-  document.getElementById('status-btns').querySelectorAll('.st-btn').forEach(b => b.disabled = false);
-  document.querySelectorAll('.risk-btns .st-btn').forEach(b => b.disabled = true);
-  document.getElementById('dp-sio-assign').disabled = true;
-  // Mark context so status changes log as SIO
-  window._detailContext = 'sio';
-}
-
-function sioChangePassword() {
-  const sio = currentSio;
-  const cur = document.getElementById('sio-cur-pass').value;
-  const np = document.getElementById('sio-new-pass2').value;
-  const cp = document.getElementById('sio-confirm-pass2').value;
-  const errEl = document.getElementById('sio-acc-err');
-  const okEl = document.getElementById('sio-acc-ok');
-  errEl.style.display = 'none'; okEl.style.display = 'none';
-  if (cur !== sio.password) { errEl.textContent = 'Current password is incorrect.'; errEl.style.display = 'block'; return; }
-  if (!np) { errEl.textContent = 'New password cannot be empty.'; errEl.style.display = 'block'; return; }
-  if (np.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'block'; return; }
-  if (np !== cp) { errEl.textContent = 'Passwords do not match.'; errEl.style.display = 'block'; return; }
-  sio.password = np;
-  sio.mustChange = false;
-  document.getElementById('sio-cur-pass').value = '';
-  document.getElementById('sio-new-pass2').value = '';
-  document.getElementById('sio-confirm-pass2').value = '';
-  okEl.textContent = 'Password updated successfully.';
-  okEl.style.display = 'block';
-  addAuditEntry('SIO ' + sio.username + ' changed password');
-  renderSioManagementTable();
-  showToast('SIO password updated ✓', 'success');
-  persistSiosToFirestore();
-}
-
-// ─── SIO Email Settings ───────────────────────────────────────
-
-function sioSaveEmail() {
-  const sio = currentSio;
-  const email = document.getElementById('sio-notif-email').value.trim();
-  const errEl = document.getElementById('sio-email-err');
-  const okEl  = document.getElementById('sio-email-ok');
-  errEl.style.display = 'none'; okEl.style.display = 'none';
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errEl.textContent = 'Please enter a valid email address.';
-    errEl.style.display = 'block'; return;
-  }
-  sio.notifEmail = email || null;
-  okEl.textContent = email ? `Email saved: ${email}` : 'Email cleared.';
-  okEl.style.display = 'block';
-  // Also pre-fill the send-to field
-  if (email) document.getElementById('sio-send-to-email').value = email;
-  addAuditEntry(`SIO ${sio.username} updated notification email`);
-  showToast('Email saved ✓', 'success');
-}
-
-function sioPopulateCaseDropdown() {
-  const sio = currentSio;
-  const sel = document.getElementById('sio-send-case-select');
-  if (!sel) return;
-  const ids = sio.assignedCases || [];
-  sel.innerHTML = '<option value="">— Select a case —</option>' +
-    ids.map(id => {
-      const c = DB[id];
-      return c ? `<option value="${id}">${id} · ${c.cat} · ${c.status}</option>` : '';
-    }).join('');
-}
-
-function buildSioCaseEmailBody(id, note) {
-  const c = DB[id];
-  const sio = currentSio;
-  if (!c) return '';
-  return `Case Report: ${id}
-Submitted by SIO: ${sio.name} (${sio.username})
-
-─────────────────────────────────
-CASE DETAILS
-─────────────────────────────────
-Case ID      : ${id}
-Category     : ${c.cat}
-Department   : ${c.dept}
-Date Filed   : ${c.date}
-Status       : ${c.status}
-Risk Level   : ${c.risk}
-
-Description:
-${c.desc}
-${note ? '\n─────────────────────────────────\nNote from SIO:\n' + note + '\n─────────────────────────────────' : ''}
-
-Sent from Reporter Whistleblower Platform`;
-}
-
-function sioSendCaseEmail() {
-  const sio = currentSio;
-  const cid = document.getElementById('sio-send-case-select').value;
-  const to  = document.getElementById('sio-send-to-email').value.trim();
-  const note = document.getElementById('sio-send-note').value.trim();
-  const errEl = document.getElementById('sio-send-err');
-  errEl.style.display = 'none';
-
-  if (!cid) { errEl.textContent = 'Please select a case to send.'; errEl.style.display = 'block'; return; }
-  if (!to)  { errEl.textContent = 'Please enter a recipient email address.'; errEl.style.display = 'block'; return; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) { errEl.textContent = 'Please enter a valid email address.'; errEl.style.display = 'block'; return; }
-
-  const subject = `[Reporter] Case Report: ${cid}`;
-  const body = buildSioCaseEmailBody(cid, note);
-  const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.open(url, '_blank');
-  addAuditEntry(`SIO ${sio.username} sent case ${cid} via email to ${to}`);
-  showToast(`Gmail opened for case ${cid} ✓`, 'success');
-  document.getElementById('sio-send-note').value = '';
-}
-
-function sioQuickSendEmail(id) {
-  // Switch to Account tab, fill in the case, scroll to send section
-  showSioTab('sio-account', document.getElementById('sio-tab-account-btn'));
-  // Pre-fill notification email if saved
-  const sio = currentSio;
-  if (sio.notifEmail) document.getElementById('sio-send-to-email').value = sio.notifEmail;
-  // Populate dropdown then select this case
-  sioPopulateCaseDropdown();
-  document.getElementById('sio-send-case-select').value = id;
-  // Scroll the send card into view
-  setTimeout(() => {
-    const sendCard = document.getElementById('sio-send-case-select');
-    if (sendCard) sendCard.closest('.adm-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, 100);
-}
-
-// ═══════════════════════════════════════
-// SIO INVESTIGATION WORKSPACE
-// ═══════════════════════════════════════
-let currentInvCaseId = null;
-// invData: { caseId: { evidence:[], persons:[], notes:[] } }
-const invData = {};
-
-function populateInvCaseDropdown() {
-  const sio = currentSio;
-  const sel = document.getElementById('inv-case-select');
-  if (!sel) return;
-  const ids = sio.assignedCases || [];
-  sel.innerHTML = '<option value="">— Select a case —</option>' +
-    ids.map(id => {
-      const c = DB[id];
-      return c ? `<option value="${id}">${id} · ${c.cat} · ${c.status}</option>` : '';
-    }).join('');
-}
-
-function loadInvestigationCase(id) {
-  const ws = document.getElementById('inv-workspace');
-  const badge = document.getElementById('inv-case-badge');
-  if (!id) { ws.style.display = 'none'; badge.style.display = 'none'; return; }
-  const c = DB[id];
-  if (!c) return;
-  currentInvCaseId = id;
-  if (!invData[id]) invData[id] = { evidence: [], persons: [], notes: [] };
-
-  ws.style.display = 'block';
-  badge.style.display = 'block';
-  badge.textContent = id + ' · ' + c.status;
-
-  // Case summary
-  document.getElementById('inv-case-summary').innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
-      <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Category</div>
-        <div style="font-size:13px;color:var(--text);">${c.cat}</div>
-      </div>
-      <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Department</div>
-        <div style="font-size:13px;color:var(--text);">${c.dept}</div>
-      </div>
-      <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Filed</div>
-        <div style="font-family:var(--mono);font-size:12px;color:var(--text);">${c.date}</div>
-      </div>
-      <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">Risk</div>
-        <div class="risk-wrap"><div class="risk-dot ${riskClass[c.risk]||'risk-low'}" style="width:8px;height:8px;"></div><span style="font-family:var(--mono);font-size:12px;">${c.risk}</span></div>
-      </div>
-    </div>
-    <div style="margin-top:12px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
-      <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Description</div>
-      <div style="font-size:13px;color:var(--muted2);line-height:1.7;">${c.desc}</div>
-    </div>`;
-
-  // Highlight current status
-  document.querySelectorAll('#inv-status-btns .st-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent.trim() === c.status);
-  });
-
-  renderInvEvidence();
-  renderInvPersons();
-  renderInvNotes();
-  document.getElementById('sio-ai-output').innerHTML = '<p style="color:var(--muted);font-style:italic;font-size:13px;">Click "Run analysis" to get AI-powered investigation guidance for this case.</p>';
-}
-
-function renderInvEvidence() {
-  const id = currentInvCaseId;
-  if (!id || !invData[id]) return;
-  const items = invData[id].evidence;
-  const list = document.getElementById('inv-evidence-list');
-  const empty = document.getElementById('inv-evidence-empty');
-  if (items.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  list.innerHTML = items.map((e, i) => `
-    <div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
-      <span style="font-family:var(--mono);font-size:10px;color:var(--accent);flex-shrink:0;margin-top:1px;">${String(i+1).padStart(2,'0')}</span>
-      <div style="flex:1;font-size:13px;color:var(--text);line-height:1.5;">${e.text}</div>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0;">${e.ts}</span>
-      <button onclick="removeInvEvidence(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:0;flex-shrink:0;" title="Remove">×</button>
-    </div>`).join('');
-}
-
-function addEvidence() {
-  const id = currentInvCaseId;
-  if (!id) return;
-  const input = document.getElementById('inv-evidence-input');
-  const text = input.value.trim();
-  if (!text) return;
-  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-  invData[id].evidence.push({ text, ts });
-  input.value = '';
-  renderInvEvidence();
-  showToast('Evidence logged ✓', 'success');
-}
-
-function removeInvEvidence(i) {
-  const id = currentInvCaseId;
-  if (!id) return;
-  invData[id].evidence.splice(i, 1);
-  renderInvEvidence();
-}
-
-function renderInvPersons() {
-  const id = currentInvCaseId;
-  if (!id || !invData[id]) return;
-  const items = invData[id].persons;
-  const list = document.getElementById('inv-persons-list');
-  const empty = document.getElementById('inv-persons-empty');
-  if (items.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  list.innerHTML = items.map((p, i) => `
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:2px;">
-      <div style="width:28px;height:28px;border-radius:50%;background:rgba(245,196,0,0.1);border:1px solid rgba(245,196,0,0.2);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:12px;color:var(--accent);flex-shrink:0;">${p.text.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
-      <div style="flex:1;font-size:13px;color:var(--text);">${p.text}</div>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">${p.ts}</span>
-      <button onclick="removeInvPerson(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:0;" title="Remove">×</button>
-    </div>`).join('');
-}
-
-function addPerson() {
-  const id = currentInvCaseId;
-  if (!id) return;
-  const input = document.getElementById('inv-person-input');
-  const text = input.value.trim();
-  if (!text) return;
-  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-  invData[id].persons.push({ text, ts });
-  input.value = '';
-  renderInvPersons();
-  showToast('Person of interest added ✓', 'success');
-}
-
-function removeInvPerson(i) {
-  const id = currentInvCaseId;
-  if (!id) return;
-  invData[id].persons.splice(i, 1);
-  renderInvPersons();
-}
-
-function renderInvNotes() {
-  const id = currentInvCaseId;
-  if (!id || !invData[id]) return;
-  const items = invData[id].notes;
-  const tl = document.getElementById('inv-notes-timeline');
-  const empty = document.getElementById('inv-notes-empty');
-  if (items.length === 0) { tl.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  tl.innerHTML = items.slice().reverse().map(n => `
-    <div class="ct-item">
-      <div class="ct-spine">
-        <div class="ct-dot" style="background:var(--accent);"></div>
-        <div class="ct-line"></div>
-      </div>
-      <div class="ct-body">
-        <div class="ct-action">${n.text}</div>
-        <div class="ct-when">${n.ts} · ${currentSio?.name || 'SIO'}</div>
-      </div>
-    </div>`).join('');
-}
-
-function saveInvNote() {
-  const id = currentInvCaseId;
-  if (!id) return;
-  const input = document.getElementById('inv-note-input');
-  const text = input.value.trim();
-  if (!text) return;
-  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-  invData[id].notes.push({ text, ts });
-  // Also push to case audit
-  DB[id].audit.push(`${ts} — Investigation note: "${text.slice(0,60)}${text.length>60?'…':''}" · SIO ${currentSio?.username||''}`);
-  input.value = '';
-  renderInvNotes();
-  showToast('Note saved ✓', 'success');
-  if (db) {
-    db.collection('complaints').doc(id).update({ audit: DB[id].audit }).catch(e => console.warn('Audit sync failed:', e));
-  }
-}
-
-function updateInvStatus(btn, status) {
-  const id = currentInvCaseId;
-  if (!id) return;
-  DB[id].status = status;
-  document.querySelectorAll('#inv-status-btns .st-btn').forEach(b => b.classList.toggle('active', b.textContent.trim() === status));
-  document.getElementById('inv-case-badge').textContent = id + ' · ' + status;
-  // Sync to case audit
-  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-  DB[id].audit.push(`${ts} — Status → ${status} · SIO ${currentSio?.username||''}`);
-  addAuditEntry(`SIO updated ${id} status → ${status}`);
-  renderSioCasesTable();
-  showToast(`Status updated → ${status}`, 'success');
-  if (db) {
-    db.collection('complaints').doc(id).update({ status, audit: DB[id].audit }).catch(e => console.warn('Firestore sync failed:', e));
-  }
-}
-
-async function runSioAIAnalysis() {
-  const id = currentInvCaseId;
-  if (!id) { showToast('Please select a case first', 'error'); return; }
-  const c = DB[id];
-  const out = document.getElementById('sio-ai-output');
-  out.innerHTML = '<div class="ai-loading"><div class="spinner"></div> Analysing case with AI…</div>';
-  const evidence = (invData[id]?.evidence || []).map(e => e.text).join('; ');
-  const persons = (invData[id]?.persons || []).map(p => p.text).join('; ');
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1200,
-        system: `You are an expert investigation analyst. Analyse the whistleblower case and any evidence/persons of interest provided. Respond ONLY with valid JSON — no markdown, no extra text — in exactly this format:
-{"priority_actions":"<3-4 immediate steps the investigator should take>","interview_questions":"<3 key questions to ask persons of interest>","red_flags":"<2-3 red flags or patterns to watch for>","evidence_needed":"<what additional evidence should be gathered>","recommended_status":"<New|In review|In progress|Escalated|Closed>","risk_assessment":"<brief risk summary>"}`,
-        messages: [{ role: 'user', content: `Case ID: ${id}\nCategory: ${c.cat}\nDept: ${c.dept}\nStatus: ${c.status}\nRisk: ${c.risk}\nDescription: ${c.desc}\nEvidence logged: ${evidence || 'None yet'}\nPersons of interest: ${persons || 'None yet'}` }]
-      })
-    });
-    const data = await res.json();
-    const raw = data.content.map(i => i.text || '').join('').trim();
-    let parsed;
-    try { parsed = JSON.parse(raw.replace(/```json|```/g,'')); } catch(e) { out.innerHTML = `<p style="font-size:13px;color:var(--muted2);">${raw}</p>`; return; }
-    const recStatus = parsed.recommended_status || c.status;
-    const statusColors = { New:'#60a5fa','In review':'#fbbf24','In progress':'var(--accent)',Escalated:'#ff6b6b',Closed:'var(--muted2)' };
-    out.innerHTML = `
-      <div style="display:grid;gap:10px;padding:4px 0;">
-        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(42,143,255,0.07);border:1px solid rgba(42,143,255,0.18);border-radius:3px;">
-          <span style="font-size:14px;">⚡</span>
-          <div>
-            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Recommended Status</div>
-            <div style="font-family:var(--mono);font-size:12px;font-weight:600;color:${statusColors[recStatus]||'var(--accent)'};">${recStatus}</div>
-          </div>
-        </div>
-        <div style="padding:10px 12px;background:rgba(255,255,255,0.02);border-left:2px solid var(--accent);border-radius:0 3px 3px 0;">
-          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Priority Actions</div>
-          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.priority_actions}</p>
-        </div>
-        <div style="padding:10px 12px;background:rgba(255,255,255,0.02);border-left:2px solid var(--blue);border-radius:0 3px 3px 0;">
-          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Interview Questions</div>
-          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.interview_questions}</p>
-        </div>
-        <div style="padding:10px 12px;background:rgba(255,68,68,0.04);border-left:2px solid #ff6b6b;border-radius:0 3px 3px 0;">
-          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Red Flags to Watch</div>
-          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.red_flags}</p>
-        </div>
-        <div style="padding:10px 12px;background:rgba(255,255,255,0.02);border-left:2px solid #fbbf24;border-radius:0 3px 3px 0;">
-          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Additional Evidence Needed</div>
-          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.evidence_needed}</p>
-        </div>
-        <div style="padding:10px 12px;background:rgba(255,255,255,0.02);border-left:2px solid #a78bfa;border-radius:0 3px 3px 0;">
-          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Risk Assessment</div>
-          <p style="margin:0;font-size:13px;color:var(--muted2);line-height:1.65;">${parsed.risk_assessment}</p>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid rgba(245,196,0,0.15);margin-top:4px;flex-wrap:wrap;">
-          <span style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Apply recommended status:</span>
-          <button onclick="updateInvStatus(this,'${recStatus}')" style="padding:6px 14px;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border:1px solid rgba(42,143,255,0.5);border-radius:2px;background:rgba(42,143,255,0.08);color:var(--blue);cursor:pointer;">${recStatus} →</button>
-        </div>
-      </div>`;
-    const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-    DB[id].audit.push(`${ts} — AI investigation analysis run · SIO ${currentSio?.username||''}`);
-    if (db) db.collection('complaints').doc(id).update({ audit: DB[id].audit }).catch(()=>{});
-  } catch(e) {
-    out.innerHTML = '<p style="color:var(--muted);font-style:italic;font-size:13px;">AI analysis unavailable. Please check connection.</p>';
-  }
-}
-
-// ── Admin: Add / Remove SIOs ──────────
-function openAddSio() {
-  document.getElementById('add-sio-overlay').style.display = 'flex';
-  document.getElementById('sio-add-name').value = '';
-  document.getElementById('sio-add-username').value = '';
-  document.getElementById('sio-add-email').value = '';
-  document.getElementById('sio-add-role').value = '';
-  document.getElementById('sio-add-defpass').value = 'Welcome@123';
-  document.getElementById('add-sio-err').style.display = 'none';
-}
-
-function closeAddSio() {
-  document.getElementById('add-sio-overlay').style.display = 'none';
-}
-
-function saveSio() {
-  const name = document.getElementById('sio-add-name').value.trim();
-  const username = document.getElementById('sio-add-username').value.trim().toLowerCase();
-  const email = document.getElementById('sio-add-email').value.trim();
-  const role = document.getElementById('sio-add-role').value.trim();
-  const defpass = document.getElementById('sio-add-defpass').value.trim();
-  const errEl = document.getElementById('add-sio-err');
-  if (!name || !username) { errEl.textContent = 'Name and username are required.'; errEl.style.display = 'block'; return; }
-  if (!defpass || defpass.length < 4) { errEl.textContent = 'Default password must be at least 4 characters.'; errEl.style.display = 'block'; return; }
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'Please enter a valid email address.'; errEl.style.display = 'block'; return; }
-  if (sioRegistry.find(s => s.username === username)) { errEl.textContent = 'Username already exists.'; errEl.style.display = 'block'; return; }
-  const newSio = { name, username, email: email || '', role: role || 'Senior Investigating Officer', password: defpass, mustChange: true, assignedCases: [] };
-  sioRegistry.push(newSio);
-  renderSioManagementTable();
-  rebuildSioAssignDropdown();
-  addAuditEntry(`SIO account created: ${username} (${name})`);
-  showToast(`SIO ${name} created ✓`, 'success');
-  closeAddSio();
-  persistSiosToFirestore();
-}
-
-function deleteSio(username) {
-  if (!confirm('Delete SIO account "' + username + '"? This cannot be undone.')) return;
-  sioRegistry = sioRegistry.filter(s => s.username !== username);
-  // Remove SIO assignment from all cases
-  Object.values(DB).forEach(c => { if (c.sioAssigned === username) delete c.sioAssigned; });
-  renderSioManagementTable();
-  rebuildSioAssignDropdown();
-  addAuditEntry(`SIO account deleted: ${username}`);
-  showToast('SIO account deleted', 'success');
-  persistSiosToFirestore();
-}
-
-function resetSioPassword(username) {
-  const newPass = prompt('Enter new default password for ' + username + ':');
-  if (!newPass || newPass.length < 4) { showToast('Password too short — minimum 4 characters', 'error'); return; }
-  const sio = sioRegistry.find(s => s.username === username);
-  if (!sio) return;
-  sio.password = newPass;
-  sio.mustChange = true;
-  renderSioManagementTable();
-  addAuditEntry(`SIO ${username} password reset by admin`);
-  showToast(`Password reset for ${username} ✓`, 'success');
-  persistSiosToFirestore();
-}
-
-function renderSioManagementTable() {
-  const tbody = document.getElementById('sio-management-tbody');
-  if (!tbody) return;
-  if (sioRegistry.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--muted);">No SIOs added yet.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = sioRegistry.map(sio => `
-    <tr>
-      <td><span class="adm-id">${sio.username}</span></td>
-      <td style="color:var(--text);">${sio.name}</td>
-      <td><span class="adm-dept">${sio.role}</span></td>
-      <td><span style="font-family:var(--mono);font-size:12px;color:var(--blue);">${sio.email || '<span style="color:var(--muted);font-style:italic;">No email</span>'}</span></td>
-      <td>${sio.mustChange ? '<span class="sio-must-change">Must change</span>' : '<span class="sio-pass-ok">Set</span>'}</td>
-      <td><span style="font-family:var(--mono);font-size:12px;color:var(--blue);">${(sio.assignedCases||[]).length} case${(sio.assignedCases||[]).length !== 1 ? 's' : ''}</span></td>
-      <td>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="adm-btn" onclick="resetSioPassword('${sio.username}')" style="font-size:10px;padding:5px 10px;">Reset pwd</button>
-          ${sio.email ? `<button class="adm-btn" onclick="sharePasswordViaGmail('${sio.username}')" style="font-size:10px;padding:5px 10px;color:var(--blue);border-color:rgba(42,143,255,0.3);" title="Share login credentials via Gmail">📧 Share creds</button>` : ''}
-          <button class="adm-btn" onclick="deleteSio('${sio.username}')" style="font-size:10px;padding:5px 10px;color:#ff6b6b;border-color:rgba(255,68,68,0.3);">Delete</button>
-        </div>
-      </td>
-    </tr>`).join('');
-}
-
-// ── Share SIO login credentials via Gmail ──
-function sharePasswordViaGmail(username) {
-  const sio = sioRegistry.find(s => s.username === username);
-  if (!sio || !sio.email) { showToast('No email address set for this SIO', 'error'); return; }
-  const sioLink = `${location.origin}${location.pathname}?sio=${encodeURIComponent(sio.username)}`;
-  const subject = `[Reporter] Your SIO Portal Credentials`;
-  const body = `Dear ${sio.name},
-
-Your Senior Investigating Officer (SIO) account has been created on the Reporter Whistleblower Platform.
-
-─────────────────────────────────
-YOUR LOGIN CREDENTIALS
-─────────────────────────────────
-Portal URL : ${sioLink}
-Username   : ${sio.username}
-Password   : ${sio.password}
-Role       : ${sio.role}
-─────────────────────────────────
-
-⚠ You will be required to change your password on first login.
-
-Please keep these credentials confidential and do not share them with anyone.
-
-Sent from Reporter Whistleblower Platform`;
-  const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(sio.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.open(url, '_blank');
-  addAuditEntry(`Credentials shared with SIO ${username} via Gmail`);
-  showToast(`Gmail opened — credentials sent to ${sio.email} ✓`, 'success');
-}
-
-// ── SIO dropdown in detail panel ──────
-function rebuildSioAssignDropdown() {
-  const sel = document.getElementById('dp-sio-assign');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">— No SIO assigned —</option>' +
-    sioRegistry.map(sio => `<option value="${sio.username}">${sio.name} · ${sio.role}</option>`).join('');
-}
-
-function logSioAssign() {
-  const sel = document.getElementById('dp-sio-assign');
-  const chosen = sel.value;
-  const id = currentDetailId;
-  if (!id) return;
-  DB[id].sioAssigned = chosen || null;
-
-  // Update SIO's case list
-  sioRegistry.forEach(sio => {
-    sio.assignedCases = (sio.assignedCases || []).filter(cid => cid !== id);
-  });
-  if (chosen) {
-    const sio = sioRegistry.find(s => s.username === chosen);
-    if (sio) {
-      if (!sio.assignedCases) sio.assignedCases = [];
-      sio.assignedCases.push(id);
-    }
-  }
-
-  const ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
-  const note = chosen ? `${ts} — SIO assigned: ${chosen} · admin` : `${ts} — SIO assignment removed · admin`;
-  DB[id].audit.push(note);
-  buildDpAudit(id);
-  renderSioManagementTable();
-  addAuditEntry(chosen ? `SIO ${chosen} assigned to ${id}` : `SIO removed from ${id}`);
-  showToast(chosen ? `SIO ${chosen} assigned ✓` : 'SIO assignment removed', 'success');
-  // Save SIO registry (triggers realtime listener on all devices) AND update complaint doc
-  persistSiosToFirestore();
-  if (db) {
-    db.collection('complaints').doc(id).set(DB[id]).catch(e => console.warn('Complaint sync error:', e));
-  }
-}
-
-// Patch openDetail to populate SIO dropdown
-const __origOpenDetail = window.openDetail;
-window.openDetail = function(id) {
-  __origOpenDetail(id);
-  rebuildSioAssignDropdown();
-  const sel = document.getElementById('dp-sio-assign');
-  if (sel) sel.value = DB[id]?.sioAssigned || '';
-  // Re-enable all controls (admin context)
-  document.getElementById('status-btns').querySelectorAll('.st-btn').forEach(b => b.disabled = false);
-  document.querySelectorAll('.risk-btns .st-btn').forEach(b => b.disabled = false);
-  document.getElementById('dp-sio-assign').disabled = false;
-  window._detailContext = 'admin';
-};
-
-// Patch showAdminTab: init QR when QR tab is opened
-const __origShowAdminTab2 = window.showAdminTab;
+// Patch showAdminTab to init QR whenever QR tab is opened
+const _origShowAdminTab = showAdminTab;
 window.showAdminTab = function(name, btn) {
-  __origShowAdminTab2(name, btn);
-  if (name === 'qr') setTimeout(() => { initQRCodes(); }, 100);
+  _origShowAdminTab(name, btn);
+  if (name === 'qr') {
+    setTimeout(() => { initQRCodes(); }, 100);
+  }
 };
 
-// ── SIO deep-link handler (?sio=username) ──
-(function() {
-  const params = new URLSearchParams(location.search);
-  const sioParam = params.get('sio');
-  if (sioParam) {
-    document.getElementById('admin-login-screen').classList.add('show');
-    switchLoginRole('sio');
-    document.getElementById('login-user').value = sioParam;
-    setTimeout(() => { document.getElementById('login-pass').focus(); }, 100);
-  }
-})();
 
-// Restore cursor glow
 const glow = document.createElement('div');
 glow.style.cssText = 'position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(245,196,0,0.05) 0%,rgba(42,143,255,0.04) 55%,transparent 72%);pointer-events:none;z-index:9997;transform:translate(-50%,-50%);transition:all 0.15s ease;';
 document.body.appendChild(glow);
 document.addEventListener('mousemove', e => { glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px'; });
-
-// ═══════════════════════════════════════════════════════════
-// ENHANCED UI — GRAPHICS, ANIMATIONS & VISUALIZATIONS
-// ═══════════════════════════════════════════════════════════
-
-// ── Count-up animation ──────────────────────────
-function animateCountUp(el, target, duration = 1200) {
-  const start = performance.now();
-  const from = parseInt(el.textContent) || 0;
-  function step(now) {
-    const p = Math.min((now - start) / duration, 1);
-    const ease = 1 - Math.pow(1 - p, 3);
-    el.textContent = Math.round(from + (target - from) * ease);
-    if (p < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
-function runCountUps() {
-  document.querySelectorAll('.count-up[data-target]').forEach(el => {
-    const target = parseInt(el.dataset.target);
-    if (!isNaN(target)) animateCountUp(el, target);
-  });
-}
-
-// Trigger count-ups on scroll into view
-const countObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      const el = e.target;
-      animateCountUp(el, parseInt(el.dataset.target) || 0);
-      countObserver.unobserve(el);
-    }
-  });
-}, { threshold: 0.3 });
-document.querySelectorAll('.count-up[data-target]').forEach(el => countObserver.observe(el));
-
-// ── Public sparkline ─────────────────────────────
-function buildPublicSparkline() {
-  const el = document.getElementById('pub-sparkline');
-  if (!el) return;
-  const data = [12,18,14,22,19,28,24,31,27,35,29,38,33,41,36,44,38,47,40,50,43,52,47,55,50,58,53,61,56,64,58,67,62,70,65,72,68,75,70,78,73,80,77,84,79,88,82,90,85,92,88,95];
-  const max = Math.max(...data);
-  el.innerHTML = data.map(v => {
-    const h = Math.round(4 + (v / max) * 28);
-    const c = v > 70 ? 'var(--accent)' : v > 40 ? 'var(--blue)' : 'var(--muted)';
-    return `<div style="width:6px;height:${h}px;border-radius:1px;background:${c};opacity:0.6;flex-shrink:0;"></div>`;
-  }).join('');
-}
-buildPublicSparkline();
-
-// ── Risk heatmap ─────────────────────────────────
-function buildRiskHeatmap() {
-  const el = document.getElementById('risk-heatmap');
-  if (!el) return;
-  const weeks = 52;
-  const levels = [0,0,0,1,0,0,1,2,1,0,0,1,1,2,3,2,1,1,0,1,2,1,0,0,1,2,2,3,2,1,2,3,2,1,0,1,2,1,2,3,2,1,2,2,1,0,1,2,1,1,0,1];
-  el.innerHTML = levels.map((lv, i) =>
-    `<div class="heat-cell heat-${lv}" title="Week ${i+1}: ${['No', 'Low', 'Medium', 'High'][lv]} risk"></div>`
-  ).join('');
-}
-buildRiskHeatmap();
-
-// ── Animated bar chart ───────────────────────────
-function animateBars() {
-  document.querySelectorAll('.bar-fill[data-w]').forEach(bar => {
-    setTimeout(() => { bar.style.width = bar.dataset.w; }, 300);
-  });
-}
-
-// ── Donut chart update ───────────────────────────
-function updateDonut(total, resolved, inProgress, newCount, escalated) {
-  const circ = 2 * Math.PI * 46; // ~289
-  const valEl = document.getElementById('donut-total-val');
-  if (valEl) valEl.textContent = total;
-  function seg(id, count, offset) {
-    const el = document.getElementById(id);
-    if (!el) return offset;
-    const dash = total > 0 ? (count / total) * circ : 0;
-    el.style.strokeDasharray = `${dash} ${circ - dash}`;
-    el.style.strokeDashoffset = -offset;
-    return offset + dash;
-  }
-  let off = 0;
-  off = seg('donut-resolved', resolved, off);
-  off = seg('donut-progress', inProgress, off);
-  off = seg('donut-new', newCount, off);
-}
-
-// ── Live activity feed ───────────────────────────
-const activityEvents = [
-  { type:'new',    icon:'📥', text:'New complaint received', sub:'Financial fraud · HR dept', time:'Just now' },
-  { type:'status', icon:'🔄', text:'Status updated → In review', sub:'Case SV-2025-9K2X', time:'2 min ago' },
-  { type:'assign', icon:'👤', text:'Investigator assigned', sub:'Ravi Sharma → SV-2025-7834', time:'8 min ago' },
-  { type:'esc',    icon:'🚨', text:'Case escalated — High risk', sub:'SV-2025-4J1X · Safety', time:'15 min ago' },
-  { type:'status', icon:'✅', text:'Case resolved & closed', sub:'SV-2025-3A9X', time:'1 hr ago' },
-  { type:'new',    icon:'📥', text:'New complaint received', sub:'Workplace harassment', time:'2 hr ago' },
-];
-let actIdx = 0;
-function renderActivityFeed() {
-  const list = document.getElementById('activity-list');
-  if (!list) return;
-  const visible = activityEvents.slice(0, 5);
-  list.innerHTML = visible.map(e => `
-    <div class="activity-item">
-      <div class="activity-icon act-${e.type}">${e.icon}</div>
-      <div style="flex:1;min-width:0;">
-        <div class="activity-text">${e.text}</div>
-        <div class="activity-time">${e.sub} · ${e.time}</div>
-      </div>
-    </div>`).join('');
-}
-renderActivityFeed();
-
-// Simulate live activity rotation
-setInterval(() => {
-  activityEvents.unshift({
-    type: ['new','status','assign','esc'][Math.floor(Math.random()*4)],
-    icon: ['📥','🔄','👤','🚨','✅'][Math.floor(Math.random()*5)],
-    text: ['New report received','Status updated','Case assigned','Risk elevated','Case resolved'][Math.floor(Math.random()*5)],
-    sub: `Case SV-2025-${Math.random().toString(36).substr(2,4).toUpperCase()}`,
-    time: 'Just now'
-  });
-  activityEvents.splice(8);
-  renderActivityFeed();
-}, 12000);
-
-// ── Overview init ────────────────────────────────
-function initOverviewGraphics() {
-  animateBars();
-  const total = Object.keys(DB).length || 24;
-  const resolved = Object.values(DB).filter(c=>c.status==='Resolved').length || 10;
-  const inProg = Object.values(DB).filter(c=>c.status==='In progress').length || 5;
-  const newC = Object.values(DB).filter(c=>c.status==='New').length || 7;
-  const esc = Object.values(DB).filter(c=>c.status==='Escalated').length || 2;
-  setTimeout(() => updateDonut(total, resolved, inProg, newC, esc), 400);
-  // Update metric cards
-  ['mc-total','mc-new','mc-progress','mc-escalated','mc-resolved'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) animateCountUp(el, parseInt(el.dataset.target) || parseInt(el.textContent) || 0);
-  });
-}
-
-// ── Patch showAdminTab to init graphics ──────────
-const __origShowAdminTabGraphics = window.showAdminTab;
-window.showAdminTab = function(name, btn) {
-  __origShowAdminTabGraphics(name, btn);
-  if (name === 'overview') setTimeout(initOverviewGraphics, 100);
-};
-
-// Also init on first admin login
-const __origDoLoginGraphics = window.doLogin;
-// Handled via setTimeout in existing doLogin patch — just trigger overview init after login
-const __origLaunchAdmin = window.doLogin;
-
-// ── SIO view toggle ───────────────────────────────
-let currentSioView = 'table';
-function setSioView(view, btn) {
-  currentSioView = view;
-  document.getElementById('sio-table-view').style.display = view === 'table' ? 'block' : 'none';
-  document.getElementById('sio-cards-view').style.display = view === 'cards' ? 'block' : 'none';
-  document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  if (view === 'cards') renderSioCaseCards();
-}
-
-function renderSioCaseCards() {
-  if (!currentSio) return;
-  const container = document.getElementById('sio-case-cards');
-  if (!container) return;
-  const ids = currentSio.assignedCases || [];
-  if (ids.length === 0) {
-    container.innerHTML = '<div style="font-family:var(--mono);font-size:12px;color:var(--muted);padding:2rem;text-align:center;">No cases assigned yet.</div>';
-    return;
-  }
-  const statusToClass = { 'New':'cc-new','In progress':'cc-progress','In review':'cc-progress','Escalated':'cc-escalated','Resolved':'cc-resolved','Closed':'cc-resolved' };
-  container.innerHTML = ids.map(id => {
-    const c = DB[id];
-    if (!c) return '';
-    const cls = statusToClass[c.status] || 'cc-new';
-    return `<div class="case-card ${cls}" onclick="openSioCaseDetail('${id}')">
-      <div class="case-card-id">${id}</div>
-      <div class="case-card-title">${c.cat}</div>
-      <div style="font-size:12px;color:var(--muted2);">${c.dept}</div>
-      <div class="case-card-meta">
-        <span class="sp ${statusClass[c.status]||'sp-new'}" style="font-size:10px;">${c.status}</span>
-        <div class="risk-wrap"><div class="risk-dot ${riskClass[c.risk]||'risk-low'}" style="width:7px;height:7px;"></div><span class="risk-label" style="font-size:11px;">${c.risk}</span></div>
-      </div>
-      <div style="margin-top:10px;display:flex;gap:6px;">
-        <button class="adm-btn" onclick="event.stopPropagation();openSioCaseDetail('${id}')" style="font-size:10px;padding:4px 8px;">View →</button>
-        <button class="adm-btn" onclick="event.stopPropagation();sioQuickSendEmail('${id}')" style="font-size:10px;padding:4px 8px;border-color:rgba(42,143,255,0.3);color:var(--blue);">📧</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ── Patch renderSioCasesTable to also update stat row & cards ──
-const __origRenderSioCasesTable = window.renderSioCasesTable;
-window.renderSioCasesTable = function() {
-  __origRenderSioCasesTable();
-  updateSioStats();
-  if (currentSioView === 'cards') renderSioCaseCards();
-};
-
-function updateSioStats() {
-  if (!currentSio) return;
-  const ids = currentSio.assignedCases || [];
-  const total = ids.length;
-  const resolved = ids.filter(id => DB[id] && (DB[id].status === 'Resolved' || DB[id].status === 'Closed')).length;
-  const open = total - resolved;
-  const tEl = document.getElementById('sio-stat-total');
-  const oEl = document.getElementById('sio-stat-open');
-  const rEl = document.getElementById('sio-stat-resolved');
-  if (tEl) animateCountUp(tEl, total);
-  if (oEl) animateCountUp(oEl, open);
-  if (rEl) animateCountUp(rEl, resolved);
-}
-
-// ── Patch renderTmOverview to also update TM stat row ──
-const __origRenderTmOverview = window.renderTmOverview;
-window.renderTmOverview = function() {
-  __origRenderTmOverview();
-  const entries = Object.entries(DB);
-  const t = entries.length;
-  const e = entries.filter(([,c])=>c.status==='Escalated').length;
-  const r = entries.filter(([,c])=>c.status==='Resolved').length;
-  const ts = document.getElementById('tm-stat-total');
-  const es = document.getElementById('tm-stat-esc');
-  const rs = document.getElementById('tm-stat-res');
-  if (ts) animateCountUp(ts, t);
-  if (es) animateCountUp(es, e);
-  if (rs) animateCountUp(rs, r);
-};
-
-// ── Login screen particles ───────────────────────
-function buildLoginParticles() {
-  const container = document.getElementById('login-particles');
-  if (!container) return;
-  container.innerHTML = '';
-  for (let i = 0; i < 18; i++) {
-    const p = document.createElement('div');
-    p.className = 'login-particle';
-    p.style.cssText = `
-      left: ${Math.random() * 100}%;
-      animation-duration: ${4 + Math.random() * 6}s;
-      animation-delay: ${Math.random() * 6}s;
-      --drift: ${(Math.random() - 0.5) * 80}px;
-      opacity: ${0.2 + Math.random() * 0.4};
-      background: ${Math.random() > 0.5 ? 'var(--accent)' : 'var(--blue)'};
-      width: ${1 + Math.random() * 2}px;
-      height: ${1 + Math.random() * 2}px;
-    `;
-    container.appendChild(p);
-  }
-}
-buildLoginParticles();
-
-// Rebuild particles when login opens
-const __origOpenAdminLogin = window.openAdminLogin;
-window.openAdminLogin = function() {
-  __origOpenAdminLogin();
-  buildLoginParticles();
-};
-
-// ── Init overview on dashboard open ─────────────
-// Patch the original doLogin to fire overview graphics
-setTimeout(() => {
-  const origDoLoginFn = window.doLogin;
-  // After any successful admin login the dashboard show fires initBars() already
-  // We just need to also fire our graphics
-  const observer = new MutationObserver(() => {
-    if (document.getElementById('admin-dashboard').classList.contains('show')) {
-      setTimeout(initOverviewGraphics, 300);
-    }
-  });
-  const adm = document.getElementById('admin-dashboard');
-  if (adm) observer.observe(adm, { attributes: true, attributeFilter: ['class'] });
-}, 500);
-
-// ═══════════════════════════════════════════════════════════
-// FIRESTORE AUTO-SAVE: SIOs & Investigators
-// ═══════════════════════════════════════════════════════════
-
-// ── SIO Registry ────────────────────────────────────────────
-
-async function persistAdminCredsToFirestore() {
-  if (!db) return;
-  try {
-    await db.collection('_config').doc('adminCreds').set({ data: JSON.stringify(adminCreds), updatedAt: new Date().toISOString() });
-    showSaveIndicator('Admin credentials saved ✓');
-  } catch(e) {
-    console.error('Admin creds Firestore save error:', e);
-  }
-}
-
-async function loadAdminCredsFromFirestore() {
-  if (!db) return;
-  try {
-    const doc = await db.collection('_config').doc('adminCreds').get();
-    if (doc.exists && doc.data().data) {
-      const loaded = JSON.parse(doc.data().data);
-      if (loaded && loaded.username && loaded.password) {
-        adminCreds.username = loaded.username;
-        adminCreds.password = loaded.password;
-      }
-    }
-  } catch(e) { console.warn('Admin creds load error (using defaults):', e); }
-}
-
-async function persistTmToFirestore() {
-  if (!db) return;
-  try {
-    await db.collection('_config').doc('tmRegistry').set({ data: JSON.stringify(tmRegistry), updatedAt: new Date().toISOString() });
-    showSaveIndicator('Top Mgmt saved ✓');
-  } catch(e) {
-    console.error('TM Firestore save error:', e);
-    showSaveIndicator('TM save failed — check Firestore', true);
-  }
-}
-
-async function loadTmFromFirestore() {
-  if (!db) return;
-  try {
-    const doc = await db.collection('_config').doc('tmRegistry').get();
-    if (doc.exists && doc.data().data) {
-      const loaded = JSON.parse(doc.data().data);
-      if (Array.isArray(loaded) && loaded.length > 0) {
-        tmRegistry.splice(0, tmRegistry.length, ...loaded);
-      }
-    }
-  } catch(e) {
-    console.warn('TM load error (using defaults):', e);
-  }
-  renderTmManagementTable();
-}
-
-async function persistSiosToFirestore() {
-  if (!db) return;
-  try {
-    const batch = db.batch();
-    // Save full registry blob (for preload)
-    batch.set(db.collection('_config').doc('sioRegistry'), {
-      data: JSON.stringify(sioRegistry),
-      updatedAt: new Date().toISOString()
-    });
-    // Also save each SIO as individual doc so realtime listeners fire per-SIO
-    sioRegistry.forEach(sio => {
-      batch.set(db.collection('sioAccounts').doc(sio.username), {
-        ...sio,
-        updatedAt: new Date().toISOString()
-      });
-    });
-    await batch.commit();
-    showSaveIndicator('SIOs saved ✓');
-  } catch(e) {
-    console.error('SIO Firestore save error:', e);
-    showSaveIndicator('SIO save failed — check Firestore', true);
-  }
-}
-
-let _sioRealtimeListener = null;
-
-async function loadSiosFromFirestore() {
-  if (!db) {
-    renderSioManagementTable();
-    rebuildSioAssignDropdown();
-    return;
-  }
-  try {
-    const doc = await db.collection('_config').doc('sioRegistry').get();
-    if (doc.exists && doc.data().data) {
-      const loaded = JSON.parse(doc.data().data);
-      if (Array.isArray(loaded)) sioRegistry = loaded;
-    }
-  } catch(e) {
-    console.warn('SIO load error (using empty registry):', e);
-  }
-  renderSioManagementTable();
-  rebuildSioAssignDropdown();
-  // Start realtime listener on _config/sioRegistry so ALL devices get updates instantly
-  startSioRealtimeListener();
-}
-
-function startSioRealtimeListener() {
-  if (!db || _sioRealtimeListener) return;
-  _sioRealtimeListener = db.collection('_config').doc('sioRegistry').onSnapshot(doc => {
-    if (!doc.exists || !doc.data().data) return;
-    try {
-      const loaded = JSON.parse(doc.data().data);
-      if (!Array.isArray(loaded)) return;
-      // Update global registry
-      sioRegistry = loaded;
-      // If an SIO is currently logged in, refresh their currentSio reference & dashboard
-      if (currentSio) {
-        const fresh = sioRegistry.find(s => s.username === currentSio.username);
-        if (fresh) {
-          currentSio = fresh;
-          renderSioCasesTable();
-          updateSioStatRow();
-          // Update TM task dropdown if TM dashboard open
-          if (document.getElementById('tm-dashboard')?.classList.contains('show')) {
-            populateTmTaskDropdowns();
-          }
-        }
-      }
-      // Refresh admin views if admin dashboard is open
-      if (document.getElementById('admin-dashboard')?.classList.contains('show')) {
-        renderSioManagementTable();
-        rebuildSioAssignDropdown();
-      }
-    } catch(e) { console.warn('SIO realtime parse error:', e); }
-  }, e => { console.error('SIO realtime listener error:', e); });
-}
-
-// ── Investigators ────────────────────────────────────────────
-
-async function persistInvestigatorsToFirestore() {
-  if (!db) return;
-  try {
-    await db.collection('_config').doc('investigators').set({ data: JSON.stringify(investigators), updatedAt: new Date().toISOString() });
-    showSaveIndicator('Investigators saved ✓');
-  } catch(e) {
-    console.error('Investigators Firestore save error:', e);
-    showSaveIndicator('Investigator save failed — check Firestore', true);
-  }
-}
-
-async function loadInvestigatorsFromFirestore() {
-  if (!db) {
-    renderInvestigatorsGrid();
-    rebuildAssignDropdown();
-    return;
-  }
-  try {
-    const doc = await db.collection('_config').doc('investigators').get();
-    if (doc.exists && doc.data().data) {
-      const loaded = JSON.parse(doc.data().data);
-      if (Array.isArray(loaded) && loaded.length > 0) {
-        // Replace entire array keeping reference
-        investigators.splice(0, investigators.length, ...loaded);
-      }
-    }
-  } catch(e) {
-    console.warn('Investigators load error (using defaults):', e);
-  }
-  renderInvestigatorsGrid();
-  rebuildAssignDropdown();
-}
-
-// ── Save indicator toast (distinct from main toast) ──────────
-function showSaveIndicator(msg, isError = false) {
-  let el = document.getElementById('save-indicator');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'save-indicator';
-    el.style.cssText = 'position:fixed;bottom:80px;right:20px;z-index:9999;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;padding:7px 14px;border-radius:2px;transition:opacity 0.4s;opacity:0;pointer-events:none;display:flex;align-items:center;gap:7px;';
-    document.body.appendChild(el);
-  }
-  el.style.background = isError ? 'rgba(255,68,68,0.12)' : 'rgba(34,197,94,0.1)';
-  el.style.border = isError ? '1px solid rgba(255,68,68,0.3)' : '1px solid rgba(34,197,94,0.3)';
-  el.style.color = isError ? '#ff6b6b' : '#22c55e';
-  el.innerHTML = (isError ? '⚠ ' : '💾 ') + msg;
-  el.style.opacity = '1';
-  clearTimeout(el._timer);
-  el._timer = setTimeout(() => { el.style.opacity = '0'; }, 2500);
-}
-
 </script>
 </body>
 </html>
