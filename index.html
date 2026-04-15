@@ -2343,11 +2343,12 @@
             <label>Description</label>
             <textarea id="desc" placeholder="Describe the incident in as much detail as possible. The more context you provide, the better we can investigate."></textarea>
           </div>
-          <div class="upload-zone" onclick="document.getElementById('f-upload').click()">
+          <div class="upload-zone" id="upload-zone" onclick="document.getElementById('f-upload').click()">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7a6e" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-            <p>Click to upload evidence · PDF, images, audio</p>
-            <input type="file" id="f-upload" style="display:none" multiple />
+            <p id="upload-label">Click to upload evidence · PDF, images, video, audio</p>
+            <input type="file" id="f-upload" style="display:none" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx" onchange="handleFileSelect(this)" />
           </div>
+          <div id="file-preview-list" style="display:none;margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;"></div>
           <label class="anon-row">
             <input type="checkbox" id="anon" checked />
             <span>Submit anonymously — identity not recorded</span>
@@ -2406,9 +2407,34 @@
         <div class="tl">
           <div class="tl-item"><div class="tl-dot done"></div><div class="tl-name">Complaint received &amp; encrypted</div><div class="tl-date" id="tl-d1">Dec 14, 2024 · 09:41</div></div>
           <div class="tl-item"><div class="tl-dot done"></div><div class="tl-name">Under initial review</div><div class="tl-date">Dec 15, 2024 · 11:00</div></div>
-          <div class="tl-item"><div class="tl-dot active"></div><div class="tl-name">Investigator assigned</div><div class="tl-date">Dec 16, 2024 · 14:15</div></div>
-          <div class="tl-item"><div class="tl-dot"></div><div class="tl-name">Investigation ongoing</div><div class="tl-date">Pending</div></div>
+          <div class="tl-item"><div class="tl-dot active"></div><div class="tl-name">Investigation ongoing</div><div class="tl-date">Dec 16, 2024 · 14:15</div></div>
           <div class="tl-item"><div class="tl-dot"></div><div class="tl-name">Resolution &amp; closure</div><div class="tl-date">Pending</div></div>
+        </div>
+
+        <!-- ADMIN FEEDBACK BLOCK (shown when admin has sent feedback) -->
+        <div id="tr-attachments-block" style="display:none;margin-top:1.5rem;">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+            <span>📎</span> Your uploaded files
+          </div>
+          <div id="tr-attachments-list" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+        </div>
+        <div id="tr-feedback-block" style="display:none;margin-top:1.5rem;">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--blue);display:inline-block;"></span>
+            Update from Admin
+          </div>
+          <div id="tr-feedback-text" style="background:rgba(42,143,255,0.05);border:1px solid rgba(42,143,255,0.2);border-radius:4px;padding:14px 16px;font-size:14px;color:var(--text);line-height:1.7;"></div>
+          <div id="tr-feedback-ts" style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:0.04em;"></div>
+        </div>
+
+        <!-- SATISFACTION SECTION (shown when admin sent feedback) -->
+        <div id="tr-satisfaction-block" style="display:none;margin-top:1.5rem;">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;">Are you satisfied with this update?</div>
+          <div id="tr-satisfaction-btns" style="display:flex;gap:10px;">
+            <button onclick="submitSatisfaction('yes')" style="flex:1;padding:12px;background:rgba(245,196,0,0.08);border:1px solid rgba(245,196,0,0.3);border-radius:4px;font-family:var(--mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(245,196,0,0.15)'" onmouseout="this.style.background='rgba(245,196,0,0.08)'">✓ Yes, satisfied</button>
+            <button onclick="submitSatisfaction('no')" style="flex:1;padding:12px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:4px;font-family:var(--mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#ff6b6b;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,68,68,0.15)'" onmouseout="this.style.background='rgba(255,68,68,0.08)'">✕ Not satisfied</button>
+          </div>
+          <div id="tr-satisfaction-done" style="display:none;padding:12px 16px;background:rgba(245,196,0,0.06);border:1px solid rgba(245,196,0,0.2);border-radius:4px;font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:0.04em;">Response recorded. Thank you for your feedback.</div>
         </div>
       </div>
     </div>
@@ -2483,7 +2509,6 @@
     <div class="admin-nav-tabs">
       <button class="admin-tab active" onclick="showAdminTab('overview',this)">Overview</button>
       <button class="admin-tab" onclick="showAdminTab('complaints',this)">Complaints</button>
-      <button class="admin-tab" onclick="showAdminTab('investigators',this)">Investigators</button>
       <button class="admin-tab" onclick="showAdminTab('analytics',this)">Analytics</button>
       <button class="admin-tab" onclick="showAdminTab('audit',this)">Audit log</button>
       <button class="admin-tab" onclick="showAdminTab('qr',this)">QR Code</button>
@@ -2493,6 +2518,23 @@
       <div id="firebase-status" style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:5px 10px;border-radius:2px;border:1px solid rgba(255,255,255,0.08);color:var(--muted);">
         <span id="fb-dot" style="width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background 0.4s;"></span>
         <span id="fb-label">Firebase…</span>
+      </div>
+      <!-- NOTIFICATION BELL -->
+      <div style="position:relative;cursor:pointer;" onclick="toggleNotifications()" title="Notifications">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--border-hi);display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(245,196,0,0.4)'" onmouseout="this.style.borderColor='var(--border-hi)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <span id="notif-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--bg);" id="notif-badge">0</span>
+      </div>
+      <!-- NOTIFICATION DROPDOWN -->
+      <div id="notif-dropdown" style="display:none;position:absolute;top:56px;right:160px;width:340px;background:var(--bg3);border:1px solid var(--border-hi);border-radius:4px;z-index:400;box-shadow:0 16px 48px rgba(0,0,0,0.6);overflow:hidden;">
+        <div style="padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);">// Notifications</span>
+          <button onclick="clearAllNotifications()" style="background:none;border:none;font-family:var(--mono);font-size:10px;color:var(--muted);cursor:pointer;letter-spacing:0.06em;">Clear all</button>
+        </div>
+        <div id="notif-list" style="max-height:320px;overflow-y:auto;">
+          <div style="padding:2rem;text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted);">No notifications</div>
+        </div>
       </div>
       <div class="admin-user">
         <div class="admin-avatar">A</div>
@@ -2629,7 +2671,7 @@
       <div class="adm-card-header">
         <span class="adm-card-title">Complaint registration QR</span>
         <div class="adm-card-actions">
-          <button class="adm-btn adm-btn-accent" onclick="showAdminTab('qr',document.querySelectorAll('.admin-tab')[4])">Full QR view →</button>
+          <button class="adm-btn adm-btn-accent" onclick="showAdminTab('qr',document.querySelectorAll('.admin-tab')[3])">Full QR view →</button>
           <button class="adm-btn" onclick="printQR()">Print</button>
         </div>
       </div>
@@ -2730,69 +2772,6 @@
             <div class="dp-row" style="border-bottom:none;"><span class="dp-lbl">Last checked</span><span class="dp-val" id="fb-last-check" style="font-family:var(--mono);font-size:12px;color:var(--muted);">—</span></div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-  <div class="admin-panel" id="tab-investigators">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
-      <div>
-        <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">// team</div>
-        <div style="font-family:var(--display);font-size:28px;letter-spacing:0.06em;">INVESTIGATORS</div>
-      </div>
-      <button class="adm-btn adm-btn-accent" onclick="openAddInv()">+ Add investigator</button>
-    </div>
-    <div class="inv-grid">
-      <div class="inv-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div class="inv-avatar">RS</div>
-          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
-        </div>
-        <div class="inv-name">Ravi Sharma</div>
-        <div class="inv-role">Investigator · Fraud</div>
-        <div class="inv-stats">
-          <div><span class="inv-stat-val">8</span><span class="inv-stat-lbl">Active cases</span></div>
-          <div><span class="inv-stat-val">47</span><span class="inv-stat-lbl">Resolved</span></div>
-        </div>
-      </div>
-      <div class="inv-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div class="inv-avatar">PG</div>
-          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
-        </div>
-        <div class="inv-name">Priya Gupta</div>
-        <div class="inv-role">Investigator · HR &amp; Compliance</div>
-        <div class="inv-stats">
-          <div><span class="inv-stat-val">5</span><span class="inv-stat-lbl">Active cases</span></div>
-          <div><span class="inv-stat-val">31</span><span class="inv-stat-lbl">Resolved</span></div>
-        </div>
-      </div>
-      <div class="inv-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div class="inv-avatar">MR</div>
-          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
-        </div>
-        <div class="inv-name">Mohammed Rashid</div>
-        <div class="inv-role">Investigator · Data &amp; IT</div>
-        <div class="inv-stats">
-          <div><span class="inv-stat-val">3</span><span class="inv-stat-lbl">Active cases</span></div>
-          <div><span class="inv-stat-val">18</span><span class="inv-stat-lbl">Resolved</span></div>
-        </div>
-      </div>
-      <div class="inv-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div class="inv-avatar">SJ</div>
-          <span style="font-family:var(--mono);font-size:10px;color:var(--accent);"><span class="inv-status-dot"></span>Active</span>
-        </div>
-        <div class="inv-name">Sunita Joshi</div>
-        <div class="inv-role">Investigator · Legal &amp; Ethics</div>
-        <div class="inv-stats">
-          <div><span class="inv-stat-val">4</span><span class="inv-stat-lbl">Active cases</span></div>
-          <div><span class="inv-stat-val">25</span><span class="inv-stat-lbl">Resolved</span></div>
-        </div>
-      </div>
-      <div class="inv-card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;cursor:pointer;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'" onclick="openAddInv()">
-        <div style="font-size:28px;color:var(--muted);margin-bottom:8px;">+</div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;">Add investigator</div>
       </div>
     </div>
   </div>
@@ -2969,6 +2948,7 @@
     </div>
   </div>
   <div class="dp-body">
+    <select id="dp-assign" style="display:none;"></select>
 
     <div class="dp-section">
       <div class="dp-section-title">Complaint details</div>
@@ -2978,6 +2958,11 @@
     <div class="dp-section">
       <div class="dp-section-title">Description</div>
       <div class="dp-desc" id="dp-desc"></div>
+    </div>
+
+    <div class="dp-section" id="dp-attachments-section" style="display:none;">
+      <div class="dp-section-title">📎 Reporter's uploaded files</div>
+      <div id="dp-attachments-list" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;"></div>
     </div>
 
     <div class="dp-section">
@@ -3016,17 +3001,6 @@
     </div>
 
     <div class="dp-section">
-      <div class="dp-section-title">Assign investigator</div>
-      <select class="dp-assign" id="dp-assign" onchange="logAssign()">
-        <option value="">Unassigned</option>
-        <option value="R. Sharma">Ravi Sharma · Investigator</option>
-        <option value="P. Gupta">Priya Gupta · HR &amp; Compliance</option>
-        <option value="M. Rashid">Mohammed Rashid · IT &amp; Data</option>
-        <option value="S. Joshi">Sunita Joshi · Legal &amp; Ethics</option>
-      </select>
-    </div>
-
-    <div class="dp-section">
       <div class="dp-section-title">Audit trail</div>
       <div id="dp-audit"></div>
     </div>
@@ -3035,6 +3009,18 @@
       <div class="dp-section-title">Add note</div>
       <textarea id="dp-note" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;resize:vertical;min-height:80px;outline:none;line-height:1.6;" placeholder="Add investigation note..."></textarea>
       <button onclick="addNote()" style="margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;padding:7px 16px;border:1px solid rgba(245,196,0,0.3);border-radius:2px;background:none;color:var(--accent);cursor:pointer;">Save note →</button>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-title">📣 Feedback to Reporter</div>
+      <p style="font-size:12px;color:var(--muted);font-family:var(--mono);margin-bottom:10px;letter-spacing:0.04em;">Write a message visible to the reporter when they track their complaint.</p>
+      <textarea id="dp-reporter-feedback" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid rgba(42,143,255,0.3);border-radius:2px;color:var(--text);font-family:var(--body);font-size:13px;resize:vertical;min-height:90px;outline:none;line-height:1.6;" placeholder="e.g. Your report is being reviewed by our compliance team. We expect to provide an update within 5 business days..."></textarea>
+      <button onclick="saveFeedback()" style="margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;padding:7px 16px;border:1px solid rgba(42,143,255,0.4);border-radius:2px;background:none;color:var(--blue);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(42,143,255,0.08)'" onmouseout="this.style.background='none'">Send to Reporter →</button>
+    </div>
+
+    <div class="dp-section" id="dp-satisfaction-section" style="display:none;">
+      <div class="dp-section-title">✅ Reporter Satisfaction</div>
+      <div id="dp-satisfaction-result" style="padding:10px 14px;background:var(--bg);border:1px solid var(--border-hi);border-radius:2px;font-family:var(--mono);font-size:12px;color:var(--muted2);letter-spacing:0.04em;">Awaiting reporter response...</div>
     </div>
 
   </div>
@@ -3142,12 +3128,166 @@ function genId() {
   return 'SV-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 8999);
 }
 
+// ═══════════════════════════════════════
+// FILE HANDLING
+// ═══════════════════════════════════════
+function handleFileSelect(input) {
+  const files = Array.from(input.files);
+  const previewList = document.getElementById('file-preview-list');
+  const label = document.getElementById('upload-label');
+  if (!files.length) return;
+  previewList.style.display = 'flex';
+  label.textContent = files.length + ' file(s) selected — click to change';
+  previewList.innerHTML = files.map(f => {
+    const icon = f.type.startsWith('image/') ? '🖼' : f.type.startsWith('video/') ? '🎬' : f.type.startsWith('audio/') ? '🎵' : f.type === 'application/pdf' ? '📄' : '📁';
+    const sizeKB = (f.size / 1024).toFixed(1);
+    return `<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--bg3);border:1px solid var(--border-hi);border-radius:3px;font-family:var(--mono);font-size:11px;color:var(--muted2);">
+      <span>${icon}</span><span style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</span><span style="color:var(--muted);font-size:10px;">${sizeKB}KB</span>
+    </div>`;
+  }).join('');
+}
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve({ name: file.name, type: file.type, size: file.size, data: reader.result });
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function getAttachmentsForContainer(containerId) {
+  if (containerId === 'dp-attachments-list' && currentDetailId) {
+    return (DB[currentDetailId] && DB[currentDetailId].attachments) || [];
+  } else if (containerId === 'tr-attachments-list') {
+    const id = document.getElementById('tr-id-label') ? document.getElementById('tr-id-label').textContent.trim() : null;
+    return (id && DB[id] && DB[id].attachments) || [];
+  }
+  return [];
+}
+
+function renderAttachmentCards(attachments, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container || !attachments || !attachments.length) return;
+  container.innerHTML = attachments.map((att, i) => {
+    const isImage = att.type && att.type.startsWith('image/');
+    const isVideo = att.type && att.type.startsWith('video/');
+    const isAudio = att.type && att.type.startsWith('audio/');
+    const isPDF  = att.type === 'application/pdf' || att.name.toLowerCase().endsWith('.pdf');
+    const icon   = isImage ? '🖼' : isVideo ? '🎬' : isAudio ? '🎵' : isPDF ? '📄' : '📁';
+    const sizeKB = att.size ? (att.size / 1024 < 1024 ? (att.size/1024).toFixed(1)+' KB' : (att.size/1048576).toFixed(1)+' MB') : '';
+    const hasData = att.data && att.data.length > 0;
+
+    let previewHTML = '';
+    if (isImage && hasData) {
+      previewHTML = `<div style="height:120px;background:var(--bg);overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="viewAttachment(${i},'${containerId}')">
+        <img src="${att.data}" style="width:100%;height:120px;object-fit:cover;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" />
+      </div>`;
+    } else if (isVideo && hasData) {
+      previewHTML = `<div style="height:120px;background:#000;overflow:hidden;"><video src="${att.data}" style="width:100%;height:120px;object-fit:cover;" preload="metadata"></video></div>`;
+    } else if (isAudio && hasData) {
+      previewHTML = `<div style="height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);gap:8px;padding:12px;">
+        <span style="font-size:28px;">🎵</span>
+      </div>`;
+    } else if (isPDF) {
+      previewHTML = `<div style="height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,68,68,0.05);gap:6px;">
+        <span style="font-size:36px;">📄</span>
+        <span style="font-family:var(--mono);font-size:9px;color:#ff6b6b;letter-spacing:0.1em;text-transform:uppercase;">PDF</span>
+      </div>`;
+    } else {
+      previewHTML = `<div style="height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);gap:6px;">
+        <span style="font-size:36px;">${icon}</span>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;">${att.name.split('.').pop().toUpperCase()}</span>
+      </div>`;
+    }
+
+    const canView = hasData && (isImage || isVideo || isAudio || isPDF);
+
+    return `<div style="width:180px;background:var(--bg2);border:1px solid var(--border-hi);border-radius:6px;overflow:hidden;flex-shrink:0;transition:border-color 0.2s,box-shadow 0.2s;" onmouseover="this.style.borderColor='rgba(245,196,0,0.35)';this.style.boxShadow='0 4px 20px rgba(0,0,0,0.4)'" onmouseout="this.style.borderColor='var(--border-hi)';this.style.boxShadow='none'">
+      ${previewHTML}
+      <div style="padding:10px 12px;border-top:1px solid var(--border);">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;" title="${att.name}">${att.name}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:10px;">${sizeKB}</div>
+        <div style="display:flex;gap:6px;">
+          ${canView ? `<button onclick="viewAttachment(${i},'${containerId}')" style="flex:1;padding:6px 4px;background:rgba(42,143,255,0.1);border:1px solid rgba(42,143,255,0.3);border-radius:3px;font-family:var(--mono);font-size:10px;color:var(--blue);cursor:pointer;letter-spacing:0.04em;transition:background 0.15s;" onmouseover="this.style.background='rgba(42,143,255,0.2)'" onmouseout="this.style.background='rgba(42,143,255,0.1)'">👁 View</button>` : ''}
+          ${hasData ? `<button onclick="downloadAttachment(${i},'${containerId}')" style="flex:1;padding:6px 4px;background:rgba(245,196,0,0.08);border:1px solid rgba(245,196,0,0.3);border-radius:3px;font-family:var(--mono);font-size:10px;color:var(--accent);cursor:pointer;letter-spacing:0.04em;transition:background 0.15s;" onmouseover="this.style.background='rgba(245,196,0,0.18)'" onmouseout="this.style.background='rgba(245,196,0,0.08)'">⬇ Save</button>` : `<span style="font-family:var(--mono);font-size:9px;color:var(--muted);padding:4px;">Cloud only</span>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Attachment viewer lightbox — supports image, video, audio, PDF
+function viewAttachment(index, containerId) {
+  const attachments = getAttachmentsForContainer(containerId);
+  if (!attachments || !attachments[index]) return;
+  const att = attachments[index];
+  const isImage = att.type && att.type.startsWith('image/');
+  const isVideo = att.type && att.type.startsWith('video/');
+  const isAudio = att.type && att.type.startsWith('audio/');
+  const isPDF   = att.type === 'application/pdf' || att.name.toLowerCase().endsWith('.pdf');
+
+  const existing = document.getElementById('att-lightbox');
+  if (existing) existing.remove();
+
+  const lb = document.createElement('div');
+  lb.id = 'att-lightbox';
+  lb.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.94);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:20px;';
+
+  let mediaHTML = '';
+  if (isImage) {
+    mediaHTML = `<img src="${att.data}" style="max-width:90vw;max-height:78vh;object-fit:contain;border-radius:4px;box-shadow:0 0 80px rgba(0,0,0,0.9);" />`;
+  } else if (isVideo) {
+    mediaHTML = `<video src="${att.data}" controls autoplay style="max-width:90vw;max-height:78vh;border-radius:4px;box-shadow:0 0 60px rgba(0,0,0,0.8);"></video>`;
+  } else if (isAudio) {
+    mediaHTML = `<div style="background:var(--bg3);border:1px solid var(--border-hi);border-radius:8px;padding:2rem 2.5rem;display:flex;flex-direction:column;align-items:center;gap:1.5rem;min-width:320px;">
+      <span style="font-size:56px;">🎵</span>
+      <div style="font-family:var(--mono);font-size:13px;color:var(--text);text-align:center;">${att.name}</div>
+      <audio src="${att.data}" controls autoplay style="width:100%;"></audio>
+    </div>`;
+  } else if (isPDF) {
+    mediaHTML = `<iframe src="${att.data}" style="width:88vw;height:82vh;border:none;border-radius:4px;box-shadow:0 0 60px rgba(0,0,0,0.8);background:#fff;"></iframe>`;
+  }
+
+  lb.innerHTML = `
+    <div style="position:absolute;top:16px;right:16px;display:flex;gap:8px;z-index:1;">
+      <div style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.4);padding:8px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:3px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${att.name}</div>
+      <button onclick="downloadAttachment(${index},'${containerId}')" style="padding:8px 16px;background:rgba(245,196,0,0.12);border:1px solid rgba(245,196,0,0.35);border-radius:3px;font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;letter-spacing:0.06em;transition:background 0.2s;" onmouseover="this.style.background='rgba(245,196,0,0.22)'" onmouseout="this.style.background='rgba(245,196,0,0.12)'">⬇ Download</button>
+      <button onclick="document.getElementById('att-lightbox').remove()" style="width:36px;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:50%;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,68,68,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">✕</button>
+    </div>
+    ${mediaHTML}`;
+  lb.addEventListener('click', e => { if (e.target === lb) lb.remove(); });
+  document.body.appendChild(lb);
+}
+
+function downloadAttachment(index, containerId) {
+  const attachments = getAttachmentsForContainer(containerId);
+  if (!attachments || !attachments[index]) return;
+  const att = attachments[index];
+  if (!att.data) { alert('File data not available for download.'); return; }
+  const a = document.createElement('a');
+  a.href = att.data;
+  a.download = att.name;
+  a.click();
+}
+
 async function submitReport() {
   const cat = document.getElementById('cat').value;
   const desc = document.getElementById('desc').value;
   if (!cat || !desc.trim()) { alert('Please select a category and provide a description.'); return; }
   const tid = genId();
   const isAnon = document.getElementById('anon').checked;
+
+  // Read files as base64
+  const fileInput = document.getElementById('f-upload');
+  const files = fileInput ? Array.from(fileInput.files) : [];
+  let attachments = [];
+  if (files.length > 0) {
+    try {
+      attachments = await Promise.all(files.map(readFileAsBase64));
+    } catch(e) { console.error('File read error:', e); }
+  }
+
   const complaint = {
     id: tid,
     cat,
@@ -3159,6 +3299,7 @@ async function submitReport() {
     reporter: isAnon ? '' : (document.querySelector('#id-fields input[type=text]')?.value || ''),
     assigned: '',
     desc,
+    attachments,
     audit: [new Date().toLocaleString('en-GB') + ' — Complaint received · System'],
     createdAt: Date.now()
   };
@@ -3168,16 +3309,112 @@ async function submitReport() {
   document.getElementById('tid-display').textContent = tid;
   document.getElementById('complaint-form').style.display = 'none';
   document.getElementById('success-view').style.display = 'block';
+  addNotification('New complaint received: ' + tid + (attachments.length ? ' · ' + attachments.length + ' file(s) attached' : ''), 'alert');
 
-  // Save to Firestore
+  // Save to Firestore (skip large base64 attachments — store metadata only if too large)
   if (db) {
     try {
-      await db.collection('complaints').doc(tid).set(complaint);
-      console.log('Complaint saved to Firestore:', tid);
-    } catch(e) {
-      console.error('Firestore save error:', e);
-    }
+      const totalSize = JSON.stringify(attachments).length;
+      const firestoreDoc = { ...complaint };
+      if (totalSize > 900000) {
+        // Too large for Firestore doc — store metadata only
+        firestoreDoc.attachments = attachments.map(a => ({ name: a.name, type: a.type, size: a.size, data: '' }));
+        firestoreDoc.attachmentNote = 'Attachments stored locally only (too large for cloud sync)';
+      }
+      await db.collection('complaints').doc(tid).set(firestoreDoc);
+    } catch(e) { console.error('Firestore save error:', e); }
   }
+}
+
+// ═══════════════════════════════════════
+// NOTIFICATION SYSTEM
+// ═══════════════════════════════════════
+const NOTIFICATIONS = [];
+
+function addNotification(msg, type) {
+  type = type || 'info';
+  const n = { id: Date.now(), msg, type, ts: new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'}), read: false };
+  NOTIFICATIONS.unshift(n);
+  renderNotifications();
+}
+
+function renderNotifications() {
+  const badge = document.getElementById('notif-badge');
+  const list = document.getElementById('notif-list');
+  const unread = NOTIFICATIONS.filter(function(n){return !n.read;}).length;
+  if (badge) {
+    if (unread > 0) { badge.style.display = 'flex'; badge.textContent = unread > 9 ? '9+' : String(unread); }
+    else { badge.style.display = 'none'; }
+  }
+  if (!list) return;
+  if (NOTIFICATIONS.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted);">No notifications</div>'; return; }
+  var iconMap = {info:'🔵',success:'🟡',alert:'🔴',satisfaction:'✅'};
+  list.innerHTML = NOTIFICATIONS.map(function(n){ return '<div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;background:'+(n.read?'transparent':'rgba(245,196,0,0.03)')+'"><span style="font-size:14px;">'+(iconMap[n.type]||'🔵')+'</span><div style="flex:1"><div style="font-size:13px;color:var(--text);line-height:1.5;">'+n.msg+'</div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px;">'+n.ts+'</div></div></div>'; }).join('');
+}
+
+function toggleNotifications() {
+  var dropdown = document.getElementById('notif-dropdown');
+  var isVisible = dropdown.style.display !== 'none';
+  dropdown.style.display = isVisible ? 'none' : 'block';
+  if (!isVisible) { NOTIFICATIONS.forEach(function(n){ n.read = true; }); renderNotifications(); }
+}
+
+function clearAllNotifications() {
+  NOTIFICATIONS.length = 0;
+  renderNotifications();
+  document.getElementById('notif-dropdown').style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+  var dropdown = document.getElementById('notif-dropdown');
+  if (dropdown && !dropdown.contains(e.target) && !e.target.closest('[onclick*="toggleNotifications"]')) {
+    dropdown.style.display = 'none';
+  }
+});
+
+// ═══════════════════════════════════════
+// ADMIN FEEDBACK TO REPORTER
+// ═══════════════════════════════════════
+async function saveFeedback() {
+  if (!requireAdmin()) return;
+  if (!currentDetailId) return;
+  var text = document.getElementById('dp-reporter-feedback').value.trim();
+  if (!text) { showToast('Please enter a feedback message', 'error'); return; }
+  var ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  DB[currentDetailId].adminFeedback = text;
+  DB[currentDetailId].adminFeedbackTs = ts;
+  DB[currentDetailId].reporterSatisfied = null;
+  DB[currentDetailId].audit.push(ts + ' — Admin feedback sent to reporter · admin');
+  buildDpAudit(currentDetailId);
+  addAuditEntry('Admin feedback sent for ' + currentDetailId);
+  addNotification('Feedback sent for report ' + currentDetailId, 'success');
+  document.getElementById('dp-satisfaction-section').style.display = 'block';
+  document.getElementById('dp-satisfaction-result').textContent = 'Awaiting reporter satisfaction response...';
+  if (db) { try { await db.collection('complaints').doc(currentDetailId).update({ adminFeedback: text, adminFeedbackTs: ts, reporterSatisfied: null, audit: DB[currentDetailId].audit }); } catch(e) {} }
+  showToast('Feedback sent to reporter ✓', 'success');
+  document.getElementById('dp-reporter-feedback').value = '';
+}
+
+// ═══════════════════════════════════════
+// REPORTER SATISFACTION
+// ═══════════════════════════════════════
+async function submitSatisfaction(answer) {
+  var satBlock = document.getElementById('tr-satisfaction-block');
+  var id = satBlock ? satBlock.dataset.trackId : null;
+  if (!id) return;
+  if (!DB[id]) DB[id] = {};
+  DB[id].reporterSatisfied = answer;
+  var ts = new Date().toLocaleString('en-GB',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  if (!DB[id].audit) DB[id].audit = [];
+  DB[id].audit.push(ts + ' — Reporter satisfaction: ' + (answer === 'yes' ? 'Satisfied ✓' : 'Not satisfied ✕'));
+  document.getElementById('tr-satisfaction-btns').style.display = 'none';
+  var done = document.getElementById('tr-satisfaction-done');
+  done.style.display = 'block';
+  done.textContent = answer === 'yes' ? '✓ Response recorded: Satisfied. Thank you for your feedback!' : '✕ Response recorded: Not satisfied. Our team will follow up.';
+  done.style.color = answer === 'yes' ? 'var(--accent)' : '#ff6b6b';
+  done.style.borderColor = answer === 'yes' ? 'rgba(245,196,0,0.3)' : 'rgba(255,68,68,0.3)';
+  if (db) { try { await db.collection('complaints').doc(id).update({ reporterSatisfied: answer, audit: DB[id].audit }); } catch(e) {} }
+  addNotification('Reporter for ' + id + ' responded: ' + (answer === 'yes' ? 'Satisfied ✓' : 'Not satisfied ✕'), answer === 'yes' ? 'success' : 'alert');
 }
 
 function resetForm() {
@@ -3185,6 +3422,10 @@ function resetForm() {
   document.getElementById('success-view').style.display = 'none';
   document.getElementById('cat').value = '';
   document.getElementById('desc').value = '';
+  document.getElementById('f-upload').value = '';
+  document.getElementById('upload-label').textContent = 'Click to upload evidence · PDF, images, video, audio';
+  const pl = document.getElementById('file-preview-list');
+  if (pl) { pl.innerHTML = ''; pl.style.display = 'none'; }
 }
 
 async function trackReport() {
@@ -3192,33 +3433,61 @@ async function trackReport() {
   const res = document.getElementById('track-result');
   const cls = {New:'sp-new','In review':'sp-review','In progress':'sp-progress','Escalated':'sp-escalated','Closed':'sp-closed'};
 
+  let c = null;
+
   // Try Firestore first
   if (db) {
     try {
       const doc = await db.collection('complaints').doc(id).get();
       if (doc.exists) {
-        const c = doc.data();
+        c = doc.data();
         DB[id] = c; // sync to local
-        res.classList.add('show');
-        document.getElementById('tr-id-label').textContent = id;
-        const pill = document.getElementById('tr-status');
-        pill.textContent = c.status;
-        pill.className = 'status-pill ' + (cls[c.status] || 'sp-progress');
-        document.getElementById('tr-info').textContent = `Category: ${c.cat}  ·  Department: ${c.dept}  ·  Submitted: ${c.date}  ·  Reporter: ${c.anon ? 'Anonymous' : (c.reporter || 'Identified')}`;
-        return;
       }
     } catch(e) { console.error('Firestore track error:', e); }
   }
 
   // Fallback to local DB
-  const c = DB[id];
+  if (!c) c = DB[id];
   if (!c) { alert('Tracking ID not found. Check your ID and try again.'); return; }
+
   res.classList.add('show');
   document.getElementById('tr-id-label').textContent = id;
   const pill = document.getElementById('tr-status');
   pill.textContent = c.status;
   pill.className = 'status-pill ' + (cls[c.status] || 'sp-progress');
   document.getElementById('tr-info').textContent = `Category: ${c.cat}  ·  Department: ${c.dept}  ·  Submitted: ${c.date}  ·  Reporter: ${c.anon ? 'Anonymous' : (c.reporter || 'Identified')}`;
+
+  // Show reporter's uploaded files
+  const trAttBlock = document.getElementById('tr-attachments-block');
+  if (c.attachments && c.attachments.length > 0 && c.attachments.some(a => a.data)) {
+    trAttBlock.style.display = 'block';
+    renderAttachmentCards(c.attachments, 'tr-attachments-list');
+  } else {
+    trAttBlock.style.display = 'none';
+  }
+  const feedbackBlock = document.getElementById('tr-feedback-block');
+  const satBlock = document.getElementById('tr-satisfaction-block');
+  const satDone = document.getElementById('tr-satisfaction-done');
+  const satBtns = document.getElementById('tr-satisfaction-btns');
+  if (c.adminFeedback) {
+    feedbackBlock.style.display = 'block';
+    document.getElementById('tr-feedback-text').textContent = c.adminFeedback;
+    document.getElementById('tr-feedback-ts').textContent = c.adminFeedbackTs ? `Sent by admin · ${c.adminFeedbackTs}` : '';
+    satBlock.style.display = 'block';
+    // Store current tracked ID for satisfaction
+    satBlock.dataset.trackId = id;
+    if (c.reporterSatisfied !== undefined) {
+      satBtns.style.display = 'none';
+      satDone.style.display = 'block';
+      satDone.textContent = c.reporterSatisfied === 'yes' ? '✓ You marked this as: Satisfied' : '✕ You marked this as: Not satisfied';
+    } else {
+      satBtns.style.display = 'flex';
+      satDone.style.display = 'none';
+    }
+  } else {
+    feedbackBlock.style.display = 'none';
+    satBlock.style.display = 'none';
+  }
 }
 
 // ═══════════════════════════════════════
@@ -3525,6 +3794,16 @@ function openDetail(id) {
     <div class="dp-row"><span class="dp-lbl">Risk level</span><span class="dp-val">${c.risk}</span></div>
   `;
   document.getElementById('dp-desc').textContent = c.desc;
+  // Show attachments
+  const attSection = document.getElementById('dp-attachments-section');
+  const attList = document.getElementById('dp-attachments-list');
+  if (c.attachments && c.attachments.length > 0) {
+    attSection.style.display = 'block';
+    renderAttachmentCards(c.attachments, 'dp-attachments-list');
+  } else {
+    attSection.style.display = 'none';
+    attList.innerHTML = '';
+  }
   rebuildAssignDropdown();
   document.getElementById('dp-assign').value = c.assigned || '';
   document.getElementById('ai-output').innerHTML = '<p style="color:var(--muted);font-style:italic;">Click "Scan complaint →" to run an AI analysis that assesses severity and recommends a status.</p>';
@@ -3539,6 +3818,24 @@ function openDetail(id) {
   });
   document.getElementById('detail-panel').classList.add('open');
   document.getElementById('admin-overlay').classList.add('show');
+  // Restore feedback
+  document.getElementById('dp-reporter-feedback').value = '';
+  var satSection = document.getElementById('dp-satisfaction-section');
+  var satResult = document.getElementById('dp-satisfaction-result');
+  if (c.adminFeedback) {
+    satSection.style.display = 'block';
+    if (c.reporterSatisfied) {
+      satResult.textContent = 'Reporter response: ' + (c.reporterSatisfied === 'yes' ? '✓ Satisfied' : '✕ Not satisfied');
+      satResult.style.color = c.reporterSatisfied === 'yes' ? 'var(--accent)' : '#ff6b6b';
+      satResult.style.borderColor = c.reporterSatisfied === 'yes' ? 'rgba(245,196,0,0.3)' : 'rgba(255,68,68,0.3)';
+    } else {
+      satResult.textContent = 'Awaiting reporter satisfaction response...';
+      satResult.style.color = 'var(--muted2)';
+      satResult.style.borderColor = 'var(--border-hi)';
+    }
+  } else {
+    satSection.style.display = 'none';
+  }
 }
 
 function closeDetail() {
@@ -3598,6 +3895,8 @@ async function updateStatus(btn, status) {
 
   // Show toast
   showToast(`Status updated → ${status}`, 'success');
+  // Notify
+  addNotification(`Report ${currentDetailId} status updated → ${status}`, 'info');
 
   // Save to Firestore
   if (db) {
@@ -3913,11 +4212,73 @@ function initQRCodes() {
 
 function downloadQR() {
   const canvas = document.querySelector('#qr-main-container canvas');
-  if (!canvas) { alert('QR code not loaded yet.'); return; }
+  if (!canvas) { showToast('QR code not ready yet', 'error'); return; }
+
+  // Create a styled branded canvas
+  const branded = document.createElement('canvas');
+  branded.width = 400;
+  branded.height = 480;
+  const ctx = branded.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#08080e';
+  ctx.fillRect(0, 0, 400, 480);
+
+  // Top accent line
+  const grad = ctx.createLinearGradient(0, 0, 400, 0);
+  grad.addColorStop(0, '#f5c400');
+  grad.addColorStop(1, '#2a8fff');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 400, 3);
+
+  // Title
+  ctx.fillStyle = '#f5c400';
+  ctx.font = 'bold 28px monospace';
+  ctx.letterSpacing = '4px';
+  ctx.textAlign = 'center';
+  ctx.fillText('REPORTER', 200, 50);
+
+  // Subtitle
+  ctx.fillStyle = '#55536e';
+  ctx.font = '11px monospace';
+  ctx.fillText('SECURE ANONYMOUS REPORTING', 200, 72);
+
+  // QR border
+  ctx.strokeStyle = 'rgba(245,196,0,0.3)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(80, 90, 240, 240);
+
+  // White QR background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(84, 94, 232, 232);
+
+  // QR image
+  ctx.drawImage(canvas, 84, 94, 232, 232);
+
+  // URL
+  ctx.fillStyle = '#9896b8';
+  ctx.font = '10px monospace';
+  ctx.fillText(getReportURL(), 200, 365);
+
+  // Instructions
+  ctx.fillStyle = '#55536e';
+  ctx.font = '11px monospace';
+  ctx.fillText('Scan to submit a complaint anonymously', 200, 395);
+
+  // Shield icon row
+  ctx.fillStyle = 'rgba(245,196,0,0.6)';
+  ctx.font = '12px monospace';
+  ctx.fillText('🛡  End-to-end encrypted  ·  No identity recorded', 200, 430);
+
+  // Bottom border
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 477, 400, 3);
+
   const link = document.createElement('a');
-  link.download = 'reporter-complaint-qr.png';
-  link.href = canvas.toDataURL('image/png');
+  link.download = 'reporter-qr-code.png';
+  link.href = branded.toDataURL('image/png');
   link.click();
+  showToast('QR code downloaded ✓', 'success');
 }
 
 function printQR() {
