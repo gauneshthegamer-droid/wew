@@ -3331,11 +3331,31 @@ async function submitReport() {
 // ═══════════════════════════════════════
 const NOTIFICATIONS = [];
 
-function addNotification(msg, type) {
+function addNotification(msg, type, reportId) {
   type = type || 'info';
-  const n = { id: Date.now(), msg, type, ts: new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'}), read: false };
+  const n = { id: Date.now(), msg, type, ts: new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'}), read: false, reportId: reportId || null };
   NOTIFICATIONS.unshift(n);
   renderNotifications();
+}
+
+function openReportFromNotification(reportId) {
+  // Close notification dropdown
+  var dropdown = document.getElementById('notif-dropdown');
+  if (dropdown) dropdown.style.display = 'none';
+  // Close admin dashboard
+  var adminDash = document.getElementById('admin-dashboard');
+  if (adminDash) adminDash.classList.remove('show');
+  // Pre-fill the track ID input and trigger lookup
+  var trackInput = document.getElementById('track-id');
+  if (trackInput) trackInput.value = reportId;
+  // Scroll to track section
+  var trackSection = document.getElementById('track');
+  if (trackSection) {
+    trackSection.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(function() { trackReport(); }, 400);
+  } else {
+    trackReport();
+  }
 }
 
 function renderNotifications() {
@@ -3349,7 +3369,14 @@ function renderNotifications() {
   if (!list) return;
   if (NOTIFICATIONS.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted);">No notifications</div>'; return; }
   var iconMap = {info:'🔵',success:'🟡',alert:'🔴',satisfaction:'✅'};
-  list.innerHTML = NOTIFICATIONS.map(function(n){ return '<div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;background:'+(n.read?'transparent':'rgba(245,196,0,0.03)')+'"><span style="font-size:14px;">'+(iconMap[n.type]||'🔵')+'</span><div style="flex:1"><div style="font-size:13px;color:var(--text);line-height:1.5;">'+n.msg+'</div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px;">'+n.ts+'</div></div></div>'; }).join('');
+  list.innerHTML = NOTIFICATIONS.map(function(n){
+    var clickable = !!n.reportId;
+    var clickAttr = clickable ? 'onclick="openReportFromNotification(\'' + n.reportId + '\')" title="Click to view this report in Track section"' : '';
+    var cursorStyle = clickable ? 'cursor:pointer;' : '';
+    var hoverBg = clickable ? ' onmouseover="this.style.background=\'rgba(245,196,0,0.07)\'" onmouseout="this.style.background=\'' + (n.read ? 'transparent' : 'rgba(245,196,0,0.03)') + '\'"' : '';
+    var linkHint = clickable ? '<span style="font-family:var(--mono);font-size:9px;color:var(--blue);letter-spacing:0.06em;margin-top:3px;display:block;">↗ Click to open in Track Report</span>' : '';
+    return '<div ' + clickAttr + hoverBg + ' style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;background:' + (n.read ? 'transparent' : 'rgba(245,196,0,0.03)') + ';' + cursorStyle + '"><span style="font-size:14px;">' + (iconMap[n.type]||'🔵') + '</span><div style="flex:1"><div style="font-size:13px;color:var(--text);line-height:1.5;">' + n.msg + '</div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px;">' + n.ts + '</div>' + linkHint + '</div></div>';
+  }).join('');
 }
 
 function toggleNotifications() {
@@ -3457,6 +3484,67 @@ async function trackReport() {
   pill.className = 'status-pill ' + (cls[c.status] || 'sp-progress');
   document.getElementById('tr-info').textContent = `Category: ${c.cat}  ·  Department: ${c.dept}  ·  Submitted: ${c.date}  ·  Reporter: ${c.anon ? 'Anonymous' : (c.reporter || 'Identified')}`;
 
+  // ── Dynamic timeline based on actual status ──────────────────────────────
+  // Extract timestamps from audit log for each stage
+  function getAuditTs(keyword) {
+    if (!c.audit) return null;
+    const entry = c.audit.find(a => a.toLowerCase().includes(keyword.toLowerCase()));
+    return entry ? entry.split(' — ')[0] : null;
+  }
+  const statusOrder = ['New', 'In review', 'In progress', 'Escalated', 'Closed'];
+  const currentIdx = statusOrder.indexOf(c.status);
+  // Map timeline steps to status thresholds
+  // Step 0: always done (received)
+  // Step 1: done when status is In review / In progress / Escalated / Closed
+  // Step 2: done when status is In progress / Escalated / Closed
+  // Step 3: done when status is Closed, active when Escalated
+  const receivedTs = getAuditTs('received') || c.date || '—';
+  const reviewTs   = getAuditTs('In review') || getAuditTs('In progress') || '—';
+  const progressTs = getAuditTs('In progress') || getAuditTs('Escalated') || '—';
+  const closedTs   = getAuditTs('Closed') || (c.status === 'Closed' ? 'Resolved' : 'Pending');
+
+  const step1done = ['In review','In progress','Escalated','Closed'].includes(c.status);
+  const step2done = ['In progress','Escalated','Closed'].includes(c.status);
+  const step3done = c.status === 'Closed';
+  const step3active = c.status === 'Escalated';
+  const step2active = c.status === 'In progress';
+  const step1active = c.status === 'In review';
+
+  document.querySelector('.tl').innerHTML = `
+    <div class="tl-item">
+      <div class="tl-dot done"></div>
+      <div class="tl-name">Complaint received &amp; encrypted</div>
+      <div class="tl-date">${receivedTs}</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot ${step1done ? 'done' : step1active ? 'active' : ''}"></div>
+      <div class="tl-name">Under initial review</div>
+      <div class="tl-date">${step1done || step1active ? reviewTs : 'Pending'}</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot ${step2done ? 'done' : step2active ? 'active' : ''}"></div>
+      <div class="tl-name">Investigation ongoing</div>
+      <div class="tl-date">${step2done || step2active ? progressTs : 'Pending'}</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot ${step3done ? 'done' : step3active ? 'active' : ''}"></div>
+      <div class="tl-name" style="${step3done ? 'color:var(--accent);font-weight:600;' : ''}">Resolution &amp; closure${step3done ? ' ✓' : ''}</div>
+      <div class="tl-date" style="${step3done ? 'color:var(--accent);' : ''}">${step3done ? closedTs : (step3active ? 'Escalated — awaiting resolution' : 'Pending')}</div>
+    </div>
+  `;
+
+  // If status is Closed, add a prominent closed notice banner
+  const existingBanner = document.getElementById('tr-closed-banner');
+  if (existingBanner) existingBanner.remove();
+  if (c.status === 'Closed') {
+    const banner = document.createElement('div');
+    banner.id = 'tr-closed-banner';
+    banner.style.cssText = 'margin-top:1.5rem;padding:14px 18px;background:rgba(245,196,0,0.07);border:1px solid rgba(245,196,0,0.3);border-radius:4px;display:flex;align-items:center;gap:12px;';
+    banner.innerHTML = `<span style="font-size:20px;">✅</span><div><div style="font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:2px;">Report Closed</div><div style="font-size:13px;color:var(--muted2);line-height:1.6;">This report has been reviewed and closed by the admin team. Thank you for your submission.</div></div>`;
+    document.querySelector('.tl').after(banner);
+  }
+  // ── End dynamic timeline ─────────────────────────────────────────────────
+
   // Show reporter's uploaded files
   const trAttBlock = document.getElementById('tr-attachments-block');
   if (c.attachments && c.attachments.length > 0 && c.attachments.some(a => a.data)) {
@@ -3465,27 +3553,38 @@ async function trackReport() {
   } else {
     trAttBlock.style.display = 'none';
   }
+
   const feedbackBlock = document.getElementById('tr-feedback-block');
   const satBlock = document.getElementById('tr-satisfaction-block');
   const satDone = document.getElementById('tr-satisfaction-done');
   const satBtns = document.getElementById('tr-satisfaction-btns');
+
+  // Show admin feedback if present
   if (c.adminFeedback) {
     feedbackBlock.style.display = 'block';
     document.getElementById('tr-feedback-text').textContent = c.adminFeedback;
     document.getElementById('tr-feedback-ts').textContent = c.adminFeedbackTs ? `Sent by admin · ${c.adminFeedbackTs}` : '';
+  } else {
+    feedbackBlock.style.display = 'none';
+  }
+
+  // Show satisfaction block when: admin sent feedback OR report is Closed
+  if (c.adminFeedback || c.status === 'Closed') {
     satBlock.style.display = 'block';
-    // Store current tracked ID for satisfaction
     satBlock.dataset.trackId = id;
-    if (c.reporterSatisfied !== undefined) {
+    if (c.reporterSatisfied !== undefined && c.reporterSatisfied !== null) {
       satBtns.style.display = 'none';
       satDone.style.display = 'block';
       satDone.textContent = c.reporterSatisfied === 'yes' ? '✓ You marked this as: Satisfied' : '✕ You marked this as: Not satisfied';
+      satDone.style.color = c.reporterSatisfied === 'yes' ? 'var(--accent)' : '#ff6b6b';
+      satDone.style.borderColor = c.reporterSatisfied === 'yes' ? 'rgba(245,196,0,0.3)' : 'rgba(255,68,68,0.3)';
+      satDone.style.color = c.reporterSatisfied === 'yes' ? 'var(--accent)' : '#ff6b6b';
+      satDone.style.borderColor = c.reporterSatisfied === 'yes' ? 'rgba(245,196,0,0.3)' : 'rgba(255,68,68,0.3)';
     } else {
       satBtns.style.display = 'flex';
       satDone.style.display = 'none';
     }
   } else {
-    feedbackBlock.style.display = 'none';
     satBlock.style.display = 'none';
   }
 }
@@ -3895,8 +3994,8 @@ async function updateStatus(btn, status) {
 
   // Show toast
   showToast(`Status updated → ${status}`, 'success');
-  // Notify
-  addNotification(`Report ${currentDetailId} status updated → ${status}`, 'info');
+  // Notify — pass reportId so clicking notification opens Track Report for that ID
+  addNotification(`Report ${currentDetailId} status updated → ${status}`, 'info', currentDetailId);
 
   // Save to Firestore
   if (db) {
@@ -4110,6 +4209,7 @@ async function applyAIStatus(status, risk) {
   renderComplaintsTable();
   renderOverviewRecent();
   showToast(`AI status applied → ${status}`, 'success');
+  addNotification(`Report ${currentDetailId} status updated → ${status} (AI)`, 'info', currentDetailId);
 
   if (db) {
     try {
